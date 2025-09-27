@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -9,7 +9,7 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, Plus, PencilSimple, Trash, GameController } from '@phosphor-icons/react';
 
 export default function AdminPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGameName, setNewGameName] = useState('');

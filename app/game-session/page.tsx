@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -9,17 +9,44 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X } from '@phosphor-icons/react';
 
 function GameSessionContent() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameSaveId = searchParams.get('gameSaveId');
 
+  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL LOGIC
+  const [activeTab, setActiveTab] = useState('puan-tablosu');
+  const [currentScores, setCurrentScores] = useState<{[key: string]: number}>({});
+  const [crownWinners, setCrownWinners] = useState<{[key: string]: boolean}>({});
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Get current user first to ensure Convex auth works
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+
   // Fetch game save data from Convex - ALWAYS call hooks first
   const gameSave = useQuery(api.gameSaves.getGameSaveById, gameSaveId ? { id: gameSaveId as Id<'gameSaves'> } : "skip");
-  const players = useQuery(api.players.getPlayers);
+  const players = useQuery(api.players.getPlayersByIds, gameSave?.players ? { playerIds: gameSave.players } : "skip");
   const gameTemplate = useQuery(api.games.getGameById, gameSave?.gameTemplate ? { id: gameSave.gameTemplate } : "skip");
   const addRoundScores = useMutation(api.gameSaves.addRoundScores);
   const updateGameSave = useMutation(api.gameSaves.updateGameSave);
+
+  // Debug logging
+  console.log('GameSession debug:', {
+    isLoaded,
+    isSignedIn,
+    user: user?.uid,
+    gameSaveId
+  });
+
+  // Debug Convex data
+  console.log('GameSession Convex data:', {
+    currentUser,
+    gameSave,
+    players,
+    gameTemplate
+  });
 
   // Redirect to home page if user is not signed in
   useEffect(() => {
@@ -44,16 +71,55 @@ function GameSessionContent() {
   if (typeof window === 'undefined') {
     return <div>Loading...</div>;
   }
+
+  // Show loading state while Convex data is loading
+  if (gameSave === undefined || players === undefined || currentUser === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading game data...</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {gameSave === undefined && "Loading game save..."}
+            {players === undefined && "Loading players..."}
+            {currentUser === undefined && "Loading user..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if game save not found
+  if (gameSave === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Game Not Found</h1>
+          <p className="text-gray-600 mb-6">The game session you're looking for doesn't exist.</p>
+          <button
+            onClick={() => router.push('/games')}
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+          >
+            Back to Games
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   const gameName = gameSave?.name || 'Oyun';
-  const gamePlayers = players?.filter(player => 
-    gameSave?.players.includes(player._id)
-  ) || [];
   
-  const [activeTab, setActiveTab] = useState('puan-tablosu');
-  const [currentScores, setCurrentScores] = useState<{[key: string]: number}>({});
-  const [crownWinners, setCrownWinners] = useState<{[key: string]: boolean}>({});
-  const [showSettings, setShowSettings] = useState(false);
+  // Debug the players data
+  console.log('GameSession players debug:', {
+    gameSavePlayers: gameSave?.players,
+    players: players?.map(p => ({ id: p._id, name: p.name })),
+    gameSavePlayersLength: gameSave?.players?.length,
+    playersLength: players?.length
+  });
+  
+  // Since we're getting players by IDs, we can use them directly
+  const gamePlayers = players || [];
+  console.log('GamePlayers:', gamePlayers.map(p => ({ id: p._id, name: p.name })));
 
   const handleBack = () => {
     router.back();

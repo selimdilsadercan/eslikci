@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { Trash } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
@@ -10,16 +10,31 @@ import { Id } from '../../convex/_generated/dataModel';
 import AppBar from '../../components/AppBar';
 
 export default function HistoryPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
 
   // Fetch game saves and related data - ALWAYS call hooks first
-  const currentUser = useQuery(api.users.getCurrentUser);
+  // Use the user from Firebase Auth to get the Convex user
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
   const gameSaves = useQuery(api.gameSaves.getGameSaves, 
     currentUser ? { userId: currentUser._id } : "skip"
   );
-  const players = useQuery(api.players.getPlayers);
+  const players = useQuery(api.players.getPlayers, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
   const games = useQuery(api.games.getGames);
+
+  // Debug logging
+  console.log('History page debug:', {
+    isLoaded,
+    isSignedIn,
+    currentUser,
+    gameSaves,
+    players,
+    games
+  });
 
   const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
 

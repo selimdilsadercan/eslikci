@@ -23,8 +23,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const players = useQuery(api.players.getPlayers, {});
-  const currentPlayer = players?.find(p => p._id === playerId);
+  const currentPlayer = useQuery(api.players.getPlayerById, { id: playerId });
   
   const updatePlayer = useMutation(api.players.updatePlayer);
   const deletePlayer = useMutation(api.players.deletePlayer);

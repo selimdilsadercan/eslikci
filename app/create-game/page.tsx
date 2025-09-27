@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -9,17 +9,25 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
 
 function CreateGameContent() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameId = searchParams.get('gameId');
 
   // Fetch game data and players from Convex - ALWAYS call hooks first
   const game = useQuery(api.games.getGameById, gameId ? { id: gameId as any } : "skip");
-  const players = useQuery(api.players.getPlayers);
-  const groups = useQuery(api.groups.getGroups);
-  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
-  const currentUser = useQuery(api.users.getCurrentUser);
+  const players = useQuery(api.players.getPlayers, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const groups = useQuery(api.groups.getGroups, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const currentUserAsPlayer = useQuery(api.players.getPlayerByUserId, 
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
   const gameName = game?.name || 'Oyun';
   
   // Mutations

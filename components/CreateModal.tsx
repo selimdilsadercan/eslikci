@@ -6,6 +6,7 @@ import { api } from '../convex/_generated/api';
 import { Id } from '../convex/_generated/dataModel';
 import { X, User, Users } from '@phosphor-icons/react';
 import { Drawer } from 'vaul';
+import { useAuth } from './FirebaseAuthProvider';
 
 interface CreateModalProps {
   onClose: () => void;
@@ -30,6 +31,7 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   
   const [isCreating, setIsCreating] = useState(false);
 
+  const { user } = useAuth();
   const createPlayer = useMutation(api.players.createPlayer);
   const createGroup = useMutation(api.groups.createGroup);
 
@@ -40,15 +42,25 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
     try {
       if (modalType === 'player') {
         if (!playerName.trim()) return;
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
         await createPlayer({
           name: playerName.trim(),
           initial: playerName.trim().charAt(0).toUpperCase(),
           groupId: selectedGroups.length === 1 ? selectedGroups[0] : undefined,
+          firebaseId: user.uid,
         });
       } else {
         if (!groupName.trim()) return;
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
         await createGroup({
           name: groupName.trim(),
+          firebaseId: user.uid,
         });
       }
 

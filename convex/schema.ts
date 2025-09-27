@@ -3,7 +3,8 @@ import { v } from "convex/values";
 
 export default defineSchema({
   users: defineTable({
-    clerkId: v.string(),
+    firebaseId: v.optional(v.string()), // Make optional for migration
+    clerkId: v.optional(v.string()), // Keep for backward compatibility
     name: v.string(),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
@@ -12,7 +13,8 @@ export default defineSchema({
     createdAt: v.number(),
     lastSeen: v.optional(v.number()),
   }).index("by_email", ["email"])
-    .index("by_clerk_id", ["clerkId"])
+    .index("by_firebase_id", ["firebaseId"])
+    .index("by_clerk_id", ["clerkId"]) // Keep for backward compatibility
     .index("by_player", ["playerId"]),
 
   players: defineTable({

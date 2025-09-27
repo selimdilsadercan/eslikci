@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -10,7 +10,7 @@ import AddGameModal from '../../components/AddGameModal';
 import AppBar from '../../components/AppBar';
 
 export default function GamesPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const games = useQuery(api.games.getGames);
   const createGame = useMutation(api.games.createGame);

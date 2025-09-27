@@ -2,17 +2,12 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getGroups = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    // Get current user
+  args: { firebaseId: v.string() },
+  handler: async (ctx, args) => {
+    // Get current user by Firebase ID
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
 
     if (!user) {
@@ -30,17 +25,13 @@ export const createGroup = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
+    firebaseId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get current user
+    // Get current user by Firebase ID
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
 
     if (!user) {

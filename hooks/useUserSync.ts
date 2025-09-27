@@ -1,23 +1,23 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../components/FirebaseAuthProvider';
 import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useEffect } from 'react';
 
 export function useUserSync() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuth();
   const createUser = useMutation(api.users.getOrCreateUser);
 
   useEffect(() => {
     if (isLoaded && user) {
       createUser({
-        clerkId: user.id,
-        name: user.fullName || user.firstName || 'User',
-        email: user.primaryEmailAddress?.emailAddress,
-        avatar: user.imageUrl,
+        firebaseId: user.uid,
+        name: user.displayName || user.email || 'User',
+        email: user.email || '',
+        avatar: user.photoURL || undefined,
       }).catch((error) => {
-        console.error('Error syncing user:', error);
+        console.error('Error syncing Firebase user:', error);
       });
     }
   }, [isLoaded, user, createUser]);

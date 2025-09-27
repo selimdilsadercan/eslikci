@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -12,16 +12,25 @@ import EditPlayerModal from '../../components/EditPlayerModal';
 import AppBar from '../../components/AppBar';
 
 export default function ContactsPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Id<'players'> | null>(null);
 
   // Get all players and groups - ALWAYS call hooks first
-  const players = useQuery(api.players.getPlayers);
-  const groups = useQuery(api.groups.getGroups);
-  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
+  const players = useQuery(api.players.getPlayers, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const groups = useQuery(api.groups.getGroups, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const currentUserAsPlayer = useQuery(api.players.getPlayerByUserId, 
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
 
   // Redirect to home page if user is not signed in
   useEffect(() => {

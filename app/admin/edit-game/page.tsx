@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '../../../components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
@@ -10,7 +10,7 @@ import { ArrowLeft, FloppyDisk, X, Plus } from '@phosphor-icons/react';
 import RichTextEditor from '../../../components/RichTextEditor';
 
 function EditGameContent() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameId = searchParams.get('gameId') as Id<'games'>;

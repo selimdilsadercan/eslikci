@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "../components/ConvexProvider";
-import { ClerkProvider } from '@clerk/nextjs';
+import { FirebaseAuthProvider } from "../components/FirebaseAuthProvider";
+import { UserSyncWrapper } from "../components/UserSyncWrapper";
 
 const urbanist = Urbanist({
   variable: "--font-urbanist",
@@ -11,7 +12,7 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: "Eşkikçi - Table Games Companion",
+  title: "Eşlikçi - Table Games Companion",
   description: "Your companion app for table games",
 };
 
@@ -21,16 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${urbanist.variable} antialiased`}
-        >
+    <html lang="en">
+      <body
+        className={`${urbanist.variable} antialiased`}
+      >
+        <FirebaseAuthProvider>
           <ConvexClientProvider>
-            {children}
+            <UserSyncWrapper>
+              {children}
+            </UserSyncWrapper>
           </ConvexClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </FirebaseAuthProvider>
+      </body>
+    </html>
   );
 }

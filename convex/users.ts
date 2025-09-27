@@ -9,37 +9,68 @@ export const getCurrentUser = query({
       return null;
     }
 
-    // Find user by Clerk ID
+    // Find user by Firebase ID
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", identity.subject))
       .first();
 
     return user;
   },
 });
 
+export const getUserByFirebaseId = query({
+  args: { firebaseId: v.string() },
+  handler: async (ctx, args) => {
+    // First try to find by Firebase ID
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    // If not found, try to find by Clerk ID (for migration)
+    if (!user) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.firebaseId))
+        .first();
+    }
+
+    return user;
+  },
+});
+
+
 export const createUser = mutation({
   args: {
-    clerkId: v.string(),
+    firebaseId: v.string(),
     name: v.string(),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Check if user already exists
-    const existingUser = await ctx.db
+    // Check if user already exists by Firebase ID
+    let existingUser = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
+
+    // If not found, check by Clerk ID (for migration)
+    if (!existingUser) {
+      existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.firebaseId))
+        .first();
+    }
 
     if (existingUser) {
       return existingUser._id;
     }
 
-    // Create new user
+    // Create new user with both IDs for compatibility
     const userId = await ctx.db.insert("users", {
-      clerkId: args.clerkId,
+      firebaseId: args.firebaseId,
+      clerkId: args.firebaseId, // Use Firebase ID as Clerk ID for compatibility
       name: args.name,
       email: args.email,
       avatar: args.avatar,
@@ -59,7 +90,7 @@ export const createUser = mutation({
 
 export const updateUser = mutation({
   args: {
-    clerkId: v.string(),
+    firebaseId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
@@ -67,14 +98,14 @@ export const updateUser = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
 
     if (!user) {
       throw new Error("User not found");
     }
 
-    const { clerkId, ...updates } = args;
+    const { firebaseId, ...updates } = args;
     return await ctx.db.patch(user._id, updates);
   },
 });
@@ -94,7 +125,7 @@ const createPlayerForUser = async (ctx: any, userId: any, name: string) => {
 
 export const getOrCreateUser = mutation({
   args: {
-    clerkId: v.string(),
+    firebaseId: v.string(),
     name: v.string(),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
@@ -103,13 +134,13 @@ export const getOrCreateUser = mutation({
     // Try to find existing user
     let user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
 
     if (!user) {
       // Create new user if doesn't exist
       const userId = await ctx.db.insert("users", {
-        clerkId: args.clerkId,
+        firebaseId: args.firebaseId,
         name: args.name,
         email: args.email,
         avatar: args.avatar,
@@ -132,13 +163,13 @@ export const getOrCreateUser = mutation({
 
 export const syncUserWithPlayer = mutation({
   args: {
-    clerkId: v.string(),
+    firebaseId: v.string(),
   },
   handler: async (ctx, args) => {
     // Get user
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
       .first();
 
     if (!user) {
