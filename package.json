@@ -6,8 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "mobile": "next build && npx cap sync",
-    "convex": "convex dev"
+    "mobile": "next build --turbopack && npx cap sync",
+    "apk": "cd android && ./gradlew assembleDebug && cd ..",
+    "aab": "cd android && ./gradlew assembleRelease && cd ..",
+    "clean": "cd android && ./gradlew clean"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
@@ -29,6 +31,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "^15.5.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

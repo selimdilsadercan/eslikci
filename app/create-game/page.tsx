@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
 
-export default function CreateGamePage() {
+function CreateGameContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameId = searchParams.get('gameId');
@@ -698,5 +698,13 @@ export default function CreateGamePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateGamePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateGameContent />
+    </Suspense>
   );
 }

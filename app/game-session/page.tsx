@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X } from '@phosphor-icons/react';
 
-export default function GameSessionPage() {
+function GameSessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameSaveId = searchParams.get('gameSaveId');
@@ -17,6 +17,11 @@ export default function GameSessionPage() {
   const players = useQuery(api.players.getPlayers);
   const addRoundScores = useMutation(api.gameSaves.addRoundScores);
   const updateGameSave = useMutation(api.gameSaves.updateGameSave);
+
+  // Handle static generation
+  if (typeof window === 'undefined') {
+    return <div>Loading...</div>;
+  }
   
   const gameName = gameSave?.name || 'Oyun';
   const gamePlayers = players?.filter(player => 
@@ -400,5 +405,13 @@ export default function GameSessionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GameSessionPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GameSessionContent />
+    </Suspense>
   );
 }
