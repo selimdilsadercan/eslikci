@@ -1,49 +1,58 @@
 'use client';
 
-import { useState } from 'react';
-import { GameController, ClockCounterClockwise, Users } from '@phosphor-icons/react';
+import { GameController, ClockCounterClockwise, AddressBook, User } from '@phosphor-icons/react';
 
 interface AppBarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activePage?: 'games' | 'history' | 'contacts' | 'profile';
 }
 
-export default function AppBar({ activeTab, onTabChange }: AppBarProps) {
+export default function AppBar({ activePage }: AppBarProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
       <div className="flex justify-around py-2">
         {/* Oyunlar Tab */}
-        <button
-          onClick={() => onTabChange('oyunlar')}
+        <a
+          href="/games"
           className={`flex flex-col items-center py-2 px-4 ${
-            activeTab === 'oyunlar' ? 'text-blue-500' : 'text-gray-500'
+            activePage === 'games' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <GameController size={24} weight={activeTab === 'oyunlar' ? 'fill' : 'regular'} />
+          <GameController size={24} weight="regular" />
           <span className="text-xs font-medium">Oyunlar</span>
-        </button>
+        </a>
 
         {/* Geçmiş Tab */}
-        <button
-          onClick={() => onTabChange('gecmis')}
+        <a
+          href="/history"
           className={`flex flex-col items-center py-2 px-4 ${
-            activeTab === 'gecmis' ? 'text-blue-500' : 'text-gray-500'
+            activePage === 'history' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <ClockCounterClockwise size={24} weight={activeTab === 'gecmis' ? 'fill' : 'regular'} />
+          <ClockCounterClockwise size={24} weight="regular" />
           <span className="text-xs font-medium">Geçmiş</span>
-        </button>
+        </a>
 
         {/* Rehber Tab */}
-        <button
-          onClick={() => onTabChange('rehber')}
+        <a
+          href="/contacts"
           className={`flex flex-col items-center py-2 px-4 ${
-            activeTab === 'rehber' ? 'text-blue-500' : 'text-gray-500'
+            activePage === 'contacts' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <Users size={24} weight={activeTab === 'rehber' ? 'fill' : 'regular'} />
+          <AddressBook size={24} weight="regular" />
           <span className="text-xs font-medium">Rehber</span>
-        </button>
+        </a>
+
+        {/* Profil Tab */}
+        <a
+          href="/profile"
+          className={`flex flex-col items-center py-2 px-4 ${
+            activePage === 'profile' ? 'text-blue-500' : 'text-gray-500'
+          }`}
+        >
+          <User size={24} weight="regular" />
+          <span className="text-xs font-medium">Profil</span>
+        </a>
       </div>
       
       {/* Gesture Bar */}

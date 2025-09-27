@@ -6,6 +6,8 @@ const isProtectedRoute = createRouteMatcher([
   '/game-session(.*)',
   '/games(.*)',
   '/history(.*)',
+  '/profile(.*)',
+  '/admin(.*)',
 ]);
 
 export default clerkMiddleware((auth, req) => {

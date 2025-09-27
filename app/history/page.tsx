@@ -1,13 +1,36 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { Trash } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
+import AppBar from '../../components/AppBar';
 
 export default function HistoryPage() {
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
+
+  // Redirect to home page if user is not signed in
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded || (isLoaded && !isSignedIn)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch game saves and related data
   const currentUser = useQuery(api.users.getCurrentUser);
@@ -47,10 +70,13 @@ export default function HistoryPage() {
     return date.toLocaleDateString('tr-TR', options);
   };
 
-  const getPlayerNames = (playerIds: Id<'players'>[]) => {
+  const getPlayerInitials = (playerIds: Id<'players'>[]) => {
     if (!players) return [];
     return playerIds
-      .map(id => players.find(p => p._id === id)?.name)
+      .map(id => {
+        const player = players.find(p => p._id === id);
+        return player?.initial || player?.name?.charAt(0).toUpperCase() || '';
+      })
       .filter(Boolean);
   };
 
@@ -61,17 +87,35 @@ export default function HistoryPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
       {/* Main Content */}
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Oyun Geçmişi</h1>
         
         {/* Game History List */}
-        <div className="space-y-4">
-          {gameSaves && gameSaves.length > 0 ? (
+        <div className="space-y-2">
+          {gameSaves === undefined ? (
+            // Skeleton loading for game history
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 flex items-center justify-between"
+                style={{
+                  boxShadow: '0 0 8px 5px #297dff0a'
+                }}
+              >
+                <div className="flex-1">
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-32 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-48 mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-40"></div>
+                </div>
+                <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))
+          ) : gameSaves.length > 0 ? (
             gameSaves.map((gameSave) => {
               const gameName = getGameName(gameSave.gameTemplate);
-              const playerNames = getPlayerNames(gameSave.players);
+              const playerInitials = getPlayerInitials(gameSave.players);
               const formattedDate = formatDate(gameSave.createdTime);
               
               return (
@@ -88,9 +132,28 @@ export default function HistoryPage() {
                   >
                     <h3 className="font-medium text-gray-800 text-lg hover:text-blue-600 transition-colors">{gameName}</h3>
                     <p className="text-gray-600 text-sm">{formattedDate}</p>
-                    <p className="text-gray-500 text-xs mt-1">
-                      Oyuncular: {playerNames.join(', ')}
-                    </p>
+                    <div className="flex space-x-1 mt-1">
+                      {playerInitials.map((initial, index) => {
+                        const colors = [
+                          'bg-blue-100 text-blue-600',
+                          'bg-green-100 text-green-600', 
+                          'bg-purple-100 text-purple-600',
+                          'bg-orange-100 text-orange-600',
+                          'bg-pink-100 text-pink-600',
+                          'bg-indigo-100 text-indigo-600'
+                        ];
+                        const colorClass = colors[index % colors.length];
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${colorClass}`}
+                          >
+                            {initial}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                   <button
                     onClick={(e) => {
@@ -115,6 +178,9 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
-    </>
+
+      {/* App Bar */}
+      <AppBar activePage="history" />
+    </div>
   );
 }

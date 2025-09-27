@@ -1,0 +1,224 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useUser, useClerk } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { User, Gear, SignOut, PencilSimple, Camera } from '@phosphor-icons/react';
+import { useUserSync } from '../../hooks/useUserSync';
+import AppBar from '../../components/AppBar';
+
+export default function ProfilePage() {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : '');
+  
+  // Sync user with Convex when they sign in
+  useUserSync();
+  
+
+  // Redirect to home page if user is not signed in
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded || (isLoaded && !isSignedIn)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSave = () => {
+    if (user) {
+      const nameParts = displayName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      user.update({ 
+        firstName: firstName,
+        lastName: lastName 
+      });
+      setIsEditing(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    signOut(() => {
+      router.push('/');
+    });
+  };
+
+  return (
+    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="px-6 py-4">
+          <h1 className="text-2xl font-bold text-gray-800">Profil</h1>
+        </div>
+      </div>
+
+      {/* Profile Content */}
+      <div className="px-6 py-6">
+        {/* Profile Picture Section */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                {!isLoaded ? (
+                  <div className="w-20 h-20 bg-gray-200 rounded-full animate-pulse"></div>
+                ) : user?.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <User size={32} weight="regular" className="text-blue-500" />
+                )}
+              </div>
+              <button className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-2 shadow-lg">
+                <Camera size={16} weight="regular" />
+              </button>
+            </div>
+            <div className="flex-1">
+              {!isLoaded ? (
+                <div className="space-y-2">
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.firstName || 'Kullanıcı'}
+                  </h2>
+                  <p className="text-gray-500 text-sm">{user?.emailAddresses[0]?.emailAddress}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Information */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Kişisel Bilgiler</h3>
+            {isLoaded && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex items-center space-x-2 text-blue-500 hover:text-blue-600"
+              >
+                <PencilSimple size={16} weight="regular" />
+                <span className="text-sm font-medium">
+                  {isEditing ? 'İptal' : 'Düzenle'}
+                </span>
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ad Soyad
+              </label>
+              {!isLoaded ? (
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+              ) : isEditing ? (
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <p className="text-gray-800">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.firstName || 'Belirtilmemiş'}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                E-posta
+              </label>
+              {!isLoaded ? (
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
+              ) : (
+                <p className="text-gray-800">{user?.emailAddresses[0]?.emailAddress}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Üyelik Tarihi
+              </label>
+              {!isLoaded ? (
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+              ) : (
+                <p className="text-gray-800">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('tr-TR') : 'Bilinmiyor'}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handleSave}
+                className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600"
+              >
+                Kaydet
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+              >
+                İptal
+              </button>
+            </div>
+          )}
+        </div>
+
+            {/* Admin Dashboard Button */}
+            <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+              {!isLoaded ? (
+                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              ) : (
+                <button
+                  onClick={() => router.push('/admin')}
+                  className="w-full flex items-center justify-center space-x-2 bg-purple-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-600"
+                >
+                  <Gear size={20} weight="regular" />
+                  <span>Admin Dashboard</span>
+                </button>
+              )}
+            </div>
+
+            {/* Sign Out Button */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              {!isLoaded ? (
+                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              ) : (
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center justify-center space-x-2 text-red-500 hover:text-red-600 py-3"
+                >
+                  <SignOut size={20} weight="regular" />
+                  <span className="font-medium">Çıkış Yap</span>
+                </button>
+              )}
+            </div>
+
+        {/* App Bar */}
+        <AppBar activePage="profile" />
+      </div>
+    </div>
+  );
+}

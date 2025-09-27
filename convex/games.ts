@@ -63,3 +63,10 @@ export const updateGame = mutation({
     return await ctx.db.patch(id, updates);
   },
 });
+
+export const deleteGame = mutation({
+  args: { id: v.id("games") },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.id, { isActive: false });
+  },
+});

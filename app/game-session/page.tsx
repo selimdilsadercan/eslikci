@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -8,13 +9,34 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X } from '@phosphor-icons/react';
 
 function GameSessionContent() {
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameSaveId = searchParams.get('gameSaveId');
+
+  // Redirect to home page if user is not signed in
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded || (isLoaded && !isSignedIn)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Fetch game save data from Convex
   const gameSave = useQuery(api.gameSaves.getGameSaveById, gameSaveId ? { id: gameSaveId as Id<'gameSaves'> } : "skip");
   const players = useQuery(api.players.getPlayers);
+  const gameTemplate = useQuery(api.games.getGameById, gameSave?.gameTemplate ? { id: gameSave.gameTemplate } : "skip");
   const addRoundScores = useMutation(api.gameSaves.addRoundScores);
   const updateGameSave = useMutation(api.gameSaves.updateGameSave);
 
@@ -273,21 +295,50 @@ function GameSessionContent() {
             </div>
 
           </>
-        ) : (
-          /* Rules Tab */
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Oyun Kuralları</h3>
-            <div className="space-y-4 text-gray-700">
-              <p>101 Okey oyununun temel kuralları:</p>
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Her oyuncu 14 taş alır</li>
-                <li>İlk oyuncu 15. taşı alır ve oyunu başlatır</li>
-                <li>Oyun 101 puana ulaşan oyuncu kazanır</li>
-                <li>Puanlar tur sonunda hesaplanır</li>
-              </ul>
-            </div>
+        ) : activeTab === 'kurallar' ? (
+          <div className="bg-white rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Oyun Kuralları</h3>
+            {gameTemplate?.rules ? (
+              <div className="space-y-6">
+                {(() => {
+                  try {
+                    // Try to parse as JSON first (structured rules)
+                    const parsedRules = JSON.parse(gameTemplate.rules);
+                    if (Array.isArray(parsedRules)) {
+                      return parsedRules.map((section, index) => (
+                        <div key={index} className="border-l-4 border-blue-500 pl-4">
+                          <h4 className="text-md font-semibold text-gray-800 mb-2">
+                            {section.title}
+                          </h4>
+                          <div 
+                            className="prose prose-sm max-w-none text-gray-700"
+                            dangerouslySetInnerHTML={{ __html: section.content }}
+                          />
+                        </div>
+                      ));
+                    }
+                  } catch (e) {
+                    // If not JSON, treat as HTML content
+                    return (
+                      <div 
+                        className="prose prose-sm max-w-none text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: gameTemplate.rules }}
+                      />
+                    );
+                  }
+                })()}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-gray-400 text-2xl">📋</span>
+                </div>
+                <h4 className="text-lg font-medium text-gray-600 mb-2">Kurallar henüz eklenmemiş</h4>
+                <p className="text-gray-500">Bu oyun için kurallar henüz tanımlanmamış.</p>
+              </div>
+            )}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Fixed Bottom Area */}
@@ -396,9 +447,9 @@ function GameSessionContent() {
               }`}
             >
               {showSettings ? (
-                <X size={20} weight="bold" />
+                <X size={20} weight="regular" />
               ) : (
-                <Gear size={20} weight="bold" />
+                <Gear size={20} weight="regular" />
               )}
             </button>
           </div>

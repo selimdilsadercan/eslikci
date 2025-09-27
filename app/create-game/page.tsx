@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -8,9 +9,29 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
 
 function CreateGameContent() {
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const gameId = searchParams.get('gameId');
+
+  // Redirect to home page if user is not signed in
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded || (isLoaded && !isSignedIn)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Fetch game data and players from Convex
   const game = useQuery(api.games.getGameById, gameId ? { id: gameId as any } : "skip");
