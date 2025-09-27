@@ -9,9 +9,12 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { Capacitor } from '@capacitor/core';
 
 interface AuthContextType {
   user: User | null;
@@ -36,6 +39,20 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
       setUser(user);
       setIsLoaded(true);
     });
+
+    // Handle redirect result for mobile apps
+    if (Capacitor.isNativePlatform()) {
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result) {
+            console.log('Redirect result:', result);
+            // User signed in via redirect
+          }
+        })
+        .catch((error) => {
+          console.error('Redirect result error:', error);
+        });
+    }
 
     return () => unsubscribe();
   }, []);
@@ -62,7 +79,15 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      
+      // Use redirect for mobile apps, popup for web
+      if (Capacitor.isNativePlatform()) {
+        // For mobile apps, use redirect
+        await signInWithRedirect(auth, provider);
+      } else {
+        // For web, use popup
+        await signInWithPopup(auth, provider);
+      }
     } catch (error) {
       console.error('Google sign in error:', error);
       throw error;

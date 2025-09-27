@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { GameController, ClockCounterClockwise, AddressBook, User } from '@phosphor-icons/react';
 
 interface AppBarProps {
@@ -11,7 +12,7 @@ export default function AppBar({ activePage }: AppBarProps) {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
       <div className="flex justify-around py-2">
         {/* Oyunlar Tab */}
-        <a
+        <Link
           href="/games"
           className={`flex flex-col items-center py-2 px-4 ${
             activePage === 'games' ? 'text-blue-500' : 'text-gray-500'
@@ -19,10 +20,10 @@ export default function AppBar({ activePage }: AppBarProps) {
         >
           <GameController size={24} weight="regular" />
           <span className="text-xs font-medium">Oyunlar</span>
-        </a>
+        </Link>
 
         {/* Geçmiş Tab */}
-        <a
+        <Link
           href="/history"
           className={`flex flex-col items-center py-2 px-4 ${
             activePage === 'history' ? 'text-blue-500' : 'text-gray-500'
@@ -30,10 +31,10 @@ export default function AppBar({ activePage }: AppBarProps) {
         >
           <ClockCounterClockwise size={24} weight="regular" />
           <span className="text-xs font-medium">Geçmiş</span>
-        </a>
+        </Link>
 
         {/* Rehber Tab */}
-        <a
+        <Link
           href="/contacts"
           className={`flex flex-col items-center py-2 px-4 ${
             activePage === 'contacts' ? 'text-blue-500' : 'text-gray-500'
@@ -41,10 +42,10 @@ export default function AppBar({ activePage }: AppBarProps) {
         >
           <AddressBook size={24} weight="regular" />
           <span className="text-xs font-medium">Rehber</span>
-        </a>
+        </Link>
 
         {/* Profil Tab */}
-        <a
+        <Link
           href="/profile"
           className={`flex flex-col items-center py-2 px-4 ${
             activePage === 'profile' ? 'text-blue-500' : 'text-gray-500'
@@ -52,7 +53,7 @@ export default function AppBar({ activePage }: AppBarProps) {
         >
           <User size={24} weight="regular" />
           <span className="text-xs font-medium">Profil</span>
-        </a>
+        </Link>
       </div>
       
       {/* Gesture Bar */}

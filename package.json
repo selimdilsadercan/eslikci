@@ -6,8 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "mobile": "next build --turbopack && npx cap sync",
-    "apk": "cd android && ./gradlew assembleDebug && cd ..",
+    "mobile": "next build --turbopack && npx cap sync && npm run apk",
+    "apk": "cd android && ./gradlew assembleDebug && cd .. && npm run open-apk",
+    "open-apk": "xdg-open /home/meral/Desktop/eslikci/android/app/build/outputs/apk/debug",
     "aab": "cd android && ./gradlew assembleRelease && cd ..",
     "clean": "cd android && ./gradlew clean"
   },

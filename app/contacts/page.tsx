@@ -35,7 +35,7 @@ export default function ContactsPage() {
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push('/');
+      router.replace('/');
     }
   }, [isLoaded, isSignedIn, router]);
 

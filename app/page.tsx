@@ -15,7 +15,8 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.push('/games');
+      // Use replace instead of push to avoid back button issues
+      router.replace('/games');
     }
   }, [isLoaded, isSignedIn, router]);
 
