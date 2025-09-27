@@ -13,6 +13,7 @@
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
+    "@phosphor-icons/react": "^2.1.10",
     "convex": "^1.27.3",
     "next": "15.5.4",
     "react": "19.1.0",
