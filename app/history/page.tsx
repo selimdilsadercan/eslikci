@@ -13,6 +13,16 @@ export default function HistoryPage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
+  // Fetch game saves and related data - ALWAYS call hooks first
+  const currentUser = useQuery(api.users.getCurrentUser);
+  const gameSaves = useQuery(api.gameSaves.getGameSaves, 
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
+  const players = useQuery(api.players.getPlayers);
+  const games = useQuery(api.games.getGames);
+
+  const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -31,16 +41,6 @@ export default function HistoryPage() {
       </div>
     );
   }
-
-  // Fetch game saves and related data
-  const currentUser = useQuery(api.users.getCurrentUser);
-  const gameSaves = useQuery(api.gameSaves.getGameSaves, 
-    currentUser ? { userId: currentUser._id } : "skip"
-  );
-  const players = useQuery(api.players.getPlayers);
-  const games = useQuery(api.games.getGames);
-
-  const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
 
   const handleDelete = async (gameSaveId: Id<'gameSaves'>) => {
     if (confirm('Bu oyunu silmek istediğinizden emin misiniz?')) {

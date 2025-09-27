@@ -14,6 +14,11 @@ export default function AdminPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGameName, setNewGameName] = useState('');
 
+  // Fetch games from Convex - ALWAYS call hooks first
+  const games = useQuery(api.games.getGames) || [];
+  const createGame = useMutation(api.games.createGame);
+  const deleteGame = useMutation(api.games.deleteGame);
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -32,11 +37,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  // Fetch games from Convex
-  const games = useQuery(api.games.getGames) || [];
-  const createGame = useMutation(api.games.createGame);
-  const deleteGame = useMutation(api.games.deleteGame);
 
   const handleBack = () => {
     router.push('/profile');

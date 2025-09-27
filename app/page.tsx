@@ -34,7 +34,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Eslikci</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Eşkikçi</h1>
           <p className="text-gray-600 mb-6">Your companion app for table games</p>
           <AuthButton />
         </div>

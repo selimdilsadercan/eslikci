@@ -18,6 +18,11 @@ export default function ContactsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Id<'players'> | null>(null);
 
+  // Get all players and groups - ALWAYS call hooks first
+  const players = useQuery(api.players.getPlayers);
+  const groups = useQuery(api.groups.getGroups);
+  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -36,11 +41,6 @@ export default function ContactsPage() {
       </div>
     );
   }
-
-  // Get all players and groups
-  const players = useQuery(api.players.getPlayers);
-  const groups = useQuery(api.groups.getGroups);
-  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
 
   // Group players by their group
   const groupedPlayers = players?.reduce((acc, player) => {

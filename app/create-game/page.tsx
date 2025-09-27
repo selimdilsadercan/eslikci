@@ -14,6 +14,17 @@ function CreateGameContent() {
   const searchParams = useSearchParams();
   const gameId = searchParams.get('gameId');
 
+  // Fetch game data and players from Convex - ALWAYS call hooks first
+  const game = useQuery(api.games.getGameById, gameId ? { id: gameId as any } : "skip");
+  const players = useQuery(api.players.getPlayers);
+  const groups = useQuery(api.groups.getGroups);
+  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
+  const currentUser = useQuery(api.users.getCurrentUser);
+  const gameName = game?.name || 'Oyun';
+  
+  // Mutations
+  const createGameSave = useMutation(api.gameSaves.createGameSave);
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -32,17 +43,6 @@ function CreateGameContent() {
       </div>
     );
   }
-  
-  // Fetch game data and players from Convex
-  const game = useQuery(api.games.getGameById, gameId ? { id: gameId as any } : "skip");
-  const players = useQuery(api.players.getPlayers);
-  const groups = useQuery(api.groups.getGroups);
-  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
-  const currentUser = useQuery(api.users.getCurrentUser);
-  const gameName = game?.name || 'Oyun';
-  
-  // Mutations
-  const createGameSave = useMutation(api.gameSaves.createGameSave);
   
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPlayers, setSelectedPlayers] = useState<Id<'players'>[]>([]);

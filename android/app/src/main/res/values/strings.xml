@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">eslikci</string>
-    <string name="title_activity_main">eslikci</string>
+    <string name="app_name">Eşkikçi</string>
+    <string name="title_activity_main">Eşkikçi</string>
     <string name="package_name">com.example.eslikci</string>
     <string name="custom_url_scheme">com.example.eslikci</string>
 </resources>

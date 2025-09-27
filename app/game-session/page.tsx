@@ -14,6 +14,13 @@ function GameSessionContent() {
   const searchParams = useSearchParams();
   const gameSaveId = searchParams.get('gameSaveId');
 
+  // Fetch game save data from Convex - ALWAYS call hooks first
+  const gameSave = useQuery(api.gameSaves.getGameSaveById, gameSaveId ? { id: gameSaveId as Id<'gameSaves'> } : "skip");
+  const players = useQuery(api.players.getPlayers);
+  const gameTemplate = useQuery(api.games.getGameById, gameSave?.gameTemplate ? { id: gameSave.gameTemplate } : "skip");
+  const addRoundScores = useMutation(api.gameSaves.addRoundScores);
+  const updateGameSave = useMutation(api.gameSaves.updateGameSave);
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -32,13 +39,6 @@ function GameSessionContent() {
       </div>
     );
   }
-  
-  // Fetch game save data from Convex
-  const gameSave = useQuery(api.gameSaves.getGameSaveById, gameSaveId ? { id: gameSaveId as Id<'gameSaves'> } : "skip");
-  const players = useQuery(api.players.getPlayers);
-  const gameTemplate = useQuery(api.games.getGameById, gameSave?.gameTemplate ? { id: gameSave.gameTemplate } : "skip");
-  const addRoundScores = useMutation(api.gameSaves.addRoundScores);
-  const updateGameSave = useMutation(api.gameSaves.updateGameSave);
 
   // Handle static generation
   if (typeof window === 'undefined') {

@@ -11,7 +11,7 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: "Eslikci - Table Games Companion",
+  title: "Eşkikçi - Table Games Companion",
   description: "Your companion app for table games",
 };
 
