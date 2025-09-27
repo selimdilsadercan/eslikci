@@ -1,76 +1,187 @@
 'use client';
 
-import { Plus, User } from '@phosphor-icons/react';
-
-// Sample contacts data
-const contacts = {
-  ungrouped: [
-    { id: 1, name: 'Yiğit', initial: 'Y' },
-    { id: 2, name: 'Betül', initial: 'B' }
-  ],
-  home: [
-    { id: 3, name: 'Murat', initial: 'M' },
-    { id: 4, name: 'Arda', initial: 'A' },
-    { id: 5, name: 'Emel', initial: 'E' }
-  ]
-};
+import { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
+import { Plus, PencilSimple } from '@phosphor-icons/react';
+import CreateModal from '../../components/CreateModal';
+import EditPlayerModal from '../../components/EditPlayerModal';
 
 export default function ContactsPage() {
-  const handleAddContact = () => {
-    // TODO: Implement add contact functionality
-    console.log('Add new contact');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Id<'players'> | null>(null);
+
+  // Get all players and groups
+  const players = useQuery(api.players.getPlayers);
+  const groups = useQuery(api.groups.getGroups);
+  const currentUserAsPlayer = useQuery(api.players.getCurrentUserAsPlayer);
+
+  // Group players by their group
+  const groupedPlayers = players?.reduce((acc, player) => {
+    const groupId = player.groupId || 'ungrouped';
+    if (!acc[groupId]) {
+      acc[groupId] = [];
+    }
+    acc[groupId].push(player);
+    return acc;
+  }, {} as Record<string, typeof players>) || {};
+
+  const handleEditPlayer = (playerId: Id<'players'>) => {
+    setSelectedPlayer(playerId);
+    setShowEditModal(true);
   };
+
 
   return (
     <>
-      {/* Header */}
+      {/* Main Content */}
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Rehber</h1>
-          <button
-            onClick={handleAddContact}
-            className="text-blue-500 font-medium text-sm"
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="text-blue-500 font-medium"
           >
             Ekle
           </button>
         </div>
 
-        {/* Ungrouped Contacts */}
-        <div className="mb-6">
-          <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplandırılmamış</h2>
-          <div className="space-y-3">
-            {contacts.ungrouped.map((contact) => (
+        {/* Current User */}
+        {currentUserAsPlayer && (
+          <div className="mb-6">
+            <h2 className="text-sm font-medium text-gray-600 mb-3">Ben</h2>
+            <div className="space-y-1">
               <div
-                key={contact.id}
-                className="bg-white rounded-lg p-4 flex items-center space-x-3 shadow-lg"
+                onClick={() => handleEditPlayer(currentUserAsPlayer._id)}
+                className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-sm">{contact.initial}</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
+                  </div>
+                  <span className="font-medium text-black">{currentUserAsPlayer.name}</span>
                 </div>
-                <span className="font-medium text-gray-800">{contact.name}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditPlayer(currentUserAsPlayer._id);
+                  }}
+                  className="p-1 text-gray-500 hover:text-blue-500"
+                >
+                  <PencilSimple size={16} />
+                </button>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
+        )}
+        
+        {/* Ungrouped Players */}
+        {groupedPlayers.ungrouped && groupedPlayers.ungrouped.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplandırılmamış</h2>
+            <div className="space-y-1">
+              {groupedPlayers.ungrouped.map((player) => (
+                <div
+                  key={player._id}
+                  onClick={() => handleEditPlayer(player._id)}
+                  className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                    </div>
+                    <span className="font-medium text-black">{player.name}</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditPlayer(player._id);
+                    }}
+                    className="p-1 text-gray-500 hover:text-blue-500"
+                  >
+                    <PencilSimple size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Home Group */}
-        <div className="mb-6">
-          <h2 className="text-sm font-medium text-gray-600 mb-3">Ev</h2>
-          <div className="space-y-3">
-            {contacts.home.map((contact) => (
-              <div
-                key={contact.id}
-                className="bg-white rounded-lg p-4 flex items-center space-x-3 shadow-lg"
-              >
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-sm">{contact.initial}</span>
-                </div>
-                <span className="font-medium text-gray-800">{contact.name}</span>
+        {/* Grouped Players */}
+        {groups?.map((group) => {
+          const groupPlayers = groupedPlayers[group._id] || [];
+          if (groupPlayers.length === 0) return null;
+          
+          return (
+            <div key={group._id} className="mb-6">
+              <h2 className="text-sm font-medium text-gray-600 mb-3">{group.name}</h2>
+              <div className="space-y-1">
+                {groupPlayers.map((player) => (
+                  <div
+                    key={player._id}
+                    onClick={() => handleEditPlayer(player._id)}
+                    className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                      </div>
+                      <span className="font-medium text-black">{player.name}</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditPlayer(player._id);
+                      }}
+                      className="p-1 text-gray-500 hover:text-blue-500"
+                    >
+                      <PencilSimple size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          );
+        })}
+
+        {/* Empty State */}
+        {(!players || players.length === 0) && !currentUserAsPlayer && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-600 mb-2">Henüz kişi eklenmemiş</h3>
+            <p className="text-gray-500 mb-4">İlk kişinizi ekleyerek başlayın</p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg font-medium"
+            >
+              Kişi Ekle
+            </button>
           </div>
-        </div>
+        )}
       </div>
+
+        {/* Modals */}
+        {showCreateModal && (
+          <CreateModal
+            onClose={() => setShowCreateModal(false)}
+            groups={groups || []}
+          />
+        )}
+
+        {showEditModal && selectedPlayer && (
+          <EditPlayerModal
+            playerId={selectedPlayer}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedPlayer(null);
+            }}
+            groups={groups || []}
+          />
+        )}
     </>
   );
 }
