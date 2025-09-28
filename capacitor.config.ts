@@ -13,11 +13,6 @@ const config: CapacitorConfig = {
     },
     FirebaseAuth: {
       enabled: true
-    },
-    GoogleAuth: {
-      scopes: ['profile', 'email'],
-      serverClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      forceCodeForRefreshToken: true
     }
   },
   android: {

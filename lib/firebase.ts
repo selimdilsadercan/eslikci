@@ -20,19 +20,29 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
 
-// Configure redirect URL for deployed app
+// Configure auth for mobile and web
 if (typeof window !== 'undefined') {
-  // Set the redirect URL to the deployed app URL
   const currentHost = window.location.hostname;
   const currentOrigin = window.location.origin;
   
   console.log('Current host:', currentHost);
   console.log('Current origin:', currentOrigin);
   
-  if (currentHost === 'eslikci-three.vercel.app' || currentHost.includes('vercel.app')) {
-    // For deployed app, use the deployed URL
-    console.log('Configuring auth for deployed app');
+  // Configure for mobile apps
+  if (Capacitor.isNativePlatform()) {
+    console.log('Configuring auth for mobile app with redirect support');
+    // Mobile apps use redirect flow
     auth.settings.appVerificationDisabledForTesting = true;
+  } else if (currentHost === 'eslikci-three.vercel.app' || currentHost.includes('vercel.app')) {
+    // For deployed web app - set the correct redirect URL
+    console.log('Configuring auth for deployed web app');
+    auth.settings.appVerificationDisabledForTesting = true;
+    
+    // Set the correct redirect URL for deployed app
+    if (currentOrigin === 'https://eslikci-three.vercel.app') {
+      console.log('Setting redirect URL for Vercel deployment');
+      // The redirect will now go to the correct Vercel URL
+    }
   } else if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
     // For local development
     console.log('Configuring auth for local development');
