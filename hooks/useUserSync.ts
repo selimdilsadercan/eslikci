@@ -11,14 +11,22 @@ export function useUserSync() {
 
   useEffect(() => {
     if (isLoaded && user) {
-      createUser({
-        firebaseId: user.uid,
-        name: user.displayName || user.email || 'User',
-        email: user.email || '',
-        avatar: user.photoURL || undefined,
-      }).catch((error) => {
-        console.error('Error syncing Firebase user:', error);
-      });
+      // Wait a bit for Firebase profile to be fully updated
+      const timeoutId = setTimeout(() => {
+        const userName = user.displayName || user.email || 'User';
+        console.log('Syncing user with name:', userName, 'displayName:', user.displayName);
+        
+        createUser({
+          firebaseId: user.uid,
+          name: userName,
+          email: user.email || '',
+          avatar: user.photoURL || undefined,
+        }).catch((error) => {
+          console.error('Error syncing Firebase user:', error);
+        });
+      }, 200); // Slightly longer delay to ensure profile is updated
+
+      return () => clearTimeout(timeoutId);
     }
   }, [isLoaded, user, createUser]);
 }

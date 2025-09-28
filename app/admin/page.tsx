@@ -1,23 +1,64 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, Plus, PencilSimple, Trash, GameController } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, PencilSimple, Trash, GameController, DotsSix } from '@phosphor-icons/react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function AdminPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGameName, setNewGameName] = useState('');
+  const [newGameCategory, setNewGameCategory] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Drag and drop sensors with mobile support
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fetch games from Convex - ALWAYS call hooks first
   const games = useQuery(api.games.getGames) || [];
   const createGame = useMutation(api.games.createGame);
   const deleteGame = useMutation(api.games.deleteGame);
+  const updateGameIndices = useMutation(api.games.updateGameIndices);
 
   // Redirect to home page if user is not signed in
   useEffect(() => {
@@ -25,6 +66,13 @@ export default function AdminPage() {
       router.push('/');
     }
   }, [isLoaded, isSignedIn, router]);
+
+  // Focus input when modal opens
+  useEffect(() => {
+    if (showAddModal && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [showAddModal]);
 
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
@@ -51,6 +99,7 @@ export default function AdminPage() {
         description: '',
         rules: '',
         banner: '',
+        category: newGameCategory.trim() || undefined,
         settings: {
           gameplay: 'herkes-tek',
           calculationMode: 'NoPoints',
@@ -60,6 +109,7 @@ export default function AdminPage() {
       });
       
       setNewGameName('');
+      setNewGameCategory('');
       setShowAddModal(false);
     } catch (error) {
       console.error('Error creating game:', error);
@@ -80,10 +130,114 @@ export default function AdminPage() {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && newGameName.trim()) {
+      handleAddGame();
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = games.findIndex((game) => game._id === active.id);
+      const newIndex = games.findIndex((game) => game._id === over?.id);
+
+      const newGames = arrayMove(games, oldIndex, newIndex);
+
+      // Update indices
+      const updates = newGames.map((game, index) => ({
+        id: game._id,
+        index: index
+      }));
+
+      try {
+        await updateGameIndices({ updates });
+      } catch (error) {
+        console.error('Error updating game order:', error);
+      }
+    }
+  };
+
+  // Sortable item component
+  function SortableItem({ game, onEdit, onDelete }: { 
+    game: any; 
+    onEdit: (id: Id<'games'>) => void; 
+    onDelete: (id: Id<'games'>) => void; 
+  }) {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: game._id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`px-6 py-4 hover:bg-gray-50 transition-colors select-none ${
+          isDragging ? 'opacity-50' : ''
+        }`}
+      >
+        <div className="grid grid-cols-12 gap-4 items-center">
+          <div className="col-span-1">
+            <div className="flex items-center justify-center">
+              <div 
+                className="p-2 rounded hover:bg-gray-100 cursor-move touch-manipulation select-none"
+                style={{ touchAction: 'none' }}
+                {...attributes}
+                {...listeners}
+              >
+                <DotsSix size={20} className="text-gray-800" />
+              </div>
+            </div>
+          </div>
+          <div className="col-span-5">
+            <h3 className="text-sm font-medium text-gray-900">
+              {game.name}
+            </h3>
+            {game.description && (
+              <p className="text-sm text-gray-500 mt-1">{game.description}</p>
+            )}
+          </div>
+          <div className="col-span-3">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {game.category || 'Kategori Yok'}
+            </span>
+          </div>
+          <div className="col-span-3">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onEdit(game._id)}
+                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+              >
+                <PencilSimple size={16} weight="regular" />
+              </button>
+              <button
+                onClick={() => onDelete(game._id)}
+                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+              >
+                <Trash size={16} weight="regular" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <div className="bg-white shadow-sm">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
@@ -92,7 +246,7 @@ export default function AdminPage() {
             >
               <ArrowLeft size={20} weight="regular" className="text-gray-600" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-800">Admin</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Oyunlar</h1>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
@@ -104,55 +258,58 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Games List */}
-      <div className="px-6 py-6">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Mevcut Oyunlar ({games.length})</h2>
-          </div>
-          
-          {games.length === 0 ? (
-            <div className="p-8 text-center">
-              <GameController size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Henüz oyun eklenmemiş</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {games.map((game) => (
-                <div key={game._id} className="p-6 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        {game.name}
-                      </h3>
-                      {game.description && (
-                        <p className="text-gray-600 text-sm mb-2">{game.description}</p>
-                      )}
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Oyun Modu: {game.settings.gameplay}</span>
-                        <span>Hesaplama: {game.settings.calculationMode}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleEditGame(game._id)}
-                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
-                      >
-                        <PencilSimple size={18} weight="regular" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteGame(game._id)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash size={18} weight="regular" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* Games Table - Add top padding to account for fixed header */}
+      <div className="px-6 py-6 pt-24">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Mevcut Oyunlar ({games.length})</h2>
         </div>
+        
+        {games.length === 0 ? (
+          <div className="p-8 text-center bg-white rounded-lg">
+            <GameController size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">Henüz oyun eklenmemiş</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Table Header */}
+            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+              <div className="grid grid-cols-12 gap-4 items-center">
+                <div className="col-span-1 text-sm font-medium text-gray-700">
+                  
+                </div>
+                <div className="col-span-5 text-sm font-medium text-gray-700">
+                  Oyun Adı
+                </div>
+                <div className="col-span-3 text-sm font-medium text-gray-700">
+                  Kategori
+                </div>
+                <div className="col-span-3 text-sm font-medium text-gray-700">
+                  İşlemler
+                </div>
+              </div>
+            </div>
+            
+            {/* Table Body */}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={games.map(game => game._id)} strategy={verticalListSortingStrategy}>
+                <div className="divide-y divide-gray-200">
+                  {games.map((game) => (
+                    <SortableItem
+                      key={game._id}
+                      game={game}
+                      onEdit={handleEditGame}
+                      onDelete={handleDeleteGame}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        )}
       </div>
 
         {/* Add Game Modal */}
@@ -173,11 +330,26 @@ export default function AdminPage() {
                   Oyun Adı *
                 </label>
                 <input
+                  ref={inputRef}
                   type="text"
                   value={newGameName}
                   onChange={(e) => setNewGameName(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   placeholder="Oyun adını girin"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kategori
+                </label>
+                <input
+                  type="text"
+                  value={newGameCategory}
+                  onChange={(e) => setNewGameCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  placeholder="Kategori girin (örn: Kart Oyunları, Strateji)"
                 />
               </div>
 

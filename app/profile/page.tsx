@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { User, Gear, SignOut, PencilSimple, Camera } from '@phosphor-icons/react';
 import { useUserSync } from '@/hooks/useUserSync';
 import AppBar from '@/components/AppBar';
@@ -15,6 +17,11 @@ export default function ProfilePage() {
   
   // Sync user with Convex when they sign in
   useUserSync();
+  
+  // Check if user is admin
+  const isAdmin = useQuery(api.users.isUserAdmin, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
   
 
   // Redirect to home page if user is not signed in
@@ -177,20 +184,22 @@ export default function ProfilePage() {
           )}
         </div>
 
-            {/* Admin Dashboard Button */}
-            <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-              {!isLoaded ? (
-                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-              ) : (
-                <button
-                  onClick={() => router.push('/admin')}
-                  className="w-full flex items-center justify-center space-x-2 bg-purple-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-600"
-                >
-                  <Gear size={20} weight="regular" />
-                  <span>Admin Dashboard</span>
-                </button>
-              )}
-            </div>
+            {/* Admin Dashboard Button - Only show for admin users */}
+            {isAdmin && (
+              <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+                {!isLoaded ? (
+                  <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                ) : (
+                  <button
+                    onClick={() => router.push('/admin')}
+                    className="w-full flex items-center justify-center space-x-2 bg-purple-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-600"
+                  >
+                    <Gear size={20} weight="regular" />
+                    <span>Admin Dashboard</span>
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Sign Out Button */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">

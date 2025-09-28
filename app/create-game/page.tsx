@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
+import toast from 'react-hot-toast';
 
 function CreateGameContent() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -98,6 +99,29 @@ function CreateGameContent() {
         return;
       }
 
+      // Validate team assignments for team mode
+      if (gameSettings.gameplay === 'takimli') {
+        const allTeamPlayers = [...redTeam, ...blueTeam];
+        const unassignedPlayers = selectedPlayers.filter(playerId => !allTeamPlayers.includes(playerId));
+        
+        if (unassignedPlayers.length > 0) {
+          toast.error('Tüm oyuncular takımlara atanmalıdır. Lütfen tüm oyuncuları kırmızı veya mavi takıma atayın.');
+          return;
+        }
+
+        // Check if any team has 0 players
+        if (redTeam.length === 0 || blueTeam.length === 0) {
+          toast.error('Her iki takımda da en az bir oyuncu olmalıdır!');
+          return;
+        }
+
+        // Optional: Check for balanced teams (can be removed if not needed)
+        if (Math.abs(redTeam.length - blueTeam.length) > 1) {
+          toast.error(`Takım dengesi: Kırmızı takım ${redTeam.length}, Mavi takım ${blueTeam.length} oyuncu. Takımları dengeleyin!`);
+          return;
+        }
+      }
+
       try {
         const gameSaveId = await createGameSave({
           name: gameName,
@@ -116,9 +140,16 @@ function CreateGameContent() {
         });
 
         console.log('Game save created:', gameSaveId);
+        console.log('Team assignments:', {
+          redTeam: gameSettings.gameplay === 'takimli' ? redTeam : 'N/A',
+          blueTeam: gameSettings.gameplay === 'takimli' ? blueTeam : 'N/A',
+          gameplay: gameSettings.gameplay
+        });
+        
         router.push(`/game-session?gameSaveId=${gameSaveId}`);
       } catch (error) {
         console.error('Error creating game save:', error);
+        toast.error('Oyun kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.');
       }
     }
   };
@@ -152,6 +183,12 @@ function CreateGameContent() {
       setRedTeam([]);
       setBlueTeam([]);
     }
+    
+    // Initialize all selected players to red team when switching to team mode
+    if (key === 'gameplay' && value === 'takimli') {
+      setRedTeam([...selectedPlayers]);
+      setBlueTeam([]);
+    }
   };
 
   const movePlayerToTeam = (playerId: Id<'players'>, team: 'red' | 'blue') => {
@@ -172,19 +209,19 @@ function CreateGameContent() {
     setBlueTeam(prev => prev.filter(id => id !== playerId));
   };
 
-  const handleDragStart = (e: React.DragEvent, playerId: Id<'players'>) => {
-    e.dataTransfer.setData('text/plain', playerId);
+  // Helper function to get team information for debugging/logging
+  const getTeamInfo = () => {
+    if (gameSettings.gameplay !== 'takimli') return null;
+    
+    return {
+      redTeam: redTeam.map(id => allPlayers.find(p => p._id === id)?.name || 'Unknown'),
+      blueTeam: blueTeam.map(id => allPlayers.find(p => p._id === id)?.name || 'Unknown'),
+      totalPlayers: selectedPlayers.length,
+      assignedPlayers: redTeam.length + blueTeam.length,
+      unassignedPlayers: selectedPlayers.filter(id => !redTeam.includes(id) && !blueTeam.includes(id)).length
+    };
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent, team: 'red' | 'blue') => {
-    e.preventDefault();
-    const playerId = e.dataTransfer.getData('text/plain') as Id<'players'>;
-    movePlayerToTeam(playerId, team);
-  };
 
   // Group players by their group
   const groupedPlayers = players?.reduce((acc, player) => {
@@ -201,6 +238,48 @@ function CreateGameContent() {
     ...(currentUserAsPlayer ? [currentUserAsPlayer] : []),
     ...(players || [])
   ];
+
+  // Simple player component for team display
+  function TeamPlayer({ player, team }: { 
+    player: any; 
+    team: 'red' | 'blue';
+  }) {
+    const getTeamColor = () => {
+      if (team === 'red') return '#F05757';
+      if (team === 'blue') return '#365376';
+      return '#F05757';
+    };
+
+    return (
+      <div
+        className="rounded-full px-3 py-2 flex items-center space-x-2"
+        style={{ backgroundColor: getTeamColor() }}
+      >
+        {player.avatar ? (
+          <img
+            src={player.avatar}
+            alt={player.name}
+            className="w-6 h-6 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+            <span className={`font-semibold text-sm ${team === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>
+              {player.initial}
+            </span>
+          </div>
+        )}
+        <span className="font-medium text-sm text-white">
+          {player.name}
+        </span>
+        <button
+          onClick={() => movePlayerToTeam(player._id, team === 'red' ? 'blue' : 'red')}
+          className="ml-2 text-white hover:text-gray-200"
+        >
+          {team === 'red' ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f4f6f9' }}>
@@ -365,137 +444,54 @@ function CreateGameContent() {
                 {/* Oyuncular - Show teams if team mode is selected */}
                 {gameSettings.gameplay === 'takimli' ? (
                   <>
-                    {/* Kırmızı Takım */}
-                    <div>
-                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Kırmızı Takım:</h2>
-                      <div 
-                        className="min-h-[60px] p-4 border-2 border-dashed border-red-300 rounded-lg bg-red-50"
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, 'red')}
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          {redTeam.map(playerId => {
-                            const player = allPlayers.find(p => p._id === playerId);
-                            return player ? (
-                              <div 
-                                key={playerId} 
-                                className="rounded-full px-3 py-2 flex items-center space-x-2 cursor-move" 
-                                style={{ backgroundColor: '#F05757' }}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, playerId)}
-                              >
-                                {player.avatar ? (
-                                  <img
-                                    src={player.avatar}
-                                    alt={player.name}
-                                    className="w-6 h-6 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                    <span className="text-red-600 font-semibold text-sm">{player.initial}</span>
-                                  </div>
-                                )}
-                                <span className="text-white font-medium text-sm">{player.name}</span>
-                                <button
-                                  onClick={() => removePlayerFromTeams(playerId)}
-                                  className="ml-2 text-white hover:text-red-200"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                        {redTeam.length === 0 && (
-                          <p className="text-gray-500 text-sm">Oyuncuları buraya sürükleyin</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Mavi Takım */}
-                    <div>
-                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Mavi Takım:</h2>
-                      <div 
-                        className="min-h-[60px] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50"
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, 'blue')}
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          {blueTeam.map(playerId => {
-                            const player = allPlayers.find(p => p._id === playerId);
-                            return player ? (
-                              <div 
-                                key={playerId} 
-                                className="rounded-full px-3 py-2 flex items-center space-x-2 cursor-move" 
-                                style={{ backgroundColor: '#365376' }}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, playerId)}
-                              >
-                                {player.avatar ? (
-                                  <img
-                                    src={player.avatar}
-                                    alt={player.name}
-                                    className="w-6 h-6 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                    <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                                  </div>
-                                )}
-                                <span className="text-white font-medium text-sm">{player.name}</span>
-                                <button
-                                  onClick={() => removePlayerFromTeams(playerId)}
-                                  className="ml-2 text-white hover:text-blue-200"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                        {blueTeam.length === 0 && (
-                          <p className="text-gray-500 text-sm">Oyuncuları buraya sürükleyin</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Available Players */}
-                    <div>
-                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Seçili Oyuncular:</h2>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPlayers.map(playerId => {
-                          const player = allPlayers.find(p => p._id === playerId);
-                          const isInTeam = redTeam.includes(playerId) || blueTeam.includes(playerId);
-                          return player ? (
-                            <div 
-                              key={playerId} 
-                              className={`rounded-full px-3 py-2 flex items-center space-x-2 cursor-move ${
-                                isInTeam ? 'opacity-50' : ''
-                              }`}
-                              style={{ backgroundColor: isInTeam ? '#E5E7EB' : '#F05757' }}
-                              draggable={!isInTeam}
-                              onDragStart={(e) => !isInTeam && handleDragStart(e, playerId)}
-                            >
-                              {player.avatar ? (
-                                <img
-                                  src={player.avatar}
-                                  alt={player.name}
-                                  className="w-6 h-6 rounded-full object-cover"
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Kırmızı Takım */}
+                      <div>
+                        <h2 className="text-sm font-semibold text-gray-800 mb-3">Kırmızı Takım:</h2>
+                        <div className="min-h-[120px] p-4 border-2 border-dashed border-red-300 rounded-lg bg-red-50">
+                          <div className="flex flex-wrap gap-2">
+                            {redTeam.map(playerId => {
+                              const player = allPlayers.find(p => p._id === playerId);
+                              return player ? (
+                                <TeamPlayer
+                                  key={playerId}
+                                  player={player}
+                                  team="red"
                                 />
-                              ) : (
-                                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                  <span className={`font-semibold text-sm ${isInTeam ? 'text-gray-400' : 'text-red-600'}`}>{player.initial}</span>
-                                </div>
-                              )}
-                              <span className={`font-medium text-sm ${isInTeam ? 'text-gray-400' : 'text-white'}`}>{player.name}</span>
-                            </div>
-                          ) : null;
-                        })}
+                              ) : null;
+                            })}
+                          </div>
+                          {redTeam.length === 0 && (
+                            <p className="text-gray-500 text-sm">Kırmızı takım oyuncuları</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Mavi Takım */}
+                      <div>
+                        <h2 className="text-sm font-semibold text-gray-800 mb-3">Mavi Takım:</h2>
+                        <div className="min-h-[120px] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
+                          <div className="flex flex-wrap gap-2">
+                            {blueTeam.map(playerId => {
+                              const player = allPlayers.find(p => p._id === playerId);
+                              return player ? (
+                                <TeamPlayer
+                                  key={playerId}
+                                  player={player}
+                                  team="blue"
+                                />
+                              ) : null;
+                            })}
+                          </div>
+                          {blueTeam.length === 0 && (
+                            <p className="text-gray-500 text-sm">Mavi takım oyuncuları</p>
+                          )}
+                        </div>
                       </div>
                     </div>
+
                   </>
                 ) : (
-                  /* Individual Players */
                   <div>
                     <h2 className="text-sm font-semibold text-gray-800 mb-3">Oyuncular:</h2>
                     <div className="flex flex-wrap gap-2">

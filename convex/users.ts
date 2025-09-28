@@ -47,6 +47,7 @@ export const createUser = mutation({
     name: v.string(),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    isAdmin: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Check if user already exists by Firebase ID
@@ -75,6 +76,7 @@ export const createUser = mutation({
       email: args.email,
       avatar: args.avatar,
       isActive: true,
+      isAdmin: args.isAdmin || false,
       createdAt: Date.now(),
     });
 
@@ -129,6 +131,7 @@ export const getOrCreateUser = mutation({
     name: v.string(),
     email: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    isAdmin: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Try to find existing user
@@ -145,6 +148,7 @@ export const getOrCreateUser = mutation({
         email: args.email,
         avatar: args.avatar,
         isActive: true,
+        isAdmin: args.isAdmin || false,
         createdAt: Date.now(),
       });
 
@@ -155,6 +159,22 @@ export const getOrCreateUser = mutation({
       await ctx.db.patch(userId, { playerId: playerId });
       
       user = await ctx.db.get(userId);
+    } else {
+      // Update existing user if name has changed (e.g., if displayName was updated)
+      if (user.name !== args.name) {
+        await ctx.db.patch(user._id, { 
+          name: args.name,
+          email: args.email,
+          avatar: args.avatar 
+        });
+        
+        // Also update the associated player
+        if (user.playerId) {
+          await ctx.db.patch(user.playerId, { name: args.name });
+        }
+        
+        user = await ctx.db.get(user._id);
+      }
     }
 
     return user;
@@ -188,5 +208,17 @@ export const syncUserWithPlayer = mutation({
     await ctx.db.patch(user._id, { playerId: playerId });
 
     return playerId;
+  },
+});
+
+export const isUserAdmin = query({
+  args: { firebaseId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    return user?.isAdmin || false;
   },
 });

@@ -87,28 +87,41 @@ export const updateGameSave = mutation({
 export const addRoundScores = mutation({
   args: {
     id: v.id("gameSaves"),
-    roundScores: v.array(v.number()), // Array of scores for current round
+    roundScores: v.array(v.union(v.number(), v.array(v.number()))), // Array of scores or arrays of scores for current round
+    isTeamMode: v.optional(v.boolean()), // Flag to indicate if this is team mode
+    teamScores: v.optional(v.array(v.union(v.number(), v.array(v.number())))), // For team mode: [redTeamScore, blueTeamScore]
   },
   handler: async (ctx, args) => {
     const gameSave = await ctx.db.get(args.id);
     if (!gameSave) throw new Error("Game save not found");
 
-    // Initialize laps if it doesn't exist
-    let laps = gameSave.laps || [];
-    
-    // Ensure we have arrays for all players
-    while (laps.length < gameSave.players.length) {
-      laps.push([]);
+    if (args.isTeamMode && args.teamScores) {
+      // Team mode: store team scores directly
+      let teamLaps = gameSave.teamLaps || [];
+      
+      // Add the new round scores for teams
+      const updatedTeamLaps = [...teamLaps];
+      updatedTeamLaps.push(args.teamScores);
+      
+      return await ctx.db.patch(args.id, { teamLaps: updatedTeamLaps });
+    } else {
+      // Individual mode: use the original logic
+      let laps = gameSave.laps || [];
+      
+      // Ensure we have arrays for all players
+      while (laps.length < gameSave.players.length) {
+        laps.push([]);
+      }
+      
+      // Add the new round scores to each player's laps
+      const updatedLaps = laps.map((playerLaps, index) => {
+        const newLaps = [...playerLaps];
+        newLaps.push(args.roundScores[index] || 0);
+        return newLaps;
+      });
+      
+      return await ctx.db.patch(args.id, { laps: updatedLaps });
     }
-    
-    // Add the new round scores to each player's laps
-    const updatedLaps = laps.map((playerLaps, index) => {
-      const newLaps = [...playerLaps];
-      newLaps.push(args.roundScores[index] || 0);
-      return newLaps;
-    });
-    
-    return await ctx.db.patch(args.id, { laps: updatedLaps });
   },
 });
 

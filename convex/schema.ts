@@ -10,6 +10,7 @@ export default defineSchema({
     avatar: v.optional(v.string()),
     playerId: v.optional(v.id("players")),
     isActive: v.boolean(),
+    isAdmin: v.optional(v.boolean()),
     createdAt: v.number(),
     lastSeen: v.optional(v.number()),
   }).index("by_email", ["email"])
@@ -40,6 +41,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     rules: v.optional(v.string()),
     banner: v.optional(v.string()),
+    category: v.optional(v.string()),
     settings: v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),
@@ -48,8 +50,11 @@ export default defineSchema({
       hideTotalColumn: v.optional(v.boolean()),
     }),
     isActive: v.boolean(),
+    index: v.optional(v.number()),
     createdAt: v.number(),
-  }).index("by_name", ["name"]),
+  }).index("by_name", ["name"])
+    .index("by_index", ["index"])
+    .index("by_category", ["category"]),
 
   gameSaves: defineTable({
     name: v.string(),
@@ -58,7 +63,8 @@ export default defineSchema({
     redTeam: v.optional(v.array(v.id("players"))),
     blueTeam: v.optional(v.array(v.id("players"))),
     results: v.optional(v.string()),
-    laps: v.optional(v.array(v.array(v.number()))), // Two-dimensional matrix: [playerIndex][roundIndex] = score
+    laps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))), // Two-dimensional matrix: [playerIndex][roundIndex] = score or array of scores
+    teamLaps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))), // For team mode: [roundIndex][teamIndex] = team score or array of team scores
     settings: v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
       calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),

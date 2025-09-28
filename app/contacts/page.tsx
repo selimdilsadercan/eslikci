@@ -85,8 +85,11 @@ export default function ContactsPage() {
         {currentUserAsPlayer === undefined ? (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-600 mb-3">Ben</h2>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm">
+            <div className="space-y-2">
+              <div 
+                className="flex items-center justify-between py-2 bg-white rounded-lg px-3"
+                style={{ boxShadow: '0 0 8px 5px #297dff0a' }}
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
                   <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
@@ -98,10 +101,10 @@ export default function ContactsPage() {
         ) : currentUserAsPlayer ? (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-600 mb-3">Ben</h2>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <div
                 onClick={() => handleEditPlayer(currentUserAsPlayer._id)}
-                className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center space-x-3">
                   {currentUserAsPlayer.avatar ? (
@@ -138,9 +141,9 @@ export default function ContactsPage() {
         {players === undefined ? (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplandırılmamış</h2>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm">
+                <div key={index} className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }}">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
@@ -153,12 +156,12 @@ export default function ContactsPage() {
         ) : groupedPlayers.ungrouped && groupedPlayers.ungrouped.length > 0 ? (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplandırılmamış</h2>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {groupedPlayers.ungrouped.map((player) => (
                 <div
                   key={player._id}
                   onClick={() => handleEditPlayer(player._id)}
-                  className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
                     {player.avatar ? (
@@ -196,9 +199,9 @@ export default function ContactsPage() {
         {groups === undefined ? (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplar</h2>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {Array.from({ length: 2 }).map((_, index) => (
-                <div key={index} className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm">
+                <div key={index} className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }}">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
@@ -216,12 +219,12 @@ export default function ContactsPage() {
             return (
               <div key={group._id} className="mb-6">
                 <h2 className="text-sm font-medium text-gray-600 mb-3">{group.name}</h2>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {groupPlayers.map((player) => (
                     <div
                       key={player._id}
                       onClick={() => handleEditPlayer(player._id)}
-                      className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
                         {player.avatar ? (

@@ -35,6 +35,7 @@ function EditGameContent() {
   }
   
   const [gameName, setGameName] = useState('');
+  const [gameCategory, setGameCategory] = useState('');
   const [gameRules, setGameRules] = useState('');
   const [rulesSections, setRulesSections] = useState<Array<{id: string, title: string, content: string}>>([]);
   const [gameplay, setGameplay] = useState('herkes-tek');
@@ -53,6 +54,7 @@ function EditGameContent() {
   useEffect(() => {
     if (game) {
       setGameName(game.name);
+      setGameCategory(game.category || '');
       setGameRules(game.rules || '');
       setGameplay(game.settings?.gameplay || 'herkes-tek');
       setCalculationMode(game.settings?.calculationMode || 'NoPoints');
@@ -108,6 +110,7 @@ function EditGameContent() {
       await updateGame({
         id: gameId,
         name: gameName.trim(),
+        category: gameCategory.trim(),
         rules: JSON.stringify(rulesSections),
         settings: {
           gameplay,
@@ -207,6 +210,19 @@ function EditGameContent() {
                     onChange={(e) => setGameName(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     placeholder="Oyun adını girin"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Kategori
+                  </label>
+                  <input
+                    type="text"
+                    value={gameCategory}
+                    onChange={(e) => setGameCategory(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Oyun kategorisini girin (örn: Kart Oyunu, Strateji, vb.)"
                   />
                 </div>
 

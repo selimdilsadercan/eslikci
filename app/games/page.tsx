@@ -67,57 +67,88 @@ export default function GamesPage() {
         </div>
         
         {/* Games Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-8">
-          {games === undefined ? (
-            // Skeleton loading for games
-            Array.from({ length: 6 }).map((_, index) => (
+        {games === undefined ? (
+          // Skeleton loading for games
+          <div className="grid grid-cols-2 gap-2 mb-8">
+            {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
                 className="bg-white rounded-lg"
                 style={{
                   padding: '20px',
-                  height: '108px',
+                  height: '120px',
                   boxShadow: '0 0 8px 5px #297dff0a'
                 }}
               >
-                <div className="flex items-center justify-center h-full">
-                  <div className="h-6 bg-gray-200 rounded animate-pulse w-24"></div>
+                <div className="flex flex-col justify-center h-full">
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-24 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
                 </div>
               </div>
-            ))
-          ) : games.length === 0 ? (
-            <div className="col-span-2 text-center py-12">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus size={32} className="text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-600 mb-2">Henüz oyun eklenmemiş</h3>
-              <p className="text-gray-500 mb-4">İlk oyununuzu ekleyerek başlayın</p>
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg font-medium"
-              >
-                Oyun Ekle
-              </button>
+            ))}
+          </div>
+        ) : games.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus size={32} className="text-gray-400" />
             </div>
-          ) : (
-            games.map((game) => (
-              <div
-                key={game._id}
-                className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                style={{
-                  padding: '20px',
-                  height: '108px',
-                  boxShadow: '0 0 8px 5px #297dff0a'
-                }}
-                onClick={() => handleGameSelect(game._id)}
-              >
-                <div className="flex items-center justify-center h-full">
-                  <h3 className="font-medium text-gray-800 text-lg">{game.name}</h3>
+            <h3 className="text-lg font-medium text-gray-600 mb-2">Henüz oyun eklenmemiş</h3>
+            <p className="text-gray-500 mb-4">İlk oyununuzu ekleyerek başlayın</p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg font-medium"
+            >
+              Oyun Ekle
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6 mb-8">
+            {(() => {
+              // Group games by category
+              const gamesByCategory = games.reduce((acc, game) => {
+                const category = game.category || 'Diğer';
+                if (!acc[category]) {
+                  acc[category] = [];
+                }
+                acc[category].push(game);
+                return acc;
+              }, {} as Record<string, typeof games>);
+
+              return Object.entries(gamesByCategory).map(([category, categoryGames]) => (
+                <div key={category}>
+                  <h2 className="text-lg font-semibold text-gray-700 mb-3 px-1">
+                    {category}
+                  </h2>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categoryGames.map((game) => (
+                      <div
+                        key={game._id}
+                        className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
+                        style={{
+                          padding: '16px',
+                          height: '120px',
+                          boxShadow: '0 0 8px 5px #297dff0a'
+                        }}
+                        onClick={() => handleGameSelect(game._id)}
+                      >
+                        <div className="flex flex-col justify-center items-center text-center h-full">
+                          <h3 className="font-medium text-gray-800 text-base leading-tight mb-1">
+                            {game.name}
+                          </h3>
+                          {game.description && (
+                            <p className="text-xs text-gray-500 line-clamp-2">
+                              {game.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ));
+            })()}
+          </div>
+        )}
       </div>
 
       {/* Add Game Modal */}
