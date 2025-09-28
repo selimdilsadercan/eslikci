@@ -11,10 +11,12 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  updateProfile
+  updateProfile,
+  signInWithCredential
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 interface AuthContextType {
   user: User | null;
@@ -40,7 +42,7 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
       setIsLoaded(true);
     });
 
-    // Handle redirect result for mobile apps
+    // Handle redirect result for mobile apps (simplified for mobile app config)
     if (Capacitor.isNativePlatform()) {
       getRedirectResult(auth)
         .then((result) => {
@@ -49,7 +51,7 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
             console.log('User signed in via redirect:', result.user?.email);
             // User signed in via redirect - the onAuthStateChanged will handle the state update
           } else {
-            console.log('No redirect result found');
+            console.log('No redirect result found - using mobile app popup flow');
           }
         })
         .catch((error) => {
@@ -82,30 +84,36 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
 
   const signInWithGoogle = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      
-      // Configure provider for better mobile experience
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      // Use redirect for mobile apps, popup for web
       if (Capacitor.isNativePlatform()) {
-        // For mobile apps, use redirect
-        console.log('Starting Google sign-in redirect for mobile...');
+        // For mobile apps, use native Google Sign-In
+        console.log('Starting native Google sign-in for mobile...');
         
-        // Set custom parameters for mobile
-        provider.setCustomParameters({
-          prompt: 'select_account'
-        });
+        // Initialize Google Auth
+        await GoogleAuth.initialize();
         
-        await signInWithRedirect(auth, provider);
-        // Note: The redirect will take the user away from the app
-        // The getRedirectResult in useEffect will handle the return
+        // Sign in with Google
+        const result = await GoogleAuth.signIn();
+        
+        if (result && result.authentication) {
+          // Create Firebase credential from Google Auth result
+          const credential = GoogleAuthProvider.credential(
+            result.authentication.idToken,
+            result.authentication.accessToken
+          );
+          
+          // Sign in to Firebase with the credential
+          await signInWithCredential(auth, credential);
+          console.log('Native Google sign-in successful');
+        } else {
+          throw new Error('Google sign-in was cancelled or failed');
+        }
       } else {
         // For web, use popup
         console.log('Starting Google sign-in popup for web...');
         
-        // Set custom parameters for web to ensure proper redirect
+        const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
         provider.setCustomParameters({
           prompt: 'select_account'
         });
@@ -120,7 +128,15 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      if (Capacitor.isNativePlatform()) {
+        // For mobile apps, sign out from both Google and Firebase
+        await GoogleAuth.signOut();
+        await firebaseSignOut(auth);
+        console.log('Native Google sign-out successful');
+      } else {
+        // For web, just sign out from Firebase
+        await firebaseSignOut(auth);
+      }
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "918761349311",
+    "project_id": "eslikci",
+    "storage_bucket": "eslikci.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918761349311:android:1db40b81762ffe9a1fe60a",
+        "android_client_info": {
+          "package_name": "com.eslikci.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "918761349311-a4aff6865eldvn5oubgm1j4a54og4mcv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1JUlBjp2-NM3OPZXoQ1BKgrCPaAQQ0D8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "918761349311-a4aff6865eldvn5oubgm1j4a54og4mcv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
