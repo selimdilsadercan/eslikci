@@ -104,6 +104,12 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
       } else {
         // For web, use popup
         console.log('Starting Google sign-in popup for web...');
+        
+        // Set custom parameters for web to ensure proper redirect
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
         await signInWithPopup(auth, provider);
       }
     } catch (error) {
