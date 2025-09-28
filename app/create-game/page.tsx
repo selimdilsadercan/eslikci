@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
 
 function CreateGameContent() {
@@ -33,12 +33,38 @@ function CreateGameContent() {
   // Mutations
   const createGameSave = useMutation(api.gameSaves.createGameSave);
 
+  // ALL STATE HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPlayers, setSelectedPlayers] = useState<Id<'players'>[]>([]);
+  const [redTeam, setRedTeam] = useState<Id<'players'>[]>([]);
+  const [blueTeam, setBlueTeam] = useState<Id<'players'>[]>([]);
+  const [gameSettings, setGameSettings] = useState({
+    gameplay: game?.settings?.gameplay || 'herkes-tek',
+    calculationMode: game?.settings?.calculationMode || 'NoPoints',
+    roundWinner: game?.settings?.roundWinner || 'Highest',
+    pointsPerRound: (game?.settings as any)?.pointsPerRound || 'Single',
+    hideTotalColumn: game?.settings?.hideTotalColumn || false
+  });
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       router.replace('/');
     }
   }, [isLoaded, isSignedIn, router]);
+
+  // Update settings when game data loads
+  useEffect(() => {
+    if (game?.settings) {
+      setGameSettings({
+        gameplay: game.settings.gameplay || 'herkes-tek',
+        calculationMode: game.settings.calculationMode || 'NoPoints',
+        roundWinner: game.settings.roundWinner || 'Highest',
+        pointsPerRound: (game.settings as any)?.pointsPerRound || 'Single',
+        hideTotalColumn: game.settings.hideTotalColumn || false
+      });
+    }
+  }, [game]);
 
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
@@ -51,33 +77,6 @@ function CreateGameContent() {
       </div>
     );
   }
-  
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedPlayers, setSelectedPlayers] = useState<Id<'players'>[]>([]);
-  const [redTeam, setRedTeam] = useState<Id<'players'>[]>([]);
-  const [blueTeam, setBlueTeam] = useState<Id<'players'>[]>([]);
-  const [gameSettings, setGameSettings] = useState({
-    gameplay: game?.settings?.gameplay || 'herkes-tek',
-    calculationMode: game?.settings?.calculationMode || 'NoPoints',
-    roundWinner: game?.settings?.roundWinner || 'OnePoint',
-    pointsPerRound: (game?.settings as any)?.pointsPerRound || 'Single',
-    penaltiesPerRound: (game?.settings as any)?.penaltiesPerRound || 'Single',
-    hideTotalColumn: game?.settings?.hideTotalColumn || false
-  });
-
-  // Update settings when game data loads
-  useEffect(() => {
-    if (game?.settings) {
-      setGameSettings({
-        gameplay: game.settings.gameplay || 'herkes-tek',
-        calculationMode: game.settings.calculationMode || 'NoPoints',
-        roundWinner: game.settings.roundWinner || 'OnePoint',
-        pointsPerRound: (game.settings as any).pointsPerRound || 'Single',
-        penaltiesPerRound: (game.settings as any).penaltiesPerRound || 'Single',
-        hideTotalColumn: game.settings.hideTotalColumn || false
-      });
-    }
-  }, [game]);
 
   const handleBack = () => {
     if (currentStep === 1) {
@@ -101,17 +100,16 @@ function CreateGameContent() {
 
       try {
         const gameSaveId = await createGameSave({
-          name: `${gameName} - ${new Date().toLocaleDateString('tr-TR')}`,
+          name: gameName,
           gameTemplate: gameId as Id<'games'>,
           players: selectedPlayers,
           redTeam: gameSettings.gameplay === 'takimli' ? redTeam : undefined,
           blueTeam: gameSettings.gameplay === 'takimli' ? blueTeam : undefined,
           settings: {
             gameplay: gameSettings.gameplay as 'herkes-tek' | 'takimli',
-            calculationMode: gameSettings.calculationMode as 'NoPoints' | 'Points' | 'Penalized',
-            roundWinner: gameSettings.roundWinner as 'OnePoint' | 'ZeroPoint' | 'Highest' | 'Lowest',
+            calculationMode: gameSettings.calculationMode as 'NoPoints' | 'Points',
+            roundWinner: gameSettings.roundWinner as 'Highest' | 'Lowest',
             pointsPerRound: gameSettings.pointsPerRound as 'Single' | 'Multiple' | undefined,
-            penaltiesPerRound: gameSettings.penaltiesPerRound as 'Single' | 'Multiple' | undefined,
             hideTotalColumn: gameSettings.hideTotalColumn,
           },
           userId: currentUser._id,
@@ -140,11 +138,9 @@ function CreateGameContent() {
       // Reset round winner when calculation mode changes
       if (key === 'calculationMode') {
         if (value === 'NoPoints') {
-          newSettings.roundWinner = 'OnePoint';
+          newSettings.roundWinner = 'Highest';
         } else if (value === 'Points') {
           newSettings.roundWinner = 'Highest';
-        } else if (value === 'Penalized') {
-          newSettings.roundWinner = 'Lowest';
         }
       }
       
@@ -216,7 +212,7 @@ function CreateGameContent() {
         <button onClick={handleBack} className="mr-4">
           <ArrowLeft size={24} className="text-black" />
         </button>
-        <h1 className="text-xl font-bold text-black">{gameName}</h1>
+        <h1 className="text-lg font-semibold text-black">{gameName}</h1>
       </div>
 
       {/* Main Content - Empty space for bottom panel */}
@@ -237,10 +233,18 @@ function CreateGameContent() {
                       className="flex items-center justify-between py-2"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
-                        </div>
-                        <span className="font-medium text-black">{currentUserAsPlayer.name}</span>
+                        {currentUserAsPlayer.avatar ? (
+                          <img
+                            src={currentUserAsPlayer.avatar}
+                            alt={currentUserAsPlayer.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
+                          </div>
+                        )}
+                        <span className="font-normal text-black text-sm">{currentUserAsPlayer.name}</span>
                       </div>
                       <button
                         onClick={() => togglePlayer(currentUserAsPlayer._id)}
@@ -272,10 +276,18 @@ function CreateGameContent() {
                         className="flex items-center justify-between py-2"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                          </div>
-                          <span className="font-medium text-black">{player.name}</span>
+                          {player.avatar ? (
+                            <img
+                              src={player.avatar}
+                              alt={player.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                            </div>
+                          )}
+                          <span className="font-normal text-black text-sm">{player.name}</span>
                         </div>
                         <button
                           onClick={() => togglePlayer(player._id)}
@@ -312,10 +324,18 @@ function CreateGameContent() {
                           className="flex items-center justify-between py-2"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                            </div>
-                            <span className="font-medium text-black">{player.name}</span>
+                            {player.avatar ? (
+                              <img
+                                src={player.avatar}
+                                alt={player.name}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                              </div>
+                            )}
+                            <span className="font-normal text-black text-sm">{player.name}</span>
                           </div>
                           <button
                             onClick={() => togglePlayer(player._id)}
@@ -347,7 +367,7 @@ function CreateGameContent() {
                   <>
                     {/* Kırmızı Takım */}
                     <div>
-                      <h2 className="text-lg font-bold text-gray-800 mb-3">Kırmızı Takım:</h2>
+                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Kırmızı Takım:</h2>
                       <div 
                         className="min-h-[60px] p-4 border-2 border-dashed border-red-300 rounded-lg bg-red-50"
                         onDragOver={handleDragOver}
@@ -364,9 +384,17 @@ function CreateGameContent() {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, playerId)}
                               >
-                                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-red-600 font-semibold text-xs">{player.initial}</span>
-                                </div>
+                                {player.avatar ? (
+                                  <img
+                                    src={player.avatar}
+                                    alt={player.name}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                    <span className="text-red-600 font-semibold text-sm">{player.initial}</span>
+                                  </div>
+                                )}
                                 <span className="text-white font-medium text-sm">{player.name}</span>
                                 <button
                                   onClick={() => removePlayerFromTeams(playerId)}
@@ -386,7 +414,7 @@ function CreateGameContent() {
 
                     {/* Mavi Takım */}
                     <div>
-                      <h2 className="text-lg font-bold text-gray-800 mb-3">Mavi Takım:</h2>
+                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Mavi Takım:</h2>
                       <div 
                         className="min-h-[60px] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50"
                         onDragOver={handleDragOver}
@@ -403,9 +431,17 @@ function CreateGameContent() {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, playerId)}
                               >
-                                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                                </div>
+                                {player.avatar ? (
+                                  <img
+                                    src={player.avatar}
+                                    alt={player.name}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                    <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                                  </div>
+                                )}
                                 <span className="text-white font-medium text-sm">{player.name}</span>
                                 <button
                                   onClick={() => removePlayerFromTeams(playerId)}
@@ -425,7 +461,7 @@ function CreateGameContent() {
 
                     {/* Available Players */}
                     <div>
-                      <h2 className="text-lg font-bold text-gray-800 mb-3">Seçili Oyuncular:</h2>
+                      <h2 className="text-sm font-semibold text-gray-800 mb-3">Seçili Oyuncular:</h2>
                       <div className="flex flex-wrap gap-2">
                         {selectedPlayers.map(playerId => {
                           const player = allPlayers.find(p => p._id === playerId);
@@ -440,9 +476,17 @@ function CreateGameContent() {
                               draggable={!isInTeam}
                               onDragStart={(e) => !isInTeam && handleDragStart(e, playerId)}
                             >
-                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                <span className={`font-semibold text-xs ${isInTeam ? 'text-gray-400' : 'text-red-600'}`}>{player.initial}</span>
-                              </div>
+                              {player.avatar ? (
+                                <img
+                                  src={player.avatar}
+                                  alt={player.name}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                  <span className={`font-semibold text-sm ${isInTeam ? 'text-gray-400' : 'text-red-600'}`}>{player.initial}</span>
+                                </div>
+                              )}
                               <span className={`font-medium text-sm ${isInTeam ? 'text-gray-400' : 'text-white'}`}>{player.name}</span>
                             </div>
                           ) : null;
@@ -453,15 +497,23 @@ function CreateGameContent() {
                 ) : (
                   /* Individual Players */
                   <div>
-                    <h2 className="text-lg font-bold text-gray-800 mb-3">Oyuncular:</h2>
+                    <h2 className="text-sm font-semibold text-gray-800 mb-3">Oyuncular:</h2>
                     <div className="flex flex-wrap gap-2">
                       {selectedPlayers.map(playerId => {
                         const player = allPlayers.find(p => p._id === playerId);
                         return player ? (
-                          <div key={playerId} className="rounded-full px-3 py-2 flex items-center space-x-2" style={{ backgroundColor: '#F05757' }}>
-                            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                              <span className="text-red-600 font-semibold text-xs">{player.initial}</span>
-                            </div>
+                          <div key={playerId} className="rounded-full px-2 py-1.5 flex items-center space-x-2" style={{ backgroundColor: '#F05757' }}>
+                            {player.avatar ? (
+                              <img
+                                src={player.avatar}
+                                alt={player.name}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                <span className="text-red-600 font-semibold text-sm">{player.initial}</span>
+                              </div>
+                            )}
                             <span className="text-white font-medium text-sm">{player.name}</span>
                           </div>
                         ) : null;
@@ -471,12 +523,12 @@ function CreateGameContent() {
                 )}
 
                 {/* Oynanış */}
-                <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Oynanış:</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Oynanış:</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => updateGameSetting('gameplay', 'herkes-tek')}
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                         gameSettings.gameplay === 'herkes-tek'
                           ? 'text-white'
                           : 'text-gray-800'
@@ -487,7 +539,7 @@ function CreateGameContent() {
                     </button>
                     <button
                       onClick={() => updateGameSetting('gameplay', 'takimli')}
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                         gameSettings.gameplay === 'takimli'
                           ? 'text-white'
                           : 'text-gray-800'
@@ -500,12 +552,12 @@ function CreateGameContent() {
                 </div>
 
                 {/* Hesaplama Modu */}
-                <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Hesaplama Modu:</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Hesaplama Modu:</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => updateGameSetting('calculationMode', 'NoPoints')}
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                         gameSettings.calculationMode === 'NoPoints'
                           ? 'text-white'
                           : 'text-gray-800'
@@ -516,7 +568,7 @@ function CreateGameContent() {
                     </button>
                     <button
                       onClick={() => updateGameSetting('calculationMode', 'Points')}
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                         gameSettings.calculationMode === 'Points'
                           ? 'text-white'
                           : 'text-gray-800'
@@ -525,57 +577,19 @@ function CreateGameContent() {
                     >
                       Puanlı
                     </button>
-                    <button
-                      onClick={() => updateGameSetting('calculationMode', 'Penalized')}
-                      className={`px-4 py-2 rounded-full text-sm font-medium ${
-                        gameSettings.calculationMode === 'Penalized'
-                          ? 'text-white'
-                          : 'text-gray-800'
-                      }`}
-                      style={gameSettings.calculationMode === 'Penalized' ? { backgroundColor: '#365376' } : {}}
-                    >
-                      Cezalı
-                    </button>
                   </div>
                 </div>
 
                 {/* Tur Kazananı - Conditional based on calculation mode */}
-                <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Tur Kazananı:</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Kazanan:</h2>
                   <div className="flex gap-2">
                     {gameSettings.calculationMode === 'NoPoints' ? (
                       // Options for Puansız mode
                       <>
                         <button
-                          onClick={() => updateGameSetting('roundWinner', 'OnePoint')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                            gameSettings.roundWinner === 'OnePoint'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'OnePoint' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          <Crown size={16} weight="fill" />
-                          <span>1 Puan</span>
-                        </button>
-                        <button
-                          onClick={() => updateGameSetting('roundWinner', 'ZeroPoint')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium ${
-                            gameSettings.roundWinner === 'ZeroPoint'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'ZeroPoint' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          0 Puan
-                        </button>
-                      </>
-                    ) : gameSettings.calculationMode === 'Points' ? (
-                      // Options for Puanlı mode
-                      <>
-                        <button
                           onClick={() => updateGameSetting('roundWinner', 'Highest')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                             gameSettings.roundWinner === 'Highest'
                               ? 'text-white'
                               : 'text-gray-800'
@@ -585,13 +599,9 @@ function CreateGameContent() {
                           <span>↑</span>
                           <span>En Yüksek</span>
                         </button>
-                      </>
-                    ) : (
-                      // Options for Cezalı mode
-                      <>
                         <button
                           onClick={() => updateGameSetting('roundWinner', 'Lowest')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                             gameSettings.roundWinner === 'Lowest'
                               ? 'text-white'
                               : 'text-gray-800'
@@ -601,30 +611,47 @@ function CreateGameContent() {
                           <span>↓</span>
                           <span>En Düşük</span>
                         </button>
+                      </>
+                    ) : gameSettings.calculationMode === 'Points' ? (
+                      // Options for Puanlı mode
+                      <>
                         <button
-                          onClick={() => updateGameSetting('roundWinner', 'ZeroPoint')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium ${
-                            gameSettings.roundWinner === 'ZeroPoint'
+                          onClick={() => updateGameSetting('roundWinner', 'Highest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            gameSettings.roundWinner === 'Highest'
                               ? 'text-white'
                               : 'text-gray-800'
                           }`}
-                          style={gameSettings.roundWinner === 'ZeroPoint' ? { backgroundColor: '#365376' } : {}}
+                          style={gameSettings.roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
                         >
-                          0 Puan
+                          <span>↑</span>
+                          <span>En Yüksek</span>
+                        </button>
+                        <button
+                          onClick={() => updateGameSetting('roundWinner', 'Lowest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            gameSettings.roundWinner === 'Lowest'
+                              ? 'text-white'
+                              : 'text-gray-800'
+                          }`}
+                          style={gameSettings.roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
+                        >
+                          <span>↓</span>
+                          <span>En Düşük</span>
                         </button>
                       </>
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
-                {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected */}
+                {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
                 {gameSettings.calculationMode === 'Points' && (
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Tur İçi Puan Sayısı:</h2>
+                  <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
+                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Tur İçi Puan Sayısı:</h2>
                     <div className="flex gap-2">
                       <button
                         onClick={() => updateGameSetting('pointsPerRound', 'Single')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                           gameSettings.pointsPerRound === 'Single'
                             ? 'text-white'
                             : 'text-gray-800'
@@ -635,7 +662,7 @@ function CreateGameContent() {
                       </button>
                       <button
                         onClick={() => updateGameSetting('pointsPerRound', 'Multiple')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                           gameSettings.pointsPerRound === 'Multiple'
                             ? 'text-white'
                             : 'text-gray-800'
@@ -648,40 +675,10 @@ function CreateGameContent() {
                   </div>
                 )}
 
-                {/* Tur İçi Ceza Sayısı - Only show when Cezalı is selected */}
-                {gameSettings.calculationMode === 'Penalized' && (
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Tur İçi Ceza Sayısı:</h2>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => updateGameSetting('penaltiesPerRound', 'Single')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium ${
-                          gameSettings.penaltiesPerRound === 'Single'
-                            ? 'text-white'
-                            : 'text-gray-800'
-                        }`}
-                        style={gameSettings.penaltiesPerRound === 'Single' ? { backgroundColor: '#365376' } : {}}
-                      >
-                        Tek
-                      </button>
-                      <button
-                        onClick={() => updateGameSetting('penaltiesPerRound', 'Multiple')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium ${
-                          gameSettings.penaltiesPerRound === 'Multiple'
-                            ? 'text-white'
-                            : 'text-gray-800'
-                        }`}
-                        style={gameSettings.penaltiesPerRound === 'Multiple' ? { backgroundColor: '#365376' } : {}}
-                      >
-                        Çok
-                      </button>
-                    </div>
-                  </div>
-                )}
 
                 {/* Toplam Sütununu Gizle */}
-                <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">Toplam Sütununu Gizle:</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Toplam Sütununu Gizle:</h2>
                   <button
                     onClick={() => updateGameSetting('hideTotalColumn', !gameSettings.hideTotalColumn)}
                     className={`w-6 h-6 rounded border-2 flex items-center justify-center ${

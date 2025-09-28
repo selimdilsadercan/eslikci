@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Urbanist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { ConvexClientProvider } from "../components/ConvexProvider";
-import { FirebaseAuthProvider } from "../components/FirebaseAuthProvider";
-import { UserSyncWrapper } from "../components/UserSyncWrapper";
+import { ConvexClientProvider } from "@/components/ConvexProvider";
+import { FirebaseAuthProvider } from "@/components/FirebaseAuthProvider";
+import { UserSyncWrapper } from "@/components/UserSyncWrapper";
+import { Toaster } from "react-hot-toast";
 
-const urbanist = Urbanist({
-  variable: "--font-urbanist",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
@@ -24,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${urbanist.variable} antialiased`}
+        className={`${inter.variable} antialiased`}
       >
         <FirebaseAuthProvider>
           <ConvexClientProvider>
@@ -33,6 +34,30 @@ export default function RootLayout({
             </UserSyncWrapper>
           </ConvexClientProvider>
         </FirebaseAuthProvider>
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            duration: 2000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 1500,
+              style: {
+                background: '#10B981',
+                color: '#fff',
+              },
+            },
+            error: {
+              duration: 2500,
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

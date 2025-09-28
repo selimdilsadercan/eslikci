@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../convex/_generated/api';
-import { Id } from '../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { X, Trash } from '@phosphor-icons/react';
 import { Drawer } from 'vaul';
+import AvatarGenerator from './AvatarGenerator';
 
 interface EditPlayerModalProps {
   playerId: Id<'players'>;
@@ -20,6 +21,8 @@ interface EditPlayerModalProps {
 export default function EditPlayerModal({ playerId, onClose, groups }: EditPlayerModalProps) {
   const [playerName, setPlayerName] = useState('');
   const [selectedGroups, setSelectedGroups] = useState<Id<'groups'>[]>([]);
+  const [playerAvatar, setPlayerAvatar] = useState<string>('');
+  const [playerGender, setPlayerGender] = useState<'male' | 'female' | 'neutral'>('neutral');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -31,6 +34,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
   useEffect(() => {
     if (currentPlayer) {
       setPlayerName(currentPlayer.name);
+      setPlayerAvatar(currentPlayer.avatar || '');
       if (currentPlayer.groupId) {
         setSelectedGroups([currentPlayer.groupId]);
       }
@@ -47,6 +51,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
         id: playerId,
         name: playerName.trim(),
         initial: playerName.trim().charAt(0).toUpperCase(),
+        avatar: playerAvatar,
         groupId: selectedGroups.length === 1 ? selectedGroups[0] : undefined,
       });
 
@@ -89,6 +94,10 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40" />
         <Drawer.Content className="bg-white h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl">
+          {/* Gesture bar */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
+          </div>
           <div className="px-6 pb-6">
             <div className="flex items-center justify-between mb-6 pt-4">
               <Drawer.Title className="text-xl font-bold text-gray-800">Kişiyi Düzenle</Drawer.Title>
@@ -110,6 +119,62 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
                   placeholder="Kişi adını girin"
                   className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                   required
+                />
+              </div>
+
+              {/* Gender Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Cinsiyet
+                </label>
+                <div className="flex gap-2 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setPlayerGender('male')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      playerGender === 'male'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Erkek
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlayerGender('female')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      playerGender === 'female'
+                        ? 'bg-pink-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Kadın
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlayerGender('neutral')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      playerGender === 'neutral'
+                        ? 'bg-gray-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Belirsiz
+                  </button>
+                </div>
+              </div>
+
+              {/* Avatar Editor */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Avatar
+                </label>
+                <AvatarGenerator
+                  name={playerName.trim() || 'Player'}
+                  gender={playerGender}
+                  size={80}
+                  onAvatarChange={setPlayerAvatar}
+                  className="mb-4"
                 />
               </div>
 

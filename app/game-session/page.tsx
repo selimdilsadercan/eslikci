@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X } from '@phosphor-icons/react';
+import toast from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 
 function GameSessionContent() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -17,6 +19,8 @@ function GameSessionContent() {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL LOGIC
   const [activeTab, setActiveTab] = useState('puan-tablosu');
   const [currentScores, setCurrentScores] = useState<{[key: string]: number}>({});
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [crownWinners, setCrownWinners] = useState<{[key: string]: boolean}>({});
   const [showSettings, setShowSettings] = useState(false);
 
@@ -177,6 +181,17 @@ function GameSessionContent() {
     }
   };
 
+  const handleConfirmAction = (action: () => void) => {
+    setConfirmAction(() => action);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    if (confirmAction) {
+      confirmAction();
+    }
+  };
+
   const toggleHideTotalColumn = async () => {
     if (!gameSaveId || !gameSave?.settings) return;
     
@@ -211,6 +226,13 @@ function GameSessionContent() {
       roundScores = gamePlayers.map(player => currentScores[player._id] || 0);
     }
     
+    // Check if all scores are 0
+    const allScoresZero = roundScores.every(score => score === 0);
+    if (allScoresZero) {
+      toast.error('En az bir oyuncu için puan girmelisiniz!');
+      return;
+    }
+    
     try {
       await addRoundScores({
         id: gameSaveId as Id<'gameSaves'>,
@@ -222,6 +244,7 @@ function GameSessionContent() {
       setCrownWinners({});
     } catch (error) {
       console.error('Error saving round scores:', error);
+      toast.error('Tur kaydedilirken hata oluştu!');
     }
   };
 
@@ -276,6 +299,37 @@ function GameSessionContent() {
 
   const roundColumns = generateRoundColumns();
 
+  const getTimeAgo = () => {
+    if (!gameSave?.createdTime) return 'Bilinmiyor';
+    
+    const now = Date.now();
+    const gameTime = gameSave.createdTime;
+    const diffInMinutes = Math.floor((now - gameTime) / (1000 * 60));
+    
+    if (diffInMinutes < 1) {
+      return 'Az önce';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} dakika önce`;
+    } else if (diffInMinutes < 1440) { // 24 hours
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours} saat önce`;
+    } else {
+      const days = Math.floor(diffInMinutes / 1440);
+      return `${days} gün önce`;
+    }
+  };
+
+  const getNextRoundNumber = () => {
+    if (!gameSave?.laps || gameSave.laps.length === 0) {
+      return 1; // First round if no laps exist
+    }
+    
+    // Get the maximum number of rounds from the laps data
+    const maxRounds = Math.max(...gameSave.laps.map(playerLaps => playerLaps.length));
+    return maxRounds + 1; // Next round number
+  };
+
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f4f6f9' }}>
       {/* Header */}
@@ -286,7 +340,7 @@ function GameSessionContent() {
           </button>
           <h1 className="text-xl font-bold text-gray-800">{gameName}</h1>
         </div>
-        <span className="text-sm text-gray-500">10 minutes ago</span>
+        <span className="text-sm text-gray-500">{getTimeAgo()}</span>
       </div>
 
       {/* Navigation Tabs */}
@@ -323,14 +377,14 @@ function GameSessionContent() {
             <div className="overflow-x-auto mb-6">
               <div className="min-w-full">
                 {/* Table Header */}
-                <div className="px-4 py-3 flex min-w-max border-b border-gray-200">
+                <div className="px-2 py-2 flex min-w-max">
                   <div className="w-[120px]"></div>
                   {!gameSave?.settings.hideTotalColumn && (
-                    <div className="w-20 text-center font-medium text-gray-700">Toplam</div>
+                    <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>Toplam</div>
                   )}
                   {/* Dynamic round columns */}
                   {roundColumns.map((roundNumber) => (
-                    <div key={roundNumber} className="w-20 text-center font-medium text-gray-700">
+                    <div key={roundNumber} className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
                       {roundNumber}. Tur
                     </div>
                   ))}
@@ -338,21 +392,35 @@ function GameSessionContent() {
 
                 {/* Player Rows */}
                 {gamePlayers.map((player, index) => (
-                  <div key={player._id} className={`px-4 py-3 flex items-center min-w-max ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  <div key={player._id} className={`px-2 py-2.5 flex items-center min-w-max ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
                     <div className="flex items-center w-[120px]">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                      </div>
-                      <span className="font-medium text-gray-800 truncate">{player.name}</span>
+                      {player.avatar ? (
+                        <img
+                          src={player.avatar}
+                          alt={player.name}
+                          className="w-8 h-8 rounded-full object-cover mr-3"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                        </div>
+                      )}
+                      <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>{player.name}</span>
                     </div>
                     {!gameSave?.settings.hideTotalColumn && (
-                      <div className="w-20 text-center font-semibold text-gray-800">
+                      <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
                         {getTotalScore(player._id)}
                       </div>
                     )}
                     {roundColumns.map((roundNumber) => (
-                      <div key={roundNumber} className="w-20 text-center text-gray-600">
-                        {getRoundScores(player._id, roundNumber) || '-'}
+                      <div key={roundNumber} className="w-20 text-center text-gray-600 font-medium">
+                        {gameSave?.settings.calculationMode === 'NoPoints' ? (
+                          getRoundScores(player._id, roundNumber) === 1 ? (
+                            <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
+                          ) : '-'
+                        ) : (
+                          getRoundScores(player._id, roundNumber) || '-'
+                        )}
                       </div>
                     ))}
                   </div>
@@ -421,7 +489,7 @@ function GameSessionContent() {
                 <span className="text-sm font-medium">Son Turu Geri Al</span>
               </button>
               <button 
-                onClick={resetAllRounds}
+                onClick={() => handleConfirmAction(resetAllRounds)}
                 className="flex items-center space-x-3 text-red-600 hover:text-red-700 w-full"
               >
                 <Trash size={16} />
@@ -450,9 +518,17 @@ function GameSessionContent() {
                     <div className={`flex items-center ${
                       gameSave?.settings.calculationMode === 'NoPoints' ? 'justify-center' : ''
                     }`}>
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                      </div>
+                      {player.avatar ? (
+                        <img
+                          src={player.avatar}
+                          alt={player.name}
+                          className="w-6 h-6 rounded-full object-cover mr-2"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                          <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
+                        </div>
+                      )}
                       <span className="font-medium text-gray-800 text-sm">{player.name}</span>
                     </div>
                     
@@ -500,27 +576,39 @@ function GameSessionContent() {
           <div className="flex items-center justify-between">
             <button
               onClick={endRound}
-              className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg font-medium text-center"
+              className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg font-medium text-center hover:bg-blue-600"
             >
-              1. Turu Bitir
+              {getNextRoundNumber()}. Turu Bitir
             </button>
             <button 
               onClick={() => setShowSettings(!showSettings)}
-              className={`ml-4 w-12 h-12 rounded-full flex items-center justify-center ${
+              className={`ml-2 w-12 h-12 rounded-xl flex items-center justify-center ${
                 showSettings 
                   ? 'bg-blue-500 text-white hover:bg-blue-600' 
                   : 'border-2 border-blue-500 text-blue-500 bg-white hover:bg-blue-50'
               }`}
             >
               {showSettings ? (
-                <X size={20} weight="regular" />
+                <X size={20} weight="bold" />
               ) : (
-                <Gear size={20} weight="regular" />
+                <Gear size={20} weight="bold" />
               )}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirm}
+        title="Turları Sıfırla"
+        message="Tüm turları sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        confirmText="Sıfırla"
+        cancelText="İptal"
+        isDestructive={true}
+      />
     </div>
   );
 }

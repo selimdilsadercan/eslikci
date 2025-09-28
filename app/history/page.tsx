@@ -1,17 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { Trash } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
-import AppBar from '../../components/AppBar';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import AppBar from '@/components/AppBar';
+import ConfirmModal from '@/components/ConfirmModal';
+import { useState } from 'react';
 
 export default function HistoryPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [gameToDelete, setGameToDelete] = useState<Id<'gameSaves'> | null>(null);
 
   // Fetch game saves and related data - ALWAYS call hooks first
   // Use the user from Firebase Auth to get the Convex user
@@ -57,10 +61,17 @@ export default function HistoryPage() {
     );
   }
 
-  const handleDelete = async (gameSaveId: Id<'gameSaves'>) => {
-    if (confirm('Bu oyunu silmek istediğinizden emin misiniz?')) {
+  const handleDelete = (gameSaveId: Id<'gameSaves'>) => {
+    setGameToDelete(gameSaveId);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (gameToDelete) {
       try {
-        await deleteGameSave({ id: gameSaveId });
+        await deleteGameSave({ id: gameToDelete });
+        setShowConfirmModal(false);
+        setGameToDelete(null);
       } catch (error) {
         console.error('Error deleting game save:', error);
       }
@@ -85,12 +96,63 @@ export default function HistoryPage() {
     return date.toLocaleDateString('tr-TR', options);
   };
 
-  const getPlayerInitials = (playerIds: Id<'players'>[]) => {
+  const getDateGroup = (timestamp: number) => {
+    const now = new Date();
+    const gameDate = new Date(timestamp);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    
+    const gameDateOnly = new Date(gameDate.getFullYear(), gameDate.getMonth(), gameDate.getDate());
+    
+    if (gameDateOnly.getTime() === today.getTime()) {
+      return 'Bugün';
+    } else if (gameDateOnly.getTime() === yesterday.getTime()) {
+      return 'Dün';
+    } else if (gameDate >= weekAgo) {
+      return 'Bu Hafta';
+    } else if (gameDate >= monthAgo) {
+      return 'Bu Ay';
+    } else {
+      return 'Daha Önce';
+    }
+  };
+
+  const groupGameSavesByDate = (gameSaves: any[]) => {
+    if (!gameSaves) return {};
+    
+    const grouped = gameSaves.reduce((groups, gameSave) => {
+      const group = getDateGroup(gameSave.createdTime);
+      if (!groups[group]) {
+        groups[group] = [];
+      }
+      groups[group].push(gameSave);
+      return groups;
+    }, {} as Record<string, any[]>);
+
+    // Sort groups in the desired order
+    const groupOrder = ['Bugün', 'Dün', 'Bu Hafta', 'Bu Ay', 'Daha Önce'];
+    const orderedGroups: Record<string, any[]> = {};
+    
+    groupOrder.forEach(groupName => {
+      if (grouped[groupName]) {
+        orderedGroups[groupName] = grouped[groupName];
+      }
+    });
+    
+    return orderedGroups;
+  };
+
+  const getPlayerData = (playerIds: Id<'players'>[]) => {
     if (!players) return [];
     return playerIds
       .map(id => {
         const player = players.find(p => p._id === id);
-        return player?.initial || player?.name?.charAt(0).toUpperCase() || '';
+        return player;
       })
       .filter(Boolean);
   };
@@ -108,7 +170,7 @@ export default function HistoryPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Oyun Geçmişi</h1>
         
         {/* Game History List */}
-        <div className="space-y-2">
+        <div className="space-y-6">
           {gameSaves === undefined ? (
             // Skeleton loading for game history
             Array.from({ length: 4 }).map((_, index) => (
@@ -128,60 +190,80 @@ export default function HistoryPage() {
               </div>
             ))
           ) : gameSaves.length > 0 ? (
-            gameSaves.map((gameSave) => {
-              const gameName = getGameName(gameSave.gameTemplate);
-              const playerInitials = getPlayerInitials(gameSave.players);
-              const formattedDate = formatDate(gameSave.createdTime);
-              
-              return (
-                <div
-                  key={gameSave._id}
-                  className="bg-white rounded-lg p-4 flex items-center justify-between"
-                  style={{
-                    boxShadow: '0 0 8px 5px #297dff0a'
-                  }}
-                >
-                  <div 
-                    className="flex-1 cursor-pointer"
-                    onClick={() => handleGameClick(gameSave._id)}
-                  >
-                    <h3 className="font-medium text-gray-800 text-lg hover:text-blue-600 transition-colors">{gameName}</h3>
-                    <p className="text-gray-600 text-sm">{formattedDate}</p>
-                    <div className="flex space-x-1 mt-1">
-                      {playerInitials.map((initial, index) => {
-                        const colors = [
-                          'bg-blue-100 text-blue-600',
-                          'bg-green-100 text-green-600', 
-                          'bg-purple-100 text-purple-600',
-                          'bg-orange-100 text-orange-600',
-                          'bg-pink-100 text-pink-600',
-                          'bg-indigo-100 text-indigo-600'
-                        ];
-                        const colorClass = colors[index % colors.length];
-                        
-                        return (
-                          <div
-                            key={index}
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${colorClass}`}
+            (() => {
+              const groupedGameSaves = groupGameSavesByDate(gameSaves);
+              return Object.entries(groupedGameSaves).map(([groupName, groupGameSaves]) => (
+                <div key={groupName} className="space-y-3">
+                  <h2 className="text-lg font-semibold text-gray-700 px-2">{groupName}</h2>
+                  <div className="space-y-2">
+                    {groupGameSaves.map((gameSave) => {
+                      const gameName = getGameName(gameSave.gameTemplate);
+                      const playerData = getPlayerData(gameSave.players);
+                      const formattedDate = formatDate(gameSave.createdTime);
+                      
+                      return (
+                        <div
+                          key={gameSave._id}
+                          className="bg-white rounded-lg p-4 flex items-center justify-between"
+                          style={{
+                            boxShadow: '0 0 8px 5px #297dff0a'
+                          }}
+                        >
+                          <div 
+                            className="flex-1 cursor-pointer"
+                            onClick={() => handleGameClick(gameSave._id)}
                           >
-                            {initial}
+                            <h3 className="font-medium text-gray-800 text-lg hover:text-blue-600 transition-colors">{gameName}</h3>
+                            <p className="text-gray-600 text-sm">{formattedDate}</p>
+                            <div className="flex space-x-1 mt-1">
+                              {playerData.map((player, index) => {
+                                const colors = [
+                                  'bg-blue-100 text-blue-600',
+                                  'bg-green-100 text-green-600', 
+                                  'bg-purple-100 text-purple-600',
+                                  'bg-orange-100 text-orange-600',
+                                  'bg-pink-100 text-pink-600',
+                                  'bg-indigo-100 text-indigo-600'
+                                ];
+                                const colorClass = colors[index % colors.length];
+                                
+                                return (
+                                  <div
+                                    key={player?._id || index}
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+                                  >
+                                    {player?.avatar ? (
+                                      <img
+                                        src={player.avatar}
+                                        alt={player.name}
+                                        className="w-6 h-6 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${colorClass}`}>
+                                        {player?.initial || player?.name?.charAt(0).toUpperCase() || ''}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(gameSave._id);
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash size={20} />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(gameSave._id);
-                    }}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash size={20} />
-                  </button>
                 </div>
-              );
-            })
+              ));
+            })()
           ) : (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -196,6 +278,18 @@ export default function HistoryPage() {
 
       {/* App Bar */}
       <AppBar activePage="history" />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmDelete}
+        title="Oyunu Sil"
+        message="Bu oyunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        confirmText="Sil"
+        cancelText="İptal"
+        isDestructive={true}
+      />
     </div>
   );
 }

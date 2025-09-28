@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, Plus, PencilSimple, Trash, GameController } from '@phosphor-icons/react';
 
 export default function AdminPage() {

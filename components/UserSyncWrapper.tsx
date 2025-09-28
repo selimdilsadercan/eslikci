@@ -1,6 +1,6 @@
 'use client';
 
-import { useUserSync } from '../hooks/useUserSync';
+import { useUserSync } from '@/hooks/useUserSync';
 import { ReactNode } from 'react';
 
 interface UserSyncWrapperProps {

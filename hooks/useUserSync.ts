@@ -1,8 +1,8 @@
 'use client';
 
-import { useAuth } from '../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useMutation } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { useEffect } from 'react';
 
 export function useUserSync() {

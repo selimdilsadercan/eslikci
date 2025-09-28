@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
-import { api } from '../convex/_generated/api';
-import { Id } from '../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { X, User, Users } from '@phosphor-icons/react';
 import { Drawer } from 'vaul';
 import { useAuth } from './FirebaseAuthProvider';
+import AvatarGenerator from './AvatarGenerator';
 
 interface CreateModalProps {
   onClose: () => void;
@@ -25,6 +26,8 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   // Player form state
   const [playerName, setPlayerName] = useState('');
   const [selectedGroups, setSelectedGroups] = useState<Id<'groups'>[]>([]);
+  const [playerAvatar, setPlayerAvatar] = useState<string>('');
+  const [playerGender, setPlayerGender] = useState<'male' | 'female' | 'neutral'>('neutral');
   
   // Group form state
   const [groupName, setGroupName] = useState('');
@@ -49,6 +52,7 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
         await createPlayer({
           name: playerName.trim(),
           initial: playerName.trim().charAt(0).toUpperCase(),
+          avatar: playerAvatar,
           groupId: selectedGroups.length === 1 ? selectedGroups[0] : undefined,
           firebaseId: user.uid,
         });
@@ -83,6 +87,8 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   const resetForm = () => {
     setPlayerName('');
     setSelectedGroups([]);
+    setPlayerAvatar('');
+    setPlayerGender('neutral');
     setGroupName('');
   };
 
@@ -169,6 +175,66 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
                       required
                     />
                   </div>
+
+                  {/* Gender Selection */}
+                  {playerName.trim() && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Cinsiyet
+                      </label>
+                      <div className="flex gap-2 mb-4">
+                        <button
+                          type="button"
+                          onClick={() => setPlayerGender('male')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            playerGender === 'male'
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Erkek
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPlayerGender('female')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            playerGender === 'female'
+                              ? 'bg-pink-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Kadın
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPlayerGender('neutral')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            playerGender === 'neutral'
+                              ? 'bg-gray-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Belirsiz
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Avatar Generator */}
+                  {playerName.trim() && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Avatar
+                      </label>
+                      <AvatarGenerator
+                        name={playerName.trim()}
+                        gender={playerGender}
+                        size={80}
+                        onAvatarChange={setPlayerAvatar}
+                        className="mb-4"
+                      />
+                    </div>
+                  )}
 
                   {/* Group Selection */}
                   {groups.length > 0 && (

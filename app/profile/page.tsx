@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { User, Gear, SignOut, PencilSimple, Camera } from '@phosphor-icons/react';
-import { useUserSync } from '../../hooks/useUserSync';
-import AppBar from '../../components/AppBar';
+import { useUserSync } from '@/hooks/useUserSync';
+import AppBar from '@/components/AppBar';
 
 export default function ProfilePage() {
   const { user, isLoaded, isSignedIn, signOut } = useAuth();
@@ -56,15 +56,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-800">Profil</h1>
-        </div>
-      </div>
-
-      {/* Profile Content */}
-      <div className="px-6 py-6">
+      {/* Main Content */}
+      <div className="px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Profil</h1>
         {/* Profile Picture Section */}
         <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
           <div className="flex items-center space-x-4">
@@ -213,9 +207,10 @@ export default function ProfilePage() {
               )}
             </div>
 
-        {/* App Bar */}
-        <AppBar activePage="profile" />
       </div>
+
+      {/* App Bar */}
+      <AppBar activePage="profile" />
     </div>
   );
 }

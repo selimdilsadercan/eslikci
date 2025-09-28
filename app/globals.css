@@ -5,12 +5,13 @@
   --foreground: #171717;
   --card-background: #ffffff;
   --card-shadow: 0 0 8px 5px #0b297d0a;
+  --secondary-color: #365376;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-urbanist);
+  --font-sans: var(--font-inter);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,7 +25,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-urbanist), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { api } from '@/convex/_generated/api';
 import { Plus } from '@phosphor-icons/react';
-import AddGameModal from '../../components/AddGameModal';
-import AppBar from '../../components/AppBar';
+import AddGameModal from '@/components/AddGameModal';
+import AppBar from '@/components/AppBar';
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded } = useAuth();

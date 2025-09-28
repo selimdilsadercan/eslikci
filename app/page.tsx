@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth } from '../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
-import FirebaseAuthButton from '../components/FirebaseAuthButton';
-import { useUserSync } from '../hooks/useUserSync';
+import FirebaseAuthButton from '@/components/FirebaseAuthButton';
+import { useUserSync } from '@/hooks/useUserSync';
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth();

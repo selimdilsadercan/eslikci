@@ -44,6 +44,7 @@ export default defineSchema({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),
       roundWinner: v.optional(v.string()),
+      pointsPerRound: v.optional(v.string()),
       hideTotalColumn: v.optional(v.boolean()),
     }),
     isActive: v.boolean(),
@@ -60,7 +61,7 @@ export default defineSchema({
     laps: v.optional(v.array(v.array(v.number()))), // Two-dimensional matrix: [playerIndex][roundIndex] = score
     settings: v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
-      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points"), v.literal("Penalized")),
+      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
       roundWinner: v.union(v.literal("OnePoint"), v.literal("ZeroPoint"), v.literal("Highest"), v.literal("Lowest")),
       pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),

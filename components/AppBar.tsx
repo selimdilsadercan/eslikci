@@ -18,7 +18,7 @@ export default function AppBar({ activePage }: AppBarProps) {
             activePage === 'games' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <GameController size={24} weight="regular" />
+          <GameController size={24} weight="bold" />
           <span className="text-xs font-medium">Oyunlar</span>
         </Link>
 
@@ -29,7 +29,7 @@ export default function AppBar({ activePage }: AppBarProps) {
             activePage === 'history' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <ClockCounterClockwise size={24} weight="regular" />
+          <ClockCounterClockwise size={24} weight="bold" />
           <span className="text-xs font-medium">Geçmiş</span>
         </Link>
 
@@ -40,7 +40,7 @@ export default function AppBar({ activePage }: AppBarProps) {
             activePage === 'contacts' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <AddressBook size={24} weight="regular" />
+          <AddressBook size={24} weight="bold" />
           <span className="text-xs font-medium">Rehber</span>
         </Link>
 
@@ -51,13 +51,10 @@ export default function AppBar({ activePage }: AppBarProps) {
             activePage === 'profile' ? 'text-blue-500' : 'text-gray-500'
           }`}
         >
-          <User size={24} weight="regular" />
+          <User size={24} weight="bold" />
           <span className="text-xs font-medium">Profil</span>
         </Link>
       </div>
-      
-      {/* Gesture Bar */}
-      <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
     </div>
   );
 }

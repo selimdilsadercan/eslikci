@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { Id } from '../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { Plus, PencilSimple } from '@phosphor-icons/react';
-import CreateModal from '../../components/CreateModal';
-import EditPlayerModal from '../../components/EditPlayerModal';
-import AppBar from '../../components/AppBar';
+import CreateModal from '@/components/CreateModal';
+import EditPlayerModal from '@/components/EditPlayerModal';
+import AppBar from '@/components/AppBar';
 
 export default function ContactsPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -104,9 +104,20 @@ export default function ContactsPage() {
                 className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
-                  </div>
+                  {currentUserAsPlayer.avatar ? (
+                    <img  
+                      src={currentUserAsPlayer.avatar}
+                      alt={currentUserAsPlayer.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative">
+                      <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">+</span>
+                      </div>
+                    </div>
+                  )}
                   <span className="font-medium text-black">{currentUserAsPlayer.name}</span>
                 </div>
                 <button
@@ -150,9 +161,20 @@ export default function ContactsPage() {
                   className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                    </div>
+                    {player.avatar ? (
+                      <img
+                        src={player.avatar}
+                        alt={player.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative">
+                        <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">+</span>
+                        </div>
+                      </div>
+                    )}
                     <span className="font-medium text-black">{player.name}</span>
                   </div>
                   <button
@@ -202,9 +224,20 @@ export default function ContactsPage() {
                       className="flex items-center justify-between py-2 bg-white rounded-lg px-3 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                        </div>
+                        {player.avatar ? (
+                          <img
+                            src={player.avatar}
+                            alt={player.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative">
+                            <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">+</span>
+                            </div>
+                          </div>
+                        )}
                         <span className="font-medium text-black">{player.name}</span>
                       </div>
                       <button

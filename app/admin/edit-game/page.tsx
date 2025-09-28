@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '../../../components/FirebaseAuthProvider';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, FloppyDisk, X, Plus } from '@phosphor-icons/react';
-import RichTextEditor from '../../../components/RichTextEditor';
+import RichTextEditor from '@/components/RichTextEditor';
 
 function EditGameContent() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -39,7 +39,8 @@ function EditGameContent() {
   const [rulesSections, setRulesSections] = useState<Array<{id: string, title: string, content: string}>>([]);
   const [gameplay, setGameplay] = useState('herkes-tek');
   const [calculationMode, setCalculationMode] = useState('NoPoints');
-  const [roundWinner, setRoundWinner] = useState('OnePoint');
+  const [roundWinner, setRoundWinner] = useState('Highest');
+  const [pointsPerRound, setPointsPerRound] = useState('Single');
   const [hideTotalColumn, setHideTotalColumn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('genel');
@@ -55,7 +56,8 @@ function EditGameContent() {
       setGameRules(game.rules || '');
       setGameplay(game.settings?.gameplay || 'herkes-tek');
       setCalculationMode(game.settings?.calculationMode || 'NoPoints');
-      setRoundWinner(game.settings?.roundWinner || 'OnePoint');
+      setRoundWinner(game.settings?.roundWinner || 'Highest');
+      setPointsPerRound((game.settings as any)?.pointsPerRound || 'Single');
       setHideTotalColumn(game.settings?.hideTotalColumn || false);
       
       // Parse rules sections if they exist
@@ -111,6 +113,7 @@ function EditGameContent() {
           gameplay,
           calculationMode,
           roundWinner,
+          pointsPerRound,
           hideTotalColumn,
         }
       });
@@ -214,63 +217,176 @@ function EditGameContent() {
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Oyun Ayarları</h3>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Oyun Modu
-                  </label>
-                  <select
-                    value={gameplay}
-                    onChange={(e) => setGameplay(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  >
-                    <option value="herkes-tek">Herkes Tek</option>
-                    <option value="takim">Takım</option>
-                    <option value="bireysel">Bireysel</option>
-                  </select>
+              <div className="space-y-6">
+                {/* Oynanış */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Oynanış:</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setGameplay('herkes-tek')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        gameplay === 'herkes-tek'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={gameplay === 'herkes-tek' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Herkes Tek
+                    </button>
+                    <button
+                      onClick={() => setGameplay('takimli')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        gameplay === 'takimli'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={gameplay === 'takimli' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Takımlı
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hesaplama Modu
-                  </label>
-                  <select
-                    value={calculationMode}
-                    onChange={(e) => setCalculationMode(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  >
-                    <option value="NoPoints">Puan Yok</option>
-                    <option value="Points">Puanlı</option>
-                    <option value="Score">Skor</option>
-                  </select>
+                {/* Hesaplama Modu */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Hesaplama Modu:</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCalculationMode('NoPoints')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        calculationMode === 'NoPoints'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={calculationMode === 'NoPoints' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Puansız
+                    </button>
+                    <button
+                      onClick={() => setCalculationMode('Points')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        calculationMode === 'Points'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={calculationMode === 'Points' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Puanlı
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Round Kazananı
-                  </label>
-                  <select
-                    value={roundWinner}
-                    onChange={(e) => setRoundWinner(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  >
-                    <option value="OnePoint">Tek Puan</option>
-                    <option value="MultiplePoints">Çoklu Puan</option>
-                    <option value="ScoreBased">Skor Bazlı</option>
-                  </select>
+                {/* Tur Kazananı - Conditional based on calculation mode */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Kazanan:</h2>
+                  <div className="flex gap-2">
+                    {calculationMode === 'NoPoints' ? (
+                      // Options for Puansız mode
+                      <>
+                        <button
+                          onClick={() => setRoundWinner('Highest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            roundWinner === 'Highest'
+                              ? 'text-white'
+                              : 'text-gray-800'
+                          }`}
+                          style={roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
+                        >
+                          <span>↑</span>
+                          <span>En Yüksek</span>
+                        </button>
+                        <button
+                          onClick={() => setRoundWinner('Lowest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            roundWinner === 'Lowest'
+                              ? 'text-white'
+                              : 'text-gray-800'
+                          }`}
+                          style={roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
+                        >
+                          <span>↓</span>
+                          <span>En Düşük</span>
+                        </button>
+                      </>
+                    ) : calculationMode === 'Points' ? (
+                      // Options for Puanlı mode
+                      <>
+                        <button
+                          onClick={() => setRoundWinner('Highest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            roundWinner === 'Highest'
+                              ? 'text-white'
+                              : 'text-gray-800'
+                          }`}
+                          style={roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
+                        >
+                          <span>↑</span>
+                          <span>En Yüksek</span>
+                        </button>
+                        <button
+                          onClick={() => setRoundWinner('Lowest')}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                            roundWinner === 'Lowest'
+                              ? 'text-white'
+                              : 'text-gray-800'
+                          }`}
+                          style={roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
+                        >
+                          <span>↓</span>
+                          <span>En Düşük</span>
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hideTotalColumn"
-                    checked={hideTotalColumn}
-                    onChange={(e) => setHideTotalColumn(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="hideTotalColumn" className="text-sm text-gray-700">
-                    Toplam sütununu gizle
-                  </label>
+                {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
+                {calculationMode === 'Points' && (
+                  <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
+                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Tur İçi Puan Sayısı:</h2>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPointsPerRound('Single')}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                          pointsPerRound === 'Single'
+                            ? 'text-white'
+                            : 'text-gray-800'
+                        }`}
+                        style={pointsPerRound === 'Single' ? { backgroundColor: '#365376' } : {}}
+                      >
+                        Tek
+                      </button>
+                      <button
+                        onClick={() => setPointsPerRound('Multiple')}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                          pointsPerRound === 'Multiple'
+                            ? 'text-white'
+                            : 'text-gray-800'
+                        }`}
+                        style={pointsPerRound === 'Multiple' ? { backgroundColor: '#365376' } : {}}
+                      >
+                        Çok
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Toplam Sütununu Gizle */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Toplam Sütununu Gizle:</h2>
+                  <button
+                    onClick={() => setHideTotalColumn(!hideTotalColumn)}
+                    className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                      hideTotalColumn
+                        ? 'border-gray-300'
+                        : 'border-gray-300'
+                    }`}
+                    style={hideTotalColumn ? { backgroundColor: '#365376' } : {}}
+                  >
+                    {hideTotalColumn && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
