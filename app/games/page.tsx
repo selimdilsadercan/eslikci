@@ -50,7 +50,7 @@ export default function GamesPage() {
         settings: {
           gameplay: 'herkes-tek',
           calculationMode: 'NoPoints',
-          roundWinner: 'OnePoint',
+          roundWinner: 'Highest',
           hideTotalColumn: false
         }
       });

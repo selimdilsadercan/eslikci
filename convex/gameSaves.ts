@@ -36,8 +36,8 @@ export const createGameSave = mutation({
     laps: v.optional(v.array(v.array(v.number()))),
     settings: v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
-      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points"), v.literal("Penalized")),
-      roundWinner: v.union(v.literal("OnePoint"), v.literal("ZeroPoint"), v.literal("Highest"), v.literal("Lowest")),
+      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
+      roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
       pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       hideTotalColumn: v.boolean(),
@@ -69,8 +69,8 @@ export const updateGameSave = mutation({
     laps: v.optional(v.array(v.array(v.number()))),
     settings: v.optional(v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
-      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points"), v.literal("Penalized")),
-      roundWinner: v.union(v.literal("OnePoint"), v.literal("ZeroPoint"), v.literal("Highest"), v.literal("Lowest")),
+      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
+      roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
       pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       hideTotalColumn: v.boolean(),
