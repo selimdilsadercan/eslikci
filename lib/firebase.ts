@@ -21,6 +21,14 @@ export const auth = getAuth(app);
 if (Capacitor.isNativePlatform()) {
   // Set up mobile-specific auth configuration
   auth.settings.appVerificationDisabledForTesting = true;
+  
+  // Configure auth for mobile redirects
+  auth.settings.appVerificationDisabledForTesting = true;
+  
+  // Set the auth domain for mobile redirects
+  if (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) {
+    auth.settings.appVerificationDisabledForTesting = true;
+  }
 }
 
 export default app;

@@ -46,11 +46,15 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
         .then((result) => {
           if (result) {
             console.log('Redirect result:', result);
-            // User signed in via redirect
+            console.log('User signed in via redirect:', result.user?.email);
+            // User signed in via redirect - the onAuthStateChanged will handle the state update
+          } else {
+            console.log('No redirect result found');
           }
         })
         .catch((error) => {
           console.error('Redirect result error:', error);
+          // Don't throw the error, just log it as it might be expected in some cases
         });
     }
 
@@ -80,12 +84,26 @@ export function FirebaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       const provider = new GoogleAuthProvider();
       
+      // Configure provider for better mobile experience
+      provider.addScope('email');
+      provider.addScope('profile');
+      
       // Use redirect for mobile apps, popup for web
       if (Capacitor.isNativePlatform()) {
         // For mobile apps, use redirect
+        console.log('Starting Google sign-in redirect for mobile...');
+        
+        // Set custom parameters for mobile
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
         await signInWithRedirect(auth, provider);
+        // Note: The redirect will take the user away from the app
+        // The getRedirectResult in useEffect will handle the return
       } else {
         // For web, use popup
+        console.log('Starting Google sign-in popup for web...');
         await signInWithPopup(auth, provider);
       }
     } catch (error) {
