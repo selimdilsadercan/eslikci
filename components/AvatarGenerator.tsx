@@ -6,56 +6,58 @@ import { useState, useEffect } from 'react';
 
 interface AvatarGeneratorProps {
   name: string;
-  gender?: 'male' | 'female' | 'neutral';
   size?: number;
   className?: string;
+  initialAvatar?: string;
   onAvatarChange?: (avatarUrl: string) => void;
 }
 
 export default function AvatarGenerator({ 
   name, 
-  gender = 'neutral',
   size = 80, 
   className = '', 
+  initialAvatar,
   onAvatarChange 
 }: AvatarGeneratorProps) {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
 
-  const generateAvatarOptions = (gender: 'male' | 'female' | 'neutral') => {
-    const baseOptions = {
+  const generateAvatarOptions = () => {
+    return {
       size: size,
       backgroundColor: ['b6e3f4', 'c0aede', 'd1d4f9', 'ffd5dc', 'ffdfbf'],
     };
-
-    // For now, just return base options and let DiceBear handle the randomization
-    // The gender detection is more for future enhancement
-    return baseOptions;
   };
 
   useEffect(() => {
-    // Generate avatar based on name and selected gender
-    const options = generateAvatarOptions(gender);
-    
-    const avatar = createAvatar(avataaars, {
-      seed: name,
-      ...options,
-    });
+    // Use initial avatar if provided, otherwise generate new one
+    if (initialAvatar) {
+      setAvatarUrl(initialAvatar);
+      onAvatarChange?.(initialAvatar);
+    } else {
+      // Generate avatar based on name
+      const options = generateAvatarOptions();
+      
+      const avatar = createAvatar(avataaars, {
+        seed: name,
+        ...options,
+      });
 
-    const svgString = avatar.toString();
-    // Use encodeURIComponent instead of btoa to handle Unicode characters
-    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-    
-    setAvatarUrl(dataUrl);
-    onAvatarChange?.(dataUrl);
-  }, [name, gender, size, onAvatarChange]);
+      const svgString = avatar.toString();
+      // Use encodeURIComponent instead of btoa to handle Unicode characters
+      const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+      
+      setAvatarUrl(dataUrl);
+      onAvatarChange?.(dataUrl);
+    }
+  }, [name, size, initialAvatar, onAvatarChange]);
 
   const generateNewAvatar = () => {
-    // Generate a new random avatar with selected gender
-    const options = generateAvatarOptions(gender);
+    // Generate a new random avatar
+    const options = generateAvatarOptions();
     
     const avatar = createAvatar(avataaars, {
-      seed: Math.random().toString(36).substring(7), // Random seed
+      seed: `${name}-${Date.now()}`, // Add timestamp for randomness
       ...options,
     });
 
@@ -96,9 +98,6 @@ export default function AvatarGenerator({
           </button>
         )}
       </div>
-      <p className="text-xs text-gray-500 text-center">
-        Avatar otomatik oluşturuldu
-      </p>
     </div>
   );
 }

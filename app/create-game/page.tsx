@@ -6,8 +6,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, ArrowRight, Crown } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
+import GameRulesTab from '@/components/GameRulesTab';
+import GameAskTab from '@/components/GameAskTab';
+import CreateModal from '@/components/CreateModal';
+import EditPlayerModal from '@/components/EditPlayerModal';
 
 function CreateGameContent() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -33,8 +37,11 @@ function CreateGameContent() {
   
   // Mutations
   const createGameSave = useMutation(api.gameSaves.createGameSave);
+  const createPlayer = useMutation(api.players.createPlayer);
+  const createGroup = useMutation(api.groups.createGroup);
 
   // ALL STATE HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  const [activeTab, setActiveTab] = useState('oyun-kur');
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPlayers, setSelectedPlayers] = useState<Id<'players'>[]>([]);
   const [redTeam, setRedTeam] = useState<Id<'players'>[]>([]);
@@ -46,6 +53,10 @@ function CreateGameContent() {
     pointsPerRound: (game?.settings as any)?.pointsPerRound || 'Single',
     hideTotalColumn: game?.settings?.hideTotalColumn || false
   });
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createModalType, setCreateModalType] = useState<'player' | 'group' | null>(null);
+  const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<Id<'players'> | null>(null);
 
   // Redirect to home page if user is not signed in
   useEffect(() => {
@@ -89,9 +100,11 @@ function CreateGameContent() {
 
   const handleNext = async () => {
     if (currentStep === 1) {
-      if (selectedPlayers.length > 0) {
-        setCurrentStep(2);
+      if (selectedPlayers.length === 0) {
+        toast.error('En az bir oyuncu seçmelisiniz!');
+        return;
       }
+      setCurrentStep(2);
     } else {
       // Create game save and start the game
       if (!currentUser || !gameId) {
@@ -209,6 +222,57 @@ function CreateGameContent() {
     setBlueTeam(prev => prev.filter(id => id !== playerId));
   };
 
+  const handleCreatePlayer = async (name: string, avatar?: string) => {
+    if (!currentUser) return;
+    
+    try {
+      const playerId = await createPlayer({
+        name,
+        avatar,
+        firebaseId: user?.uid || '',
+        initial: name.charAt(0).toUpperCase()
+      });
+      
+      // Automatically select the new player
+      setSelectedPlayers(prev => [...prev, playerId]);
+      toast.success(`${name} oyuncu olarak eklendi!`);
+    } catch (error) {
+      console.error('Error creating player:', error);
+      toast.error('Oyuncu eklenirken hata oluştu!');
+    }
+  };
+
+  const handleCreateGroup = async (name: string) => {
+    if (!currentUser) return;
+    
+    try {
+      await createGroup({
+        name,
+        firebaseId: user?.uid || ''
+      });
+      
+      toast.success(`${name} grubu oluşturuldu!`);
+    } catch (error) {
+      console.error('Error creating group:', error);
+      toast.error('Grup oluşturulurken hata oluştu!');
+    }
+  };
+
+  const openCreateModal = (type: 'player' | 'group') => {
+    setCreateModalType(type);
+    setShowCreateModal(true);
+  };
+
+  const openEditPlayerModal = (playerId: Id<'players'>) => {
+    setSelectedPlayerId(playerId);
+    setShowEditPlayerModal(true);
+  };
+
+  const closeEditPlayerModal = () => {
+    setShowEditPlayerModal(false);
+    setSelectedPlayerId(null);
+  };
+
   // Helper function to get team information for debugging/logging
   const getTeamInfo = () => {
     if (gameSettings.gameplay !== 'takimli') return null;
@@ -282,36 +346,101 @@ function CreateGameContent() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Gray Gap at Top */}
-      <div className="h-2 bg-gray-300"></div>
-      
-      {/* Header */}
-      <div className="bg-white px-4 py-4 flex items-center shadow-sm">
-        <button onClick={handleBack} className="mr-4">
-          <ArrowLeft size={24} className="text-black" />
-        </button>
-        <h1 className="text-lg font-semibold text-black">{gameName}</h1>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <button onClick={handleBack} className="mr-4">
+              <ArrowLeft size={24} className="text-gray-600" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-800">{gameName}</h1>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="px-4 py-2 border-b border-gray-200">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('oyun-kur')}
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+                activeTab === 'oyun-kur'
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600'
+              }`}
+            >
+              <ChartBar size={16} />
+              <span>Oyun Kur</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('sor')}
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+                activeTab === 'sor'
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600'
+              }`}
+            >
+              <ChatCircle size={16} />
+              <span>Sor</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('kurallar')}
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+                activeTab === 'kurallar'
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600'
+              }`}
+            >
+              <ListBullets size={16} />
+              <span>Kurallar</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Main Content - Empty space for bottom panel */}
-      <div className="flex-1"></div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col px-4 pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
+        {activeTab === 'oyun-kur' ? (
+          <div className="flex-1 overflow-y-auto">
+            {/* Content will be handled by the bottom panel based on currentStep */}
+          </div>
+        ) : activeTab === 'sor' ? (
+          <GameAskTab gameId={gameId as Id<'games'>} />
+        ) : activeTab === 'kurallar' ? (
+          <GameRulesTab gameId={gameId as Id<'games'>} />
+        ) : null}
+      </div>
 
-      {/* Fixed White Rectangle at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg">
+      {/* Fixed White Rectangle at Bottom - Hide when Sor or Kurallar tab is selected */}
+      {activeTab === 'oyun-kur' && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg">
         <div className="p-6">
           {currentStep === 1 ? (
             // Player Selection in Bottom Panel
             <>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4 -mx-0.5">
+                <h2 className="text-lg font-semibold text-gray-800">Oyuncu Seç</h2>
+                <button
+                  onClick={() => openCreateModal('player')}
+                  className="text-blue-500 hover:text-blue-600 font-medium"
+                >
+                  Ekle
+                </button>
+              </div>
+
               {/* Current User */}
               {currentUserAsPlayer && (
                 <div className="mb-6">
-                  <h2 className="text-sm font-medium text-gray-600 mb-3">Ben</h2>
-                  <div className="space-y-1">
+                  <h3 className="text-sm font-medium text-gray-600 mb-2">Ben</h3>
+                  <div className="space-y-0.5">
                     <div
-                      className="flex items-center justify-between py-2"
+                      className="flex items-center justify-between py-1"
                     >
-                      <div className="flex items-center space-x-3">
+                      <div 
+                        className="flex items-center space-x-3 cursor-pointer flex-1"
+                        onClick={() => openEditPlayerModal(currentUserAsPlayer._id)}
+                      >
                         {currentUserAsPlayer.avatar ? (
                           <img
                             src={currentUserAsPlayer.avatar}
@@ -347,14 +476,17 @@ function CreateGameContent() {
               {/* Ungrouped Players */}
               {groupedPlayers.ungrouped && groupedPlayers.ungrouped.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-sm font-medium text-gray-600 mb-3">Gruplandırılmamış</h2>
-                  <div className="space-y-1">
+                  <h3 className="text-sm font-medium text-gray-600 mb-2">Gruplandırılmamış</h3>
+                  <div className="space-y-0.5">
                     {groupedPlayers.ungrouped.map((player) => (
                       <div
                         key={player._id}
-                        className="flex items-center justify-between py-2"
+                        className="flex items-center justify-between py-1"
                       >
-                        <div className="flex items-center space-x-3">
+                        <div 
+                          className="flex items-center space-x-3 cursor-pointer flex-1"
+                          onClick={() => openEditPlayerModal(player._id)}
+                        >
                           {player.avatar ? (
                             <img
                               src={player.avatar}
@@ -395,14 +527,17 @@ function CreateGameContent() {
                 
                 return (
                   <div key={group._id} className="mb-6">
-                    <h2 className="text-sm font-medium text-gray-600 mb-3">{group.name}</h2>
-                    <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-gray-600 mb-2">{group.name}</h3>
+                    <div className="space-y-0.5">
                       {groupPlayers.map((player) => (
                         <div
                           key={player._id}
-                          className="flex items-center justify-between py-2"
+                          className="flex items-center justify-between py-1"
                         >
-                          <div className="flex items-center space-x-3">
+                          <div 
+                            className="flex items-center space-x-3 cursor-pointer flex-1"
+                            onClick={() => openEditPlayerModal(player._id)}
+                          >
                             {player.avatar ? (
                               <img
                                 src={player.avatar}
@@ -706,12 +841,7 @@ function CreateGameContent() {
             )}
             <button
               onClick={handleNext}
-              disabled={currentStep === 1 && selectedPlayers.length === 0}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2 ${
-                currentStep === 1 && selectedPlayers.length === 0
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-500 text-white'
-              }`}
+              className="flex-1 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors"
             >
               <span>{currentStep === 1 ? 'Sonraki Adım' : 'Oyunu Başlat'}</span>
               <ArrowRight size={20} />
@@ -719,6 +849,27 @@ function CreateGameContent() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <CreateModal
+          onClose={() => {
+            setShowCreateModal(false);
+            setCreateModalType(null);
+          }}
+          groups={groups || []}
+        />
+      )}
+
+      {/* Edit Player Modal */}
+      {showEditPlayerModal && selectedPlayerId && (
+        <EditPlayerModal
+          playerId={selectedPlayerId}
+          onClose={closeEditPlayerModal}
+          groups={groups || []}
+        />
+      )}
     </div>
   );
 }

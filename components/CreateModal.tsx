@@ -27,7 +27,6 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   const [playerName, setPlayerName] = useState('');
   const [selectedGroups, setSelectedGroups] = useState<Id<'groups'>[]>([]);
   const [playerAvatar, setPlayerAvatar] = useState<string>('');
-  const [playerGender, setPlayerGender] = useState<'male' | 'female' | 'neutral'>('neutral');
   
   // Group form state
   const [groupName, setGroupName] = useState('');
@@ -88,7 +87,6 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
     setPlayerName('');
     setSelectedGroups([]);
     setPlayerAvatar('');
-    setPlayerGender('neutral');
     setGroupName('');
   };
 
@@ -104,8 +102,8 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   return (
     <Drawer.Root open={true} onOpenChange={(open) => !open && onClose()}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="bg-white h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl">
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
+        <Drawer.Content className="bg-white h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl z-[70]">
           <div className="px-6 pb-6">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2">
@@ -161,80 +159,34 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
             <form onSubmit={handleSubmit} className="space-y-6">
               {modalType === 'player' ? (
                 <>
-                  {/* Player Name Input */}
+                  {/* Player Name Input with Avatar */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kişi İsmi
-                    </label>
-                    <input
-                      type="text"
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      placeholder="Kişi adını girin"
-                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                      required
-                    />
-                  </div>
-
-                  {/* Gender Selection */}
-                  {playerName.trim() && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Cinsiyet
-                      </label>
-                      <div className="flex gap-2 mb-4">
-                        <button
-                          type="button"
-                          onClick={() => setPlayerGender('male')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            playerGender === 'male'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Erkek
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPlayerGender('female')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            playerGender === 'female'
-                              ? 'bg-pink-500 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Kadın
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPlayerGender('neutral')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            playerGender === 'neutral'
-                              ? 'bg-gray-500 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Belirsiz
-                        </button>
+                    <div className="flex items-center space-x-4">
+                      {/* Avatar on the left */}
+                      <div className="flex-shrink-0">
+                        <AvatarGenerator
+                          name={playerName.trim() || 'Player'}
+                          size={80}
+                          onAvatarChange={setPlayerAvatar}
+                        />
+                      </div>
+                      
+                      {/* Column with name input */}
+                      <div className="flex-1">
+                        {/* Name input */}
+                        <div>
+                          <input
+                            type="text"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                            placeholder="Kişi adını girin"
+                            className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
-                  )}
-
-                  {/* Avatar Generator */}
-                  {playerName.trim() && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Avatar
-                      </label>
-                      <AvatarGenerator
-                        name={playerName.trim()}
-                        gender={playerGender}
-                        size={80}
-                        onAvatarChange={setPlayerAvatar}
-                        className="mb-4"
-                      />
-                    </div>
-                  )}
+                  </div>
 
                   {/* Group Selection */}
                   {groups.length > 0 && (

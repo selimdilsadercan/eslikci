@@ -211,54 +211,59 @@ export default function ContactsPage() {
               ))}
             </div>
           </div>
-        ) : (
+        ) : groups.length > 0 ? (
           groups.map((group) => {
             const groupPlayers = groupedPlayers[group._id] || [];
-            if (groupPlayers.length === 0) return null;
             
             return (
               <div key={group._id} className="mb-6">
                 <h2 className="text-sm font-medium text-gray-600 mb-3">{group.name}</h2>
                 <div className="space-y-2">
-                  {groupPlayers.map((player) => (
-                    <div
-                      key={player._id}
-                      onClick={() => handleEditPlayer(player._id)}
-                      className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        {player.avatar ? (
-                          <img
-                            src={player.avatar}
-                            alt={player.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative">
-                            <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs">+</span>
-                            </div>
-                          </div>
-                        )}
-                        <span className="font-medium text-black">{player.name}</span>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditPlayer(player._id);
-                        }}
-                        className="p-1 text-gray-500 hover:text-blue-500"
+                  {groupPlayers.length > 0 ? (
+                    groupPlayers.map((player) => (
+                      <div
+                        key={player._id}
+                        onClick={() => handleEditPlayer(player._id)}
+                        className="flex items-center justify-between py-2 bg-white rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 transition-colors"
                       >
-                        <PencilSimple size={16} />
-                      </button>
+                        <div className="flex items-center space-x-3">
+                          {player.avatar ? (
+                            <img
+                              src={player.avatar}
+                              alt={player.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative">
+                              <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs">+</span>
+                              </div>
+                            </div>
+                          )}
+                          <span className="font-medium text-black">{player.name}</span>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPlayer(player._id);
+                          }}
+                          className="p-1 text-gray-500 hover:text-blue-500"
+                        >
+                          <PencilSimple size={16} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-4 text-center text-gray-500 text-sm">
+                      Bu grupta henüz kişi yok
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             );
           })
-        )}
+        ) : null}
 
         {/* Empty State */}
         {players !== undefined && players.length === 0 && !currentUserAsPlayer && (

@@ -20,9 +20,8 @@ interface EditPlayerModalProps {
 
 export default function EditPlayerModal({ playerId, onClose, groups }: EditPlayerModalProps) {
   const [playerName, setPlayerName] = useState('');
-  const [selectedGroups, setSelectedGroups] = useState<Id<'groups'>[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Id<'groups'> | null>(null);
   const [playerAvatar, setPlayerAvatar] = useState<string>('');
-  const [playerGender, setPlayerGender] = useState<'male' | 'female' | 'neutral'>('neutral');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -36,7 +35,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
       setPlayerName(currentPlayer.name);
       setPlayerAvatar(currentPlayer.avatar || '');
       if (currentPlayer.groupId) {
-        setSelectedGroups([currentPlayer.groupId]);
+        setSelectedGroup(currentPlayer.groupId);
       }
     }
   }, [currentPlayer]);
@@ -52,7 +51,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
         name: playerName.trim(),
         initial: playerName.trim().charAt(0).toUpperCase(),
         avatar: playerAvatar,
-        groupId: selectedGroups.length === 1 ? selectedGroups[0] : undefined,
+        groupId: selectedGroup || undefined,
       });
 
       onClose();
@@ -77,12 +76,8 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
     }
   };
 
-  const toggleGroup = (groupId: Id<'groups'>) => {
-    setSelectedGroups(prev => 
-      prev.includes(groupId) 
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
-    );
+  const selectGroup = (groupId: Id<'groups'>) => {
+    setSelectedGroup(selectedGroup === groupId ? null : groupId);
   };
 
   if (!currentPlayer) {
@@ -92,8 +87,8 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
   return (
     <Drawer.Root open={true} onOpenChange={(open) => !open && onClose()}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="bg-white h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl">
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
+        <Drawer.Content className="bg-white h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl z-[60]">
           {/* Gesture bar */}
           <div className="flex justify-center pt-3 pb-1">
             <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
@@ -107,75 +102,34 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Player Name Input */}
+              {/* Player Name Input with Avatar */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kişi İsmi
-                </label>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Kişi adını girin"
-                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                  required
-                />
-              </div>
-
-              {/* Gender Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Cinsiyet
-                </label>
-                <div className="flex gap-2 mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setPlayerGender('male')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      playerGender === 'male'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Erkek
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPlayerGender('female')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      playerGender === 'female'
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Kadın
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPlayerGender('neutral')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      playerGender === 'neutral'
-                        ? 'bg-gray-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Belirsiz
-                  </button>
+                <div className="flex items-center space-x-4">
+                  {/* Avatar on the left */}
+                  <div className="flex-shrink-0">
+                    <AvatarGenerator
+                      name={playerName.trim() || 'Player'}
+                      size={80}
+                      initialAvatar={playerAvatar}
+                      onAvatarChange={setPlayerAvatar}
+                    />
+                  </div>
+                  
+                  {/* Column with name input */}
+                  <div className="flex-1">
+                    {/* Name input */}
+                    <div>
+                      <input
+                        type="text"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        placeholder="Kişi adını girin"
+                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Avatar Editor */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Avatar
-                </label>
-                <AvatarGenerator
-                  name={playerName.trim() || 'Player'}
-                  gender={playerGender}
-                  size={80}
-                  onAvatarChange={setPlayerAvatar}
-                  className="mb-4"
-                />
               </div>
 
               {/* Group Selection */}
@@ -193,17 +147,15 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
                         <span className="text-gray-800">{group.name}</span>
                         <button
                           type="button"
-                          onClick={() => toggleGroup(group._id)}
-                          className={`w-5 h-5 border-2 flex items-center justify-center ${
-                            selectedGroups.includes(group._id)
+                          onClick={() => selectGroup(group._id)}
+                          className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                            selectedGroup === group._id
                               ? 'bg-blue-500 border-blue-500'
                               : 'bg-white border-blue-500'
                           }`}
                         >
-                          {selectedGroups.includes(group._id) && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
+                          {selectedGroup === group._id && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
                           )}
                         </button>
                       </div>
