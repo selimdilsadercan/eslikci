@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Status bar colors -->
+    <color name="statusBarColor">#ffffff</color>
+    <color name="navigationBarColor">#ffffff</color>
+    
+    <!-- Primary colors -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    
+    <!-- Background colors -->
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+</resources>

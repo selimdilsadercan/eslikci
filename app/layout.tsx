@@ -4,6 +4,8 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexProvider";
 import { FirebaseAuthProvider } from "@/components/FirebaseAuthProvider";
 import { UserSyncWrapper } from "@/components/UserSyncWrapper";
+import StatusBarComponent from "@/components/StatusBar";
+import BackButtonHandler from "@/components/BackButtonHandler";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -27,6 +29,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased`}
       >
+        <StatusBarComponent 
+          backgroundColor="#ffffff"
+          style="light"
+          overlay={false}
+        />
+        <BackButtonHandler />
         <FirebaseAuthProvider>
           <ConvexClientProvider>
             <UserSyncWrapper>

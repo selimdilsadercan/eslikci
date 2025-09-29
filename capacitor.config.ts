@@ -13,7 +13,12 @@ const config: CapacitorConfig = {
     },
     FirebaseAuth: {
       enabled: true
-    }
+    },
+    StatusBar: {
+      style: "light",
+      backgroundColor: "#ffffff",
+      overlaysWebView: false
+    },
   },
   android: {
     allowMixedContent: true
