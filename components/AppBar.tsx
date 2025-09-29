@@ -61,7 +61,7 @@ export default function AppBar({ currentPage }: AppBarProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
       <div className="max-w-md mx-auto">
-        <div className="flex items-center py-3 px-6 gap-1">
+        <div className="flex items-center py-3 px-4 gap-1">
           {navigationItems.map((item) => (
             <Link
               key={item.href}
