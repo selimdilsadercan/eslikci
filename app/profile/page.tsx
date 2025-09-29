@@ -5,9 +5,10 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { User, Gear, SignOut, PencilSimple, Camera } from '@phosphor-icons/react';
+import { User, Gear, SignOut, PencilSimple } from '@phosphor-icons/react';
 import { useUserSync } from '@/hooks/useUserSync';
 import AppBar from '@/components/AppBar';
+import Header from '@/components/Header';
 
 export default function ProfilePage() {
   const { user, isLoaded, isSignedIn, signOut } = useAuth();
@@ -17,6 +18,14 @@ export default function ProfilePage() {
   
   // Sync user with Convex when they sign in
   useUserSync();
+  
+  // Get current user and their player data
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const currentUserAsPlayer = useQuery(api.players.getPlayerByUserId, 
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
   
   // Check if user is admin
   const isAdmin = useQuery(api.users.isUserAdmin, 
@@ -63,32 +72,33 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header */}
+      <Header />
+
       {/* Main Content */}
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Profil</h1>
-        {/* Profile Picture Section */}
+        {/* Player Avatar Section */}
         <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                {!isLoaded ? (
-                  <div className="w-20 h-20 bg-gray-200 rounded-full animate-pulse"></div>
-                ) : user?.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt="Profile"
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={32} weight="regular" className="text-blue-500" />
-                )}
-              </div>
-              <button className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-2 shadow-lg">
-                <Camera size={16} weight="regular" />
-              </button>
+            <div className="w-20 h-20 rounded-full flex items-center justify-center">
+              {!isLoaded || !currentUserAsPlayer ? (
+                <div className="w-20 h-20 bg-gray-200 rounded-full animate-pulse"></div>
+              ) : currentUserAsPlayer.avatar ? (
+                <img
+                  src={currentUserAsPlayer.avatar}
+                  alt={currentUserAsPlayer.name}
+                  className="w-20 h-20 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-semibold text-2xl">
+                    {currentUserAsPlayer.initial}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="flex-1">
-              {!isLoaded ? (  
+              {!isLoaded || !currentUserAsPlayer ? (  
                 <div className="space-y-2">
                   <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
                   <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
@@ -96,7 +106,7 @@ export default function ProfilePage() {
               ) : (
                 <>
                   <h2 className="text-xl font-semibold text-gray-800">
-                    {user?.displayName || user?.email || 'Kullanıcı'}
+                    {currentUserAsPlayer.name}
                   </h2>
                   <p className="text-gray-500 text-sm">{user?.email}</p>
                 </>
@@ -219,7 +229,7 @@ export default function ProfilePage() {
       </div>
 
       {/* App Bar */}
-      <AppBar activePage="profile" />
+      <AppBar currentPage="profile" />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api';
 import { Plus } from '@phosphor-icons/react';
 import AddGameModal from '@/components/AddGameModal';
 import AppBar from '@/components/AppBar';
+import Header from '@/components/Header';
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -60,11 +61,11 @@ export default function GamesPage() {
   };
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header */}
+      <Header />
+
       {/* Main Content */}
       <div className="px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Oyunlar</h1>
-        </div>
         
         {/* Games Grid */}
         {games === undefined ? (
@@ -159,7 +160,7 @@ export default function GamesPage() {
       />
 
       {/* App Bar */}
-      <AppBar activePage="games" />
+      <AppBar currentPage="games" />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import AppBar from '@/components/AppBar';
 import ConfirmModal from '@/components/ConfirmModal';
+import Header from '@/components/Header';
 import { useState } from 'react';
 
 export default function HistoryPage() {
@@ -165,9 +166,11 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header */}
+      <Header />
+
       {/* Main Content */}
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Oyun Geçmişi</h1>
         
         {/* Game History List */}
         <div className="space-y-6">
@@ -277,7 +280,7 @@ export default function HistoryPage() {
       </div>
 
       {/* App Bar */}
-      <AppBar activePage="history" />
+      <AppBar currentPage="history" />
 
       {/* Confirm Modal */}
       <ConfirmModal

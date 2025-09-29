@@ -287,8 +287,13 @@ function CreateGameContent() {
   };
 
 
-  // Group players by their group
+  // Group players by their group, excluding the current user's player
   const groupedPlayers = players?.reduce((acc, player) => {
+    // Skip the current user's player since it's shown in the "Ben" section
+    if (currentUserAsPlayer && player._id === currentUserAsPlayer._id) {
+      return acc;
+    }
+    
     const groupId = player.groupId || 'ungrouped';
     if (!acc[groupId]) {
       acc[groupId] = [];

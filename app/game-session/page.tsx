@@ -612,7 +612,7 @@ function GameSessionContent() {
                                 <div
                                   key={player._id}
                                   className="relative"
-                                  style={{ zIndex: Math.min(redTeamPlayers.length - index, 5) }}
+                                  style={{ zIndex: 10 + redTeamPlayers.length - index }}
                                 >
                                   {player.avatar ? (
                                     <img
@@ -671,7 +671,7 @@ function GameSessionContent() {
                                 <div
                                   key={player._id}
                                   className="relative"
-                                  style={{ zIndex: Math.min(blueTeamPlayers.length - index, 5) }}
+                                  style={{ zIndex: 10 + blueTeamPlayers.length - index }}
                                 >
                                   {player.avatar ? (
                                     <img
@@ -770,7 +770,7 @@ function GameSessionContent() {
 
       {/* Fixed Bottom Area - Hide when Tüm Kurallar or Kural Sor tab is selected */}
       {activeTab !== 'tum-kurallar' && activeTab !== 'kural-sor' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg" style={{ zIndex: 60 }}>
         {showSettings ? (
           /* Settings Modal */
           <div className="p-4 border-b border-gray-200">

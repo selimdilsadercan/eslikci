@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { Plus, PencilSimple } from '@phosphor-icons/react';
+import { Plus, PencilSimple, Users } from '@phosphor-icons/react';
 import CreateModal from '@/components/CreateModal';
 import EditPlayerModal from '@/components/EditPlayerModal';
 import AppBar from '@/components/AppBar';
+import Header from '@/components/Header';
 
 export default function ContactsPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -51,8 +52,13 @@ export default function ContactsPage() {
     );
   }
 
-  // Group players by their group
+  // Group players by their group, excluding the current user's player
   const groupedPlayers = players?.reduce((acc, player) => {
+    // Skip the current user's player since it's shown in the "Ben" section
+    if (currentUserAsPlayer && player._id === currentUserAsPlayer._id) {
+      return acc;
+    }
+    
     const groupId = player.groupId || 'ungrouped';
     if (!acc[groupId]) {
       acc[groupId] = [];
@@ -69,17 +75,11 @@ export default function ContactsPage() {
 
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header */}
+      <Header />
+
       {/* Main Content */}
       <div className="px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Rehber</h1>
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="text-blue-500 font-medium"
-          >
-            Ekle
-          </button>
-        </div>
 
         {/* Current User */}
         {currentUserAsPlayer === undefined ? (
@@ -265,20 +265,46 @@ export default function ContactsPage() {
           })
         ) : null}
 
-        {/* Empty State */}
-        {players !== undefined && players.length === 0 && !currentUserAsPlayer && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus size={32} className="text-gray-400" />
+        {/* Empty State - Show when there are no players besides the current user */}
+        {players !== undefined && Object.keys(groupedPlayers).length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 px-6">
+            {/* Decorative background circle */}
+            <div className="relative mb-8">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                  <Users size={28} className="text-white" />
+                </div>
+              </div>
+              {/* Floating dots decoration */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-orange-400 rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-1 -left-3 w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
             </div>
-            <h3 className="text-lg font-medium text-gray-600 mb-2">Henüz kişi eklenmemiş</h3>
-            <p className="text-gray-500 mb-4">İlk kişinizi ekleyerek başlayın</p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg font-medium"
-            >
-              Kişi Ekle
-            </button>
+            
+            {/* Content */}
+            <div className="text-center max-w-sm">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                Henüz kişi eklenmemiş
+              </h3>
+              <p className="text-gray-500 text-base leading-relaxed mb-8">
+                Oyun arkadaşlarınızı ekleyerek başlayın. Gruplar oluşturun ve oyun deneyiminizi paylaşın.
+              </p>
+              
+              {/* Call to action button */}
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 mx-auto"
+              >
+                <Plus size={20} />
+                <span>İlk Kişiyi Ekle</span>
+              </button>
+            </div>
+            
+            {/* Subtle hint */}
+            <div className="mt-8 text-center">
+              <p className="text-xs text-gray-400">
+                Sağ üstteki "Ekle" butonunu da kullanabilirsiniz
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -302,8 +328,21 @@ export default function ContactsPage() {
         />
       )}
 
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        className="fixed bottom-24 right-4 text-white rounded-2xl shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 transform hover:scale-105 z-50 px-4 py-3.5 space-x-2"
+        style={{ backgroundColor: 'var(--secondary-color)' }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a3f5a'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--secondary-color)'}
+        aria-label="Add new contact"
+      >
+        <Plus size={20} weight="bold" />
+        <span className="font-medium text-sm">Ekle</span>
+      </button>
+
       {/* App Bar */}
-      <AppBar activePage="contacts" />
+      <AppBar currentPage="contacts" />
     </div>
   );
 }
