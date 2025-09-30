@@ -5,7 +5,7 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Plus } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass } from '@phosphor-icons/react';
 import AddGameModal from '@/components/AddGameModal';
 import AppBar from '@/components/AppBar';
 import Header from '@/components/Header';
@@ -59,6 +59,10 @@ export default function GamesPage() {
       console.error('Error creating game:', error);
     }
   };
+
+  const handleSearchClick = () => {
+    router.push('/search');
+  };
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
       {/* Header */}
@@ -66,6 +70,24 @@ export default function GamesPage() {
 
       {/* Main Content */}
       <div className="px-4 py-6">
+        {/* Search Button */}
+        <div className="mb-6">
+          <div className="relative">
+            <MagnifyingGlass 
+              size={20} 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+            />
+            <button
+              onClick={handleSearchClick}
+              className="w-full bg-white rounded-lg border border-gray-200 pl-10 pr-4 py-3 text-left text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
+              style={{
+                boxShadow: '0 0 8px 5px #297dff0a'
+              }}
+            >
+              Oyun ara...
+            </button>
+          </div>
+        </div>
         
         {/* Games Grid */}
         {games === undefined ? (

@@ -1,4 +1,4 @@
-package com.example.eslikci;
+package com.everything.eslikci;
 
 import com.getcapacitor.BridgeActivity;
 
