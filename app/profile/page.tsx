@@ -5,7 +5,7 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { User, Gear, SignOut, PencilSimple } from '@phosphor-icons/react';
+import { User, Gear, SignOut, PencilSimple, Shield } from '@phosphor-icons/react';
 import { useUserSync } from '@/hooks/useUserSync';
 import AppBar from '@/components/AppBar';
 import Header from '@/components/Header';
@@ -210,6 +210,21 @@ export default function ProfilePage() {
                 )}
               </div>
             )}
+
+            {/* Privacy Policy Link */}
+            <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+              {!isLoaded ? (
+                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              ) : (
+                <button
+                  onClick={() => router.push('/privacy')}
+                  className="w-full flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-800 py-3"
+                >
+                  <Shield size={20} weight="regular" />
+                  <span className="font-medium">Gizlilik Politikası</span>
+                </button>
+              )}
+            </div>
 
             {/* Sign Out Button */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">

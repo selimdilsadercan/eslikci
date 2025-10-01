@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useAuth } from './FirebaseAuthProvider';
-import { SignIn, UserPlus, SignOut, User, Eye, EyeSlash } from '@phosphor-icons/react';
+import { useRouter } from 'next/navigation';
+import { SignIn, UserPlus, SignOut, User, Eye, EyeSlash, Shield } from '@phosphor-icons/react';
 
 export default function FirebaseAuthButton() {
   const { user, isSignedIn, signIn, signUp, signOut } = useAuth();
+  const router = useRouter();
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -161,6 +163,17 @@ export default function FirebaseAuthButton() {
             )}
           </button>
         </form>
+
+        {/* Privacy Policy Link */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onClick={() => router.push('/privacy')}
+            className="w-full flex items-center justify-center space-x-2 text-gray-500 hover:text-gray-700 py-2 text-sm"
+          >
+            <Shield size={16} weight="regular" />
+            <span>Gizlilik Politikası</span>
+          </button>
+        </div>
       </div>
     </div>
   );
