@@ -1,269 +1,197 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/components/FirebaseAuthProvider';
-import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { User, Gear, SignOut, PencilSimple, Shield, ChatCircle } from '@phosphor-icons/react';
-import { useUserSync } from '@/hooks/useUserSync';
-import AppBar from '@/components/AppBar';
-import Header from '@/components/Header';
-import AdBanner from '@/components/AdBanner';
+import AppBar from "@/components/AppBar";
+import Header from "@/components/Header";
+import { useAuth } from "@/components/FirebaseAuthProvider";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function ProfilePage() {
-  const { user, isLoaded, isSignedIn, signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
   
-  // Sync user with Convex when they sign in
-  useUserSync();
-  
-  // Get current user and their player data
+  // Get current user from Convex
   const currentUser = useQuery(api.users.getUserByFirebaseId, 
     user?.uid ? { firebaseId: user.uid } : "skip"
   );
   const currentUserAsPlayer = useQuery(api.players.getPlayerByUserId, 
     currentUser ? { userId: currentUser._id } : "skip"
   );
-  
-  // Check if user is admin
-  const isAdmin = useQuery(api.users.isUserAdmin, 
-    user?.uid ? { firebaseId: user.uid } : "skip"
-  );
-  
 
-  // Redirect to home page if user is not signed in
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace('/');
-    }
-  }, [isLoaded, isSignedIn, router]);
+  return (
+      <div className="min-h-screen w-full" style={{ backgroundColor: '#f4f6f9' }}>
+        {/* Header */}
+        <Header />
+        
+        {/* Main Content with bottom padding for fixed bottom navigation */}
+        <div className="pt-8 px-6 pb-24">
+          <div className="max-w-sm mx-auto">
+            {/* Profile Header */}
+            <div className="text-center mb-8">
+              <div className="mb-4">
+                {!currentUserAsPlayer ? (
+                  // Skeleton loading
+                  <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto animate-pulse"></div>
+                ) : currentUserAsPlayer.avatar ? (
+                  <img
+                    src={currentUserAsPlayer.avatar}
+                    alt={currentUserAsPlayer.name}
+                    className="w-24 h-24 rounded-full mx-auto object-cover"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">
+                      {currentUserAsPlayer.initial || currentUserAsPlayer.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                {!currentUserAsPlayer ? (
+                  <div className="h-8 bg-gray-200 rounded animate-pulse mx-auto w-32"></div>
+                ) : (
+                  currentUserAsPlayer.name || currentUser?.name || user?.displayName || user?.email?.split('@')[0] || 'Kullanıcı'
+                )}
+              </h2>
+              <p className="text-gray-500 text-sm">
+                {user?.email}
+              </p>
+            </div>
 
-  // Show loading state while checking authentication
-  if (!isLoaded || (isLoaded && !isSignedIn)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
-        <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+
+            {/* Profile Sections */}
+            <div className="space-y-3">
+
+              {/* Edit Profile */}
+              <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                <Link href="/profile/edit" className="flex items-center gap-3 text-gray-700">
+                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">Profili Düzenle</h3>
+                  </div>
+                  <div className="text-gray-500">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Feedback */}
+              <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                <button
+                  onClick={() => router.push('/feedback')}
+                  className="w-full flex items-center gap-3 text-gray-700"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold">Geri Bildirim Gönder</h3>
+                  </div>
+                  <div className="text-gray-500">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+
+              {/* About Button */}
+              <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                <button
+                  onClick={() => router.push('/about')}
+                  className="w-full flex items-center gap-3 text-gray-700"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold">Hakkımızda</h3>
+                  </div>
+                  <div className="text-gray-500">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+
+              {/* Logout Button */}
+              <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                <button
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="w-full flex items-center gap-3 text-red-600 hover:text-red-700 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-pink-500 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold">Çıkış Yap</h3>
+                  </div>
+                  <div className="text-red-500">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* App Bar */}
+        <AppBar currentPage="profile" />
+        
+        {/* Logout Confirmation Modal */}
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 bg-[#00000090] flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 mx-4 max-w-sm w-full">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Çıkış Yap</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Hesabınızdan çıkış yapmak istediğinizden emin misiniz?
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLogoutConfirm(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      setShowLogoutConfirm(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Çıkış Yap
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
-
-  const handleSave = () => {
-    if (user) {
-      const nameParts = displayName.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      // Note: User profile updates would need to be handled through Clerk's API
-      // For now, we'll just close the editing mode
-      console.log('Profile update:', { firstName, lastName });
-      setIsEditing(false);
-    }
-  };
-
-  const handleSignOut = () => {
-    signOut();
-    router.push('/');
-  };
-
-  return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
-
-      {/* Main Content */}
-      <div className="px-4 py-6">
-        {/* Player Avatar Section */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center">
-              {!isLoaded || !currentUserAsPlayer ? (
-                <div className="w-20 h-20 bg-gray-200 rounded-full animate-pulse"></div>
-              ) : currentUserAsPlayer.avatar ? (
-                <img
-                  src={currentUserAsPlayer.avatar}
-                  alt={currentUserAsPlayer.name}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-2xl">
-                    {currentUserAsPlayer.initial}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              {!isLoaded || !currentUserAsPlayer ? (  
-                <div className="space-y-2">
-                  <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
-                  <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
-                </div>
-              ) : (
-                <>
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {currentUserAsPlayer.name}
-                  </h2>
-                  <p className="text-gray-500 text-sm">{user?.email}</p>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Information */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Kişisel Bilgiler</h3>
-            {isLoaded && (
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex items-center space-x-2 text-blue-500 hover:text-blue-600"
-              >
-                <PencilSimple size={16} weight="regular" />
-                <span className="text-sm font-medium">
-                  {isEditing ? 'İptal' : 'Düzenle'}
-                </span>
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ad Soyad
-              </label>
-              {!isLoaded ? (
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
-              ) : isEditing ? (
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              ) : (
-                <p className="text-gray-800">{user?.displayName || user?.email || 'Belirtilmemiş'}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                E-posta
-              </label>
-              {!isLoaded ? (
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
-              ) : (
-                <p className="text-gray-800">{user?.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Üyelik Tarihi
-              </label>
-              {!isLoaded ? (
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-              ) : (
-                <p className="text-gray-800">
-                  {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('tr-TR') : 'Bilinmiyor'}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {isEditing && (
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={handleSave}
-                className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600"
-              >
-                Kaydet
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
-              >
-                İptal
-              </button>
-            </div>
-          )}
-        </div>
-
-            {/* Admin Dashboard Button - Only show for admin users */}
-            {isAdmin && (
-              <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-                {!isLoaded ? (
-                  <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-                ) : (
-                  <button
-                    onClick={() => router.push('/admin')}
-                    className="w-full flex items-center justify-center space-x-2 bg-purple-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-600"
-                  >
-                    <Gear size={20} weight="regular" />
-                    <span>Admin Dashboard</span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Feedback Link */}
-            <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-              {!isLoaded ? (
-                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-              ) : (
-                <button
-                  onClick={() => router.push('/feedback')}
-                  className="w-full flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-800 py-3"
-                >
-                  <ChatCircle size={20} weight="regular" />
-                  <span className="font-medium">Geri Bildirim Gönder</span>
-                </button>
-              )}
-            </div>
-
-            {/* Privacy Policy Link */}
-            <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-              {!isLoaded ? (
-                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-              ) : (
-                <button
-                  onClick={() => router.push('/privacy')}
-                  className="w-full flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-800 py-3"
-                >
-                  <Shield size={20} weight="regular" />
-                  <span className="font-medium">Gizlilik Politikası</span>
-                </button>
-              )}
-            </div>
-
-            {/* Sign Out Button */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              {!isLoaded ? (
-                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-              ) : (
-                <button
-                  onClick={handleSignOut}
-                  className="w-full flex items-center justify-center space-x-2 text-red-500 hover:text-red-600 py-3"
-                >
-                  <SignOut size={20} weight="regular" />
-                  <span className="font-medium">Çıkış Yap</span>
-                </button>
-              )}
-            </div>
-
-      </div>
-
-      {/* Banner Ad */}
-      <AdBanner position="bottom" className="mx-4 mb-4" />
-
-      {/* App Bar */}
-      <AppBar currentPage="profile" />
-    </div>
-  );
-}

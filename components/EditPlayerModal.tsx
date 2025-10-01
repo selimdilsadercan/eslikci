@@ -7,6 +7,7 @@ import { Id } from '@/convex/_generated/dataModel';
 import { X, Trash } from '@phosphor-icons/react';
 import { Drawer } from 'vaul';
 import AvatarGenerator from './AvatarGenerator';
+import ConfirmModal from './ConfirmModal';
 
 interface EditPlayerModalProps {
   playerId: Id<'players'>;
@@ -24,6 +25,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
   const [playerAvatar, setPlayerAvatar] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const currentPlayer = useQuery(api.players.getPlayerById, { id: playerId });
   
@@ -62,9 +64,11 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('Bu kişiyi silmek istediğinizden emin misiniz?')) return;
+  const handleDeleteClick = () => {
+    setShowConfirmDelete(true);
+  };
 
+  const handleDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
       await deletePlayer({ id: playerId });
@@ -85,6 +89,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
   }
 
   return (
+    <>
     <Drawer.Root open={true} onOpenChange={(open) => !open && onClose()}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
@@ -168,7 +173,7 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   disabled={isDeleting}
                   className="flex-1 py-3 px-4 border border-red-300 text-red-600 rounded-lg font-medium flex items-center justify-center space-x-2"
                 >
@@ -199,5 +204,18 @@ export default function EditPlayerModal({ playerId, onClose, groups }: EditPlaye
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
+
+    <ConfirmModal
+      isOpen={showConfirmDelete}
+      onClose={() => setShowConfirmDelete(false)}
+      onConfirm={handleDeleteConfirm}
+      title="Kişiyi Sil"
+      message="Bu kişiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+      confirmText="Sil"
+      cancelText="İptal"
+      isDestructive={true}
+      isLoading={isDeleting}
+    />
+    </>
   );
 }

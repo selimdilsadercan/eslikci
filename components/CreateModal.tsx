@@ -25,7 +25,7 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
   
   // Player form state
   const [playerName, setPlayerName] = useState('');
-  const [selectedGroups, setSelectedGroups] = useState<Id<'groups'>[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Id<'groups'> | null>(null);
   const [playerAvatar, setPlayerAvatar] = useState<string>('');
   
   // Group form state
@@ -52,7 +52,7 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
           name: playerName.trim(),
           initial: playerName.trim().charAt(0).toUpperCase(),
           avatar: playerAvatar,
-          groupId: selectedGroups.length === 1 ? selectedGroups[0] : undefined,
+          groupId: selectedGroup || undefined,
           firebaseId: user.uid,
         });
       } else {
@@ -75,17 +75,13 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
     }
   };
 
-  const toggleGroup = (groupId: Id<'groups'>) => {
-    setSelectedGroups(prev => 
-      prev.includes(groupId) 
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
-    );
+  const selectGroup = (groupId: Id<'groups'>) => {
+    setSelectedGroup(selectedGroup === groupId ? null : groupId);
   };
 
   const resetForm = () => {
     setPlayerName('');
-    setSelectedGroups([]);
+    setSelectedGroup(null);
     setPlayerAvatar('');
     setGroupName('');
   };
@@ -203,17 +199,15 @@ export default function CreateModal({ onClose, groups }: CreateModalProps) {
                             <span className="text-gray-800">{group.name}</span>
                             <button
                               type="button"
-                              onClick={() => toggleGroup(group._id)}
-                              className={`w-5 h-5 border-2 flex items-center justify-center ${
-                                selectedGroups.includes(group._id)
+                              onClick={() => selectGroup(group._id)}
+                              className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                                selectedGroup === group._id
                                   ? 'bg-blue-500 border-blue-500'
                                   : 'bg-white border-blue-500'
                               }`}
                             >
-                              {selectedGroups.includes(group._id) && (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
+                              {selectedGroup === group._id && (
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
                               )}
                             </button>
                           </div>
