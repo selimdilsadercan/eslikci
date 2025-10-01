@@ -10,7 +10,9 @@ import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import GameRulesTab from '@/components/GameRulesTab';
-import GameAskTab from '@/components/GameAskTab'; 
+import GameAskTab from '@/components/GameAskTab';
+import { useInterstitialAd } from '@/components/InterstitialAd';
+import AdBanner from '@/components/AdBanner'; 
 
 function GameSessionContent() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -32,6 +34,17 @@ function GameSessionContent() {
   });
   const [crownWinners, setCrownWinners] = useState<{[key: string]: boolean}>({});
   const [showSettings, setShowSettings] = useState(false);
+  const [roundCount, setRoundCount] = useState(0);
+
+  // Initialize interstitial ad
+  const { showInterstitial, isAdReady } = useInterstitialAd({
+    onAdClosed: () => {
+      console.log('Interstitial ad closed');
+    },
+    onAdFailedToLoad: (error) => {
+      console.log('Interstitial ad failed to load:', error);
+    }
+  });
 
   // Get current user first to ensure Convex auth works
   const currentUser = useQuery(api.users.getUserByFirebaseId, 
@@ -125,7 +138,16 @@ function GameSessionContent() {
   const { redTeamPlayers, blueTeamPlayers } = getTeamPlayers();
 
   const handleBack = () => {
-    router.push('/history');
+    // Show interstitial ad when navigating back (if ad is ready)
+    if (isAdReady) {
+      showInterstitial().then(() => {
+        // Navigate after ad is shown
+        router.push('/history');
+      });
+    } else {
+      // Navigate immediately if ad is not ready
+      router.push('/history');
+    }
   };
 
   const addScoreInput = (playerId: Id<'players'>) => {
@@ -342,6 +364,18 @@ function GameSessionContent() {
       setCurrentScores({});
       setCrownWinners({});
       setMultipleScores({});
+      
+      // Increment round count and show interstitial ad every 3 rounds
+      setRoundCount(prev => {
+        const newCount = prev + 1;
+        if (newCount % 3 === 0 && isAdReady) {
+          // Show interstitial ad after every 3 rounds
+          setTimeout(() => {
+            showInterstitial();
+          }, 1000); // Small delay to let the UI update
+        }
+        return newCount;
+      });
     } catch (error) {
       console.error('Error saving round scores:', error);
       toast.error('Tur kaydedilirken hata oluştu!');
@@ -373,17 +407,22 @@ function GameSessionContent() {
     // For team mode, use teamLaps if available
     if (gameSave?.settings.gameplay === 'takimli' && gameSave?.teamLaps) {
       const teamIndex = teamPlayers === redTeamPlayers ? 0 : 1; // 0 for red team, 1 for blue team
-      return gameSave.teamLaps.reduce((total: number, roundScores: (number | number[])[]) => {
+      
+      // Sum all individual scores from all rounds
+      let totalSum = 0;
+      gameSave.teamLaps.forEach((roundScores: (number | number[])[]) => {
         if (Array.isArray(roundScores) && roundScores[teamIndex] !== undefined) {
           const teamScore = roundScores[teamIndex];
           if (Array.isArray(teamScore)) {
-            return total + teamScore.reduce((sum, score) => sum + score, 0);
+            totalSum += teamScore.reduce((sum, score) => sum + score, 0);
           } else {
-            return total + (teamScore || 0);
+            totalSum += (teamScore || 0);
           }
         }
-        return total;
-      }, 0);
+      });
+      
+      // Return the sum for total column
+      return totalSum;
     }
     
     // Fallback to individual player scores (for backward compatibility)
@@ -404,7 +443,8 @@ function GameSessionContent() {
       if (Array.isArray(roundScores) && roundScores[teamIndex] !== undefined) {
         const teamScore = roundScores[teamIndex];
         if (Array.isArray(teamScore)) {
-          return teamScore.reduce((sum, score) => sum + score, 0);
+          // Return comma-separated individual scores instead of sum
+          return teamScore.join(', ');
         } else {
           return teamScore || 0;
         }
@@ -578,185 +618,208 @@ function GameSessionContent() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col px-4 pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
+      <div className="flex-1 flex flex-col pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
         {activeTab === 'puan-tablosu' ? (
           <>
+            {/* Banner Ad above score table */}
+            <AdBanner position="top" className="mb-4 mx-4" />
+            
             {/* Score Table - Full height, horizontally scrollable */}
             <div className="flex-1 overflow-x-auto overflow-y-auto">
               <div className="min-w-full">
-                {/* Table Header */}
+                {/* Table - Column by Column Rendering */}
                 <div className="px-2 py-2 flex min-w-max">
-                  <div className={gameSave?.settings.gameplay === 'takimli' ? 'w-[180px]' : 'w-[120px]'}></div>
+                  {/* Player/Team Names Column */}
+                  <div className="flex flex-col">
+                    <div className="py-4"></div> {/* Header spacer */}
+                    {gameSave?.settings.gameplay === 'takimli' ? (
+                      <>
+                        {/* Red Team */}
+                        <div className="pb-1 pt-3.5 pl-4 pr-2 flex items-center border-b border-gray-100">
+                          <div className="flex items-center min-w-[180px]">
+                            <div className="relative mr-3">
+                              {redTeamPlayers && redTeamPlayers.length > 0 ? (
+                                <div className="flex -space-x-2">
+                                  {redTeamPlayers.slice(0, 3).map((player, index) => (
+                                    <div
+                                      key={player._id}
+                                      className="relative"
+                                      style={{ zIndex: 10 + redTeamPlayers.length - index }}
+                                    >
+                                      {player.avatar ? (
+                                        <img
+                                          src={player.avatar}
+                                          alt={player.name}
+                                          className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                                        />
+                                      ) : (
+                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
+                                          <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {redTeamPlayers.length > 3 && (
+                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center border-2 border-white">
+                                      <span className="text-gray-600 font-semibold text-xs">+{redTeamPlayers.length - 3}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-semibold text-sm">K</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
+                              {redTeamPlayers?.map(p => p.name).join(', ') || 'Kırmızı Takım'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Blue Team */}
+                        <div className="py-2 pl-4 pr-2 flex items-center">
+                          <div className="flex items-center min-w-[180px]">
+                            <div className="relative mr-3">
+                              {blueTeamPlayers && blueTeamPlayers.length > 0 ? (
+                                <div className="flex -space-x-2">
+                                  {blueTeamPlayers.slice(0, 3).map((player, index) => (
+                                    <div
+                                      key={player._id}
+                                      className="relative"
+                                      style={{ zIndex: 10 + blueTeamPlayers.length - index }}
+                                    >
+                                      {player.avatar ? (
+                                        <img
+                                          src={player.avatar}
+                                          alt={player.name}
+                                          className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                                        />
+                                      ) : (
+                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
+                                          <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {blueTeamPlayers.length > 3 && (
+                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center border-2 border-white">
+                                      <span className="text-gray-600 font-semibold text-xs">+{blueTeamPlayers.length - 3}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-semibold text-sm">M</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
+                              {blueTeamPlayers?.map(p => p.name).join(', ') || 'Mavi Takım'}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      gamePlayers.map((player, index) => (
+                        <div key={player._id} className={`pt-3 pb-0.5 pl-4 pr-2 flex items-center ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                          <div className="flex items-center min-w-[120px]">
+                            {player.avatar ? (
+                              <img
+                                src={player.avatar}
+                                alt={player.name}
+                                className="w-8 h-8 rounded-full object-cover mr-3"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                              </div>
+                            )}
+                            <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>{player.name}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Total Column */}
                   {!gameSave?.settings.hideTotalColumn && (
-                    <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>Toplam</div>
+                    <div className="flex flex-col">
+                      <div className="py-2 px-4 font-medium flex items-center justify-center" style={{ color: 'var(--secondary-color)' }}>Toplam</div>
+                      {gameSave?.settings.gameplay === 'takimli' ? (
+                        <>
+                          <div className="py-2.5 px-4 flex items-center justify-center border-b border-gray-100">
+                            <div className="font-medium" style={{ color: 'var(--secondary-color)' }}>
+                              {getTeamTotalScore(redTeamPlayers || [])}
+                            </div>
+                          </div>
+                          <div className="py-2.5 px-4 flex items-center justify-center">
+                            <div className="font-medium" style={{ color: 'var(--secondary-color)' }}>
+                              {getTeamTotalScore(blueTeamPlayers || [])}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        gamePlayers.map((player, index) => (
+                          <div key={player._id} className={`py-2.5 px-4 flex items-center justify-center ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                            <div className="font-medium" style={{ color: 'var(--secondary-color)' }}>
+                              {getTotalScore(player._id)}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   )}
-                  {/* Dynamic round columns */}
+
+                  {/* Round Columns */}
                   {roundColumns.map((roundNumber) => (
-                    <div key={roundNumber} className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
-                      {roundNumber}. Tur
+                    <div key={roundNumber} className="flex flex-col">
+                      <div className="py-2 px-4 font-medium flex items-center justify-center" style={{ color: 'var(--secondary-color)' }}>
+                        {roundNumber}. Tur
+                      </div>
+                      {gameSave?.settings.gameplay === 'takimli' ? (
+                        <>
+                          <div className="py-2.5 px-4 flex items-center justify-center border-b border-gray-100">
+                            <div className="text-gray-600 font-medium">
+                              {gameSave?.settings.calculationMode === 'NoPoints' ? (
+                                getTeamRoundScore(redTeamPlayers || [], roundNumber) === 1 ? (
+                                  <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
+                                ) : '-'
+                              ) : (
+                                getTeamRoundScore(redTeamPlayers || [], roundNumber) || '-'
+                              )}
+                            </div>
+                          </div>
+                          <div className="py-2.5 px-4 flex items-center justify-center">
+                            <div className="text-gray-600 font-medium">
+                              {gameSave?.settings.calculationMode === 'NoPoints' ? (
+                                getTeamRoundScore(blueTeamPlayers || [], roundNumber) === 1 ? (
+                                  <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
+                                ) : '-'
+                              ) : (
+                                getTeamRoundScore(blueTeamPlayers || [], roundNumber) || '-'
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        gamePlayers.map((player, index) => (
+                          <div key={player._id} className={`py-2.5 px-4 flex items-center justify-center ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                            <div className="text-gray-600 font-medium">
+                              {gameSave?.settings.calculationMode === 'NoPoints' ? (
+                                getRoundScores(player._id, roundNumber) === 1 ? (
+                                  <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
+                                ) : '-'
+                              ) : (
+                                getRoundScores(player._id, roundNumber) || '-'
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   ))}
                 </div>
-
-                {/* Player/Team Rows */}
-                {gameSave?.settings.gameplay === 'takimli' ? (
-                  // Team Mode - Show Teams
-                  <>
-                    {/* Red Team Row */}
-                    <div className="px-2 py-2.5 flex items-center min-w-max border-b border-gray-100">
-                      <div className="flex items-center w-[180px]">
-                        <div className="relative mr-3">
-                          {redTeamPlayers && redTeamPlayers.length > 0 ? (
-                            <div className="flex -space-x-2">
-                              {redTeamPlayers.slice(0, 3).map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
-                                  style={{ zIndex: 10 + redTeamPlayers.length - index }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
-                                      className="w-8 h-8 rounded-full object-cover border-2 border-white"
-                                    />
-                                  ) : (
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
-                                      <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              {redTeamPlayers.length > 3 && (
-                                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center border-2 border-white">
-                                  <span className="text-gray-600 font-semibold text-xs">+{redTeamPlayers.length - 3}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">K</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
-                          {redTeamPlayers?.map(p => p.name).join(', ') || 'Kırmızı Takım'}
-                        </span>
-                      </div>
-                      {!gameSave?.settings.hideTotalColumn && (
-                        <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
-                          {getTeamTotalScore(redTeamPlayers || [])}
-                        </div>
-                      )}
-                      {roundColumns.map((roundNumber) => (
-                        <div key={roundNumber} className="w-20 text-center text-gray-600 font-medium">
-                          {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                            getTeamRoundScore(redTeamPlayers || [], roundNumber) === 1 ? (
-                              <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
-                            ) : '-'
-                          ) : (
-                            getTeamRoundScore(redTeamPlayers || [], roundNumber) || '-'
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Blue Team Row */}
-                    <div className="px-2 py-2.5 flex items-center min-w-max">
-                      <div className="flex items-center w-[180px]">
-                        <div className="relative mr-3">
-                          {blueTeamPlayers && blueTeamPlayers.length > 0 ? (
-                            <div className="flex -space-x-2">
-                              {blueTeamPlayers.slice(0, 3).map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
-                                  style={{ zIndex: 10 + blueTeamPlayers.length - index }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
-                                      className="w-8 h-8 rounded-full object-cover border-2 border-white"
-                                    />
-                                  ) : (
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
-                                      <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              {blueTeamPlayers.length > 3 && (
-                                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center border-2 border-white">
-                                  <span className="text-gray-600 font-semibold text-xs">+{blueTeamPlayers.length - 3}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">M</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
-                          {blueTeamPlayers?.map(p => p.name).join(', ') || 'Mavi Takım'}
-                        </span>
-                      </div>
-                      {!gameSave?.settings.hideTotalColumn && (
-                        <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
-                          {getTeamTotalScore(blueTeamPlayers || [])}
-                        </div>
-                      )}
-                      {roundColumns.map((roundNumber) => (
-                        <div key={roundNumber} className="w-20 text-center text-gray-600 font-medium">
-                          {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                            getTeamRoundScore(blueTeamPlayers || [], roundNumber) === 1 ? (
-                              <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
-                            ) : '-'
-                          ) : (
-                            getTeamRoundScore(blueTeamPlayers || [], roundNumber) || '-'
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  // Individual Mode - Show Individual Players
-                  gamePlayers.map((player, index) => (
-                  <div key={player._id} className={`px-2 py-2.5 flex items-center min-w-max ${index < gamePlayers.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                    <div className="flex items-center w-[120px]">
-                      {player.avatar ? (
-                        <img
-                          src={player.avatar}
-                          alt={player.name}
-                          className="w-8 h-8 rounded-full object-cover mr-3"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
-                        </div>
-                      )}
-                      <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>{player.name}</span>
-                    </div>
-                    {!gameSave?.settings.hideTotalColumn && (
-                      <div className="w-20 text-center font-medium" style={{ color: 'var(--secondary-color)' }}>
-                        {getTotalScore(player._id)}
-                      </div>
-                    )}
-                    {roundColumns.map((roundNumber) => (
-                      <div key={roundNumber} className="w-20 text-center text-gray-600 font-medium">
-                        {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                          getRoundScores(player._id, roundNumber) === 1 ? (
-                            <CrownSimple size={16} weight="fill" className="text-gray-500 mx-auto" />
-                          ) : '-'
-                        ) : (
-                          getRoundScores(player._id, roundNumber) || '-'
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  ))
-                )}
               </div>
             </div>
 

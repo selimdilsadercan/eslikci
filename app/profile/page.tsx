@@ -9,6 +9,7 @@ import { User, Gear, SignOut, PencilSimple, Shield, ChatCircle } from '@phosphor
 import { useUserSync } from '@/hooks/useUserSync';
 import AppBar from '@/components/AppBar';
 import Header from '@/components/Header';
+import AdBanner from '@/components/AdBanner';
 
 export default function ProfilePage() {
   const { user, isLoaded, isSignedIn, signOut } = useAuth();
@@ -257,6 +258,9 @@ export default function ProfilePage() {
             </div>
 
       </div>
+
+      {/* Banner Ad */}
+      <AdBanner position="bottom" className="mx-4 mb-4" />
 
       {/* App Bar */}
       <AppBar currentPage="profile" />

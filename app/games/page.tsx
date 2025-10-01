@@ -9,6 +9,7 @@ import { Plus, MagnifyingGlass } from '@phosphor-icons/react';
 import AddGameModal from '@/components/AddGameModal';
 import AppBar from '@/components/AppBar';
 import Header from '@/components/Header';
+import AdBanner from '@/components/AdBanner';
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -180,6 +181,9 @@ export default function GamesPage() {
         onClose={() => setShowModal(false)}
         onAddGame={handleAddGame}
       />
+
+      {/* Banner Ad */}
+      <AdBanner position="bottom" className="mx-4 mb-4" />
 
       {/* App Bar */}
       <AppBar currentPage="games" />

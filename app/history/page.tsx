@@ -10,6 +10,7 @@ import { Id } from '@/convex/_generated/dataModel';
 import AppBar from '@/components/AppBar';
 import ConfirmModal from '@/components/ConfirmModal';
 import Header from '@/components/Header';
+import AdBanner from '@/components/AdBanner';
 import { useState } from 'react';
 
 export default function HistoryPage() {
@@ -278,6 +279,9 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
+
+      {/* Banner Ad */}
+      <AdBanner position="bottom" className="mx-4 mb-4" />
 
       {/* App Bar */}
       <AppBar currentPage="history" />
