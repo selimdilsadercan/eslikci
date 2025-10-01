@@ -1,15 +1,16 @@
 {
   "name": "eslikci",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "mobile": "next build --turbopack && npx cap sync && npm run apk",
-    "apk": "cd android && ./gradlew assembleDebug && ./gradlew bundleRelease && cd .. && npm run open-apk",
+    "increment-version": "node scripts/increment-version.js",
+    "mobile": "npm run increment-version && next build --turbopack && npx cap sync && npm run apk",
+    "apk": "cd android && ./gradlew assembleDebug && ./gradlew bundleRelease && cd .. && npm run open-aab",
     "open-apk": "xdg-open /home/meral/Desktop/eslikci/android/app/build/outputs/apk/debug",
-    "aab": "cd android && ./gradlew bundleRelease && cd ..",
+    "aab": "npm run increment-version && cd android && ./gradlew bundleRelease && cd ..",
     "open-aab": "xdg-open /home/meral/Desktop/eslikci/android/app/build/outputs/bundle/release",
     "clean": "cd android && ./gradlew clean"
   },
