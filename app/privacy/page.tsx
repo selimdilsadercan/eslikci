@@ -43,7 +43,7 @@ export default function PrivacyPolicyPage() {
                 <span>Uygulama ve Geliştirici</span>
               </h2>
               <p className="text-gray-600 leading-relaxed">
-                Table Games Companion ("Uygulama"), geliştirici tarafından yayınlanır. 
+                Board Games Companion ("Uygulama"), geliştirici tarafından yayınlanır. 
                 Kullanıcılarımızın gizliliğini korumak bizim için çok önemlidir. 
                 Bu gizlilik politikası, kişisel bilgilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.
               </p>

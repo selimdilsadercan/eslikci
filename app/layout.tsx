@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Eşlikçi - Table Games Companion",
+  title: "Eşlikçi - Board Games Companion",
   description: "Your companion app for table games",
 };
 

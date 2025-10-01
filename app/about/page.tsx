@@ -49,7 +49,7 @@ export default function AboutPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Hakkımızda</h1>
-              <p className="text-gray-500 text-sm">Table Games Companion</p>
+              <p className="text-gray-500 text-sm">Board Games Companion</p>
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export default function AboutPage() {
                 <span>Uygulama Hakkında</span>
               </h2>
               <p className="text-gray-600 leading-relaxed">
-                Table Games Companion, masa oyunları severler için özel olarak tasarlanmış bir uygulamadır. 
+                Board Games Companion, masa oyunları severler için özel olarak tasarlanmış bir uygulamadır. 
                 Oyunlarınızı kaydetmenize, istatistiklerinizi takip etmenize ve arkadaşlarınızla oyun deneyimlerinizi paylaşmanıza olanak tanır.
               </p>
             </section>
