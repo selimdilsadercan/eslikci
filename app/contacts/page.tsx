@@ -121,7 +121,7 @@ export default function ContactsPage() {
                       </div>
                     </div>
                   )}
-                  <span className="font-medium text-black">{currentUserAsPlayer.name}</span>
+                  <span className="font-medium text-black truncate max-w-[200px]">{currentUserAsPlayer.name}</span>
                 </div>
                 <button
                   onClick={(e) => {
@@ -178,7 +178,7 @@ export default function ContactsPage() {
                         </div>
                       </div>
                     )}
-                    <span className="font-medium text-black">{player.name}</span>
+                    <span className="font-medium text-black truncate max-w-[200px]">{player.name}</span>
                   </div>
                   <button
                     onClick={(e) => {
@@ -241,7 +241,7 @@ export default function ContactsPage() {
                               </div>
                             </div>
                           )}
-                          <span className="font-medium text-black">{player.name}</span>
+                          <span className="font-medium text-black truncate max-w-[200px]">{player.name}</span>
                         </div>
                         <button
                           onClick={(e) => {

@@ -636,7 +636,7 @@ function GameSessionContent() {
                       <>
                         {/* Red Team */}
                         <div className="pb-1 pt-3.5 pl-4 pr-2 flex items-center border-b border-gray-100">
-                          <div className="flex items-center min-w-[180px]">
+                          <div className="flex items-center min-w-[120px] flex-1">
                             <div className="relative mr-3">
                               {redTeamPlayers && redTeamPlayers.length > 0 ? (
                                 <div className="flex -space-x-2">
@@ -671,7 +671,7 @@ function GameSessionContent() {
                                 </div>
                               )}
                             </div>
-                            <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
+                            <span className="font-medium truncate max-w-[100px]" style={{ color: 'var(--secondary-color)' }}>
                               {redTeamPlayers?.map(p => p.name).join(', ') || 'Kırmızı Takım'}
                             </span>
                           </div>
@@ -679,7 +679,7 @@ function GameSessionContent() {
                         
                         {/* Blue Team */}
                         <div className="py-2 pl-4 pr-2 flex items-center">
-                          <div className="flex items-center min-w-[180px]">
+                          <div className="flex items-center min-w-[180px] flex-1">
                             <div className="relative mr-3">
                               {blueTeamPlayers && blueTeamPlayers.length > 0 ? (
                                 <div className="flex -space-x-2">
@@ -714,7 +714,7 @@ function GameSessionContent() {
                                 </div>
                               )}
                             </div>
-                            <span className="font-medium truncate" style={{ color: 'var(--secondary-color)' }}>
+                            <span className="font-medium truncate max-w-[100px]" style={{ color: 'var(--secondary-color)' }}>
                               {blueTeamPlayers?.map(p => p.name).join(', ') || 'Mavi Takım'}
                             </span>
                           </div>
@@ -921,7 +921,7 @@ function GameSessionContent() {
                             </div>
                           )}
                         </div>
-                        <span className="font-medium text-gray-800 text-sm">
+                        <span className="font-medium text-gray-800 text-sm truncate max-w-[100px]">
                           {redTeamPlayers?.map(p => p.name).join(', ') || 'Kırmızı Takım'}
                         </span>
                       </div>
@@ -1055,7 +1055,7 @@ function GameSessionContent() {
                             </div>
                           )}
                         </div>
-                        <span className="font-medium text-gray-800 text-sm">
+                        <span className="font-medium text-gray-800 text-sm truncate max-w-[100px]">
                           {blueTeamPlayers?.map(p => p.name).join(', ') || 'Mavi Takım'}
                         </span>
                       </div>
@@ -1172,7 +1172,7 @@ function GameSessionContent() {
                           <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
                         </div>
                       )}
-                      <span className="font-medium text-gray-800 text-sm">{player.name}</span>
+                      <span className="font-medium text-gray-800 text-sm truncate max-w-[200px]">{player.name}</span>
                     </div>
                     
                     {gameSave?.settings.calculationMode === 'NoPoints' ? (

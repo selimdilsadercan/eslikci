@@ -337,7 +337,7 @@ function CreateGameContent() {
             </span>
           </div>
         )}
-        <span className="font-medium text-sm text-white">
+        <span className="font-medium text-sm text-white truncate max-w-[70px]">
           {player.name}
         </span>
         <button
@@ -503,7 +503,7 @@ function CreateGameContent() {
                               <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
                             </div>
                           )}
-                          <span className="font-normal text-black text-sm">{player.name}</span>
+                          <span className="font-normal text-black text-sm truncate max-w-[200px]">{player.name}</span>
                         </div>
                         <button
                           onClick={() => togglePlayer(player._id)}
@@ -554,7 +554,7 @@ function CreateGameContent() {
                                 <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
                               </div>
                             )}
-                            <span className="font-normal text-black text-sm">{player.name}</span>
+                            <span className="font-normal text-black text-sm truncate max-w-[200px]">{player.name}</span>
                           </div>
                           <button
                             onClick={() => togglePlayer(player._id)}
@@ -650,7 +650,7 @@ function CreateGameContent() {
                                 <span className="text-red-600 font-semibold text-sm">{player.initial}</span>
                               </div>
                             )}
-                            <span className="text-white font-medium text-sm">{player.name}</span>
+                            <span className="text-white font-medium text-sm truncate max-w-[70px]">{player.name}</span>
                           </div>
                         ) : null;
                       })}
