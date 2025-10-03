@@ -4,14 +4,17 @@ import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useAuth } from "@/components/FirebaseAuthProvider";
+import { usePro } from "@/components/ProProvider";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Crown, Star } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
+  const { isPro, isLoading: proLoading } = usePro();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
   
@@ -66,6 +69,36 @@ export default function ProfilePage() {
 
             {/* Profile Sections */}
             <div className="space-y-3">
+
+              {/* Pro Status */}
+              <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                <Link href="/pro" className="flex items-center gap-3 text-gray-700">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    isPro 
+                      ? 'bg-gradient-to-br from-yellow-400 to-orange-500' 
+                      : 'bg-gradient-to-br from-purple-400 to-pink-500'
+                  }`}>
+                    {isPro ? (
+                      <Crown className="w-5 h-5 text-white" />
+                    ) : (
+                      <Star className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">
+                      {isPro ? 'Pro Aktif' : 'Pro Özellikler'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {isPro ? 'Reklamsız deneyim' : 'Pro\'ya yükselt'}
+                    </p>
+                  </div>
+                  <div className="text-gray-500">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              </div>
 
               {/* Edit Profile */}
               <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">

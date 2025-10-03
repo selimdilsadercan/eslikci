@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "increment-version": "node scripts/increment-version.js",
+    "increment-version": "node scripts/increment-version.ts",
     "mobile": "npm run increment-version && next build --turbopack && npx cap sync && npm run apk",
     "apk": "cd android && ./gradlew assembleDebug && ./gradlew bundleRelease && cd .. && npm run open-aab",
     "open-apk": "xdg-open /home/meral/Desktop/eslikci/android/app/build/outputs/apk/debug",

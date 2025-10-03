@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AdMob } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
+import { usePro } from './ProProvider';
 
 // Hook for easier usage
 export function useInterstitialAd(callbacks?: {
@@ -10,14 +11,20 @@ export function useInterstitialAd(callbacks?: {
   onAdFailedToLoad?: (error: any) => void;
   onAdLoaded?: () => void;
 }) {
+  const { isPro, isLoading: proLoading } = usePro();
   const [isAdReady, setIsAdReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Don't initialize ads for pro users
+    if (isPro || proLoading) {
+      return;
+    }
+
     if (Capacitor.isNativePlatform()) {
       initializeAd();
     }
-  }, []);
+  }, [isPro, proLoading]);
 
   const initializeAd = async () => {
     try {
@@ -46,6 +53,11 @@ export function useInterstitialAd(callbacks?: {
   };
 
   const showInterstitial = async () => {
+    // Don't show ads for pro users
+    if (isPro || proLoading) {
+      return true; // Return true to continue with the action
+    }
+
     if (!Capacitor.isNativePlatform()) {
       // Show placeholder for web development
       console.log('Interstitial Ad (Web Preview) - Would show full-screen ad');

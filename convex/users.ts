@@ -222,3 +222,72 @@ export const isUserAdmin = query({
     return user?.isAdmin || false;
   },
 });
+
+export const isUserPro = query({
+  args: { firebaseId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    if (!user) return false;
+    
+    // Check if user has pro status and it hasn't expired
+    if (user.isPro && user.proExpiresAt) {
+      return user.proExpiresAt > Date.now();
+    }
+    
+    return false;
+  },
+});
+
+export const upgradeToPro = mutation({
+  args: {
+    firebaseId: v.string(),
+    duration: v.number(), // Duration in milliseconds (e.g., 30 days = 30 * 24 * 60 * 60 * 1000)
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const now = Date.now();
+    const newExpirationTime = user.proExpiresAt && user.proExpiresAt > now 
+      ? user.proExpiresAt + args.duration 
+      : now + args.duration;
+
+    await ctx.db.patch(user._id, {
+      isPro: true,
+      proExpiresAt: newExpirationTime,
+    });
+
+    return { success: true, proExpiresAt: newExpirationTime };
+  },
+});
+
+export const cancelPro = mutation({
+  args: { firebaseId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await ctx.db.patch(user._id, {
+      isPro: false,
+      proExpiresAt: undefined,
+    });
+
+    return { success: true };
+  },
+});

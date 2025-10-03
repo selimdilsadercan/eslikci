@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexProvider";
 import { FirebaseAuthProvider } from "@/components/FirebaseAuthProvider";
+import { ProProvider } from "@/components/ProProvider";
 import { UserSyncWrapper } from "@/components/UserSyncWrapper";
 import StatusBarComponent from "@/components/StatusBar";
 import BackButtonHandler from "@/components/BackButtonHandler";
@@ -37,9 +38,11 @@ export default function RootLayout({
         <BackButtonHandler />
         <FirebaseAuthProvider>
           <ConvexClientProvider>
-            <UserSyncWrapper>
-              {children}
-            </UserSyncWrapper>
+            <ProProvider>
+              <UserSyncWrapper>
+                {children}
+              </UserSyncWrapper>
+            </ProProvider>
           </ConvexClientProvider>
         </FirebaseAuthProvider>
         <Toaster 

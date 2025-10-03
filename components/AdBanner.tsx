@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AdMob } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
+import { usePro } from './ProProvider';
 
 interface AdBannerProps {
   position?: 'top' | 'bottom';
@@ -10,8 +11,14 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ position = 'bottom', className = '' }: AdBannerProps) {
+  const { isPro, isLoading } = usePro();
   const [isAdLoaded, setIsAdLoaded] = useState(false);
   const [adError, setAdError] = useState<string | null>(null);
+
+  // Don't show ads for pro users
+  if (isPro || isLoading) {
+    return null;
+  }
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {

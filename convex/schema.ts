@@ -11,6 +11,8 @@ export default defineSchema({
     playerId: v.optional(v.id("players")),
     isActive: v.boolean(),
     isAdmin: v.optional(v.boolean()),
+    isPro: v.optional(v.boolean()), // Pro subscription status
+    proExpiresAt: v.optional(v.number()), // Pro subscription expiration timestamp
     createdAt: v.number(),
     lastSeen: v.optional(v.number()),
   }).index("by_email", ["email"])
