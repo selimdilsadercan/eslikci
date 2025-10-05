@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/components/FirebaseAuthProvider';
 import { usePro } from '@/components/ProProvider';
 import ProUpgrade from '@/components/ProUpgrade';
+import BillingDebug from '@/components/BillingDebug';
 import AppBar from '@/components/AppBar';
 import { Crown, Calendar, Zap, Star, Check, ArrowLeft, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -11,7 +12,7 @@ import toast from 'react-hot-toast';
 
 export default function ProPage() {
   const { isSignedIn, isLoaded } = useAuth();
-  const { isPro, isLoading, proExpiresAt, cancelPro } = usePro();
+  const { isPro, isLoading, proExpiresAt, cancelPro, purchasePro } = usePro();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -185,6 +186,11 @@ export default function ProPage() {
                 <span className="text-sm text-gray-700">Get early access to new features</span>
               </div>
             </div>
+          </div>
+
+          {/* Debug Component - Remove in production */}
+          <div className="mt-6">
+            <BillingDebug />
           </div>
         </div>
       </div>

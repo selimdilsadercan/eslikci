@@ -31,17 +31,6 @@ export default function HistoryPage() {
     user?.uid ? { firebaseId: user.uid } : "skip"
   );
   const games = useQuery(api.games.getGames);
-
-  // Debug logging
-  console.log('History page debug:', {
-    isLoaded,
-    isSignedIn,
-    currentUser,
-    gameSaves,
-    players,
-    games
-  });
-
   const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
 
   // Redirect to home page if user is not signed in

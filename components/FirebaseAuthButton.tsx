@@ -55,7 +55,7 @@ export default function FirebaseAuthButton() {
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="p-4">
         <div className="flex mb-8 border-b border-gray-200">
           <button
             onClick={() => setIsSignIn(true)}

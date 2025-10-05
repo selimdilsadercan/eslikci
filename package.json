@@ -2,11 +2,11 @@
   "name": "eslikci",
   "version": "0.2.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "increment-version": "node scripts/increment-version.js",
     "ios": "next build --turbopack && npx cap sync && npx cap open ios",
     "increment-version": "node scripts/increment-version.ts",
     "mobile": "npm run increment-version && next build --turbopack && npx cap sync && npm run apk",

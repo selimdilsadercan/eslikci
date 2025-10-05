@@ -13,6 +13,7 @@ export default defineSchema({
     isAdmin: v.optional(v.boolean()),
     isPro: v.optional(v.boolean()), // Pro subscription status
     proExpiresAt: v.optional(v.number()), // Pro subscription expiration timestamp
+    isOnboardingFinished: v.optional(v.boolean()), // Onboarding completion status
     createdAt: v.number(),
     lastSeen: v.optional(v.number()),
   }).index("by_email", ["email"])

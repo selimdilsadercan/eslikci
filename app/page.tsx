@@ -13,12 +13,7 @@ export default function Home() {
   // Sync user with Convex when they sign in
   useUserSync();
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      // Use replace instead of push to avoid back button issues
-      router.replace('/games');
-    }
-  }, [isLoaded, isSignedIn, router]);
+  // Let useUserSync handle the redirect logic for onboarding
 
   if (!isLoaded) {
     return (

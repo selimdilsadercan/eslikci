@@ -5,6 +5,7 @@ import { usePro } from './ProProvider';
 import { useAuth } from './FirebaseAuthProvider';
 import { Star, Check, Crown, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ProductId } from '@/lib/billing';
 
 interface ProUpgradeProps {
   onClose?: () => void;
@@ -13,7 +14,7 @@ interface ProUpgradeProps {
 }
 
 export default function ProUpgrade({ onClose, showCloseButton = true, isModal = false }: ProUpgradeProps) {
-  const { isPro, isLoading, upgradeToPro } = usePro();
+  const { isPro, isLoading, purchasePro } = usePro();
   const { user } = useAuth();
   const [isUpgrading, setIsUpgrading] = useState(false);
 
@@ -35,7 +36,7 @@ export default function ProUpgrade({ onClose, showCloseButton = true, isModal = 
     }
   ];
 
-  const handleUpgrade = async (duration: number) => {
+  const handleUpgrade = async (productId: ProductId) => {
     if (!user) {
       toast.error('Please sign in to upgrade to Pro');
       return;
@@ -43,7 +44,7 @@ export default function ProUpgrade({ onClose, showCloseButton = true, isModal = 
 
     try {
       setIsUpgrading(true);
-      await upgradeToPro(duration);
+      await purchasePro(productId);
       toast.success('Successfully upgraded to Pro! 🎉');
       onClose?.();
     } catch (error) {
@@ -94,19 +95,27 @@ export default function ProUpgrade({ onClose, showCloseButton = true, isModal = 
         {/* Pricing Options */}
         <div className="space-y-3 mb-6">
           <button
-            onClick={() => handleUpgrade(30 * 24 * 60 * 60 * 1000)} // 30 days
+            onClick={() => handleUpgrade('pro.monthly')}
             disabled={isUpgrading || isLoading}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUpgrading ? 'Processing...' : 'Upgrade for 30 Days - Free'}
+            {isUpgrading ? 'Processing...' : 'Aylık Üyelik - TRY 39,90'}
           </button>
           
           <button
-            onClick={() => handleUpgrade(365 * 24 * 60 * 60 * 1000)} // 1 year
+            onClick={() => handleUpgrade('premium_yearly')}
             disabled={isUpgrading || isLoading}
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUpgrading ? 'Processing...' : 'Upgrade for 1 Year - Free'}
+            {isUpgrading ? 'Processing...' : 'Yıllık Üyelik - TRY 299,90'}
+          </button>
+          
+          <button
+            onClick={() => handleUpgrade('pro_lifetime')}
+            disabled={isUpgrading || isLoading}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUpgrading ? 'Processing...' : 'Ömür Boyu Erişim - TRY 499,90'}
           </button>
         </div>
 
