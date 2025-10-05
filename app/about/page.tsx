@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Info, FileText, Shield, Users, Heart, Star, Envelope } from '@phosphor-icons/react';
-import Header from '@/components/Header';
+import { ArrowLeft, Info, FileText, Shield, Users, Heart, Star } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 export default function AboutPage() {
@@ -27,9 +26,6 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
-
       {/* Main Content */}
       <div className="px-4 py-6">
         {/* Back Button */}

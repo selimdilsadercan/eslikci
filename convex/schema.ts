@@ -7,7 +7,6 @@ export default defineSchema({
     clerkId: v.optional(v.string()), // Keep for backward compatibility
     name: v.string(),
     email: v.optional(v.string()),
-    avatar: v.optional(v.string()),
     playerId: v.optional(v.id("players")),
     isActive: v.boolean(),
     isAdmin: v.optional(v.boolean()),
@@ -41,10 +40,7 @@ export default defineSchema({
 
   games: defineTable({
     name: v.string(),
-    description: v.optional(v.string()),
     rules: v.optional(v.string()),
-    banner: v.optional(v.string()),
-    category: v.optional(v.string()),
     emoji: v.optional(v.string()), // New emoji field
     settings: v.object({
       gameplay: v.optional(v.string()),
@@ -57,8 +53,7 @@ export default defineSchema({
     index: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_name", ["name"])
-    .index("by_index", ["index"])
-    .index("by_category", ["category"]),
+    .index("by_index", ["index"]),
 
   gameSaves: defineTable({
     name: v.string(),
@@ -92,4 +87,14 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_user", ["userId"])
     .index("by_user_created", ["userId", "createdAt"]),
+
+  gameLists: defineTable({
+    name: v.string(),
+    emoji: v.optional(v.string()),
+    gameIds: v.array(v.id("games")),
+    isActive: v.boolean(),
+    order: v.number(),
+    createdAt: v.number(),
+  }).index("by_order", ["order"])
+    .index("by_active", ["isActive"]),
 });

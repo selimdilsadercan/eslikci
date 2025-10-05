@@ -5,7 +5,7 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Plus, MagnifyingGlass, Star, Fire, Sparkle } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass, Star, Fire, Sparkle, Clock } from '@phosphor-icons/react';
 import AddGameModal from '@/components/AddGameModal';
 import AdBanner from '@/components/AdBanner';
 import Sidebar from '@/components/Sidebar';
@@ -16,7 +16,8 @@ export default function GamesPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
   const games = useQuery(api.games.getGames);
-  const createGame = useMutation(api.games.createGame);
+  const gameLists = useQuery(api.gameLists.getGameLists);
+  const createGame = useMutation(api.games.createGame); 
   
   // Get user's game history to determine favorites
   const currentUser = useQuery(api.users.getUserByFirebaseId, 
@@ -55,9 +56,7 @@ export default function GamesPage() {
     try {
       await createGame({
         name: gameName,
-        description: '',
         rules: '',
-        banner: '',
         settings: {
           gameplay: 'herkes-tek',
           calculationMode: 'NoPoints',
@@ -90,20 +89,27 @@ export default function GamesPage() {
       .slice(0, 4);
   };
 
-  // Get popular games (most played by all users)
-  const getPopularGames = () => {
+  // Get games in a specific list
+  const getGamesInList = (listId: string) => {
     if (!games) return [];
-    // For now, return first 4 games as popular
-    // In a real app, you'd track global play counts
-    return games.slice(0, 4);
+    const list = gameLists?.find(l => l._id === listId);
+    if (!list) return [];
+    
+    return games.filter(game => list.gameIds.includes(game._id));
   };
 
-  // Get games to discover (not played by user)
-  const getDiscoverGames = () => {
-    if (!games || !gameSaves) return games || [];
+  // Get recently played games
+  const getRecentlyPlayedGames = () => {
+    if (!gameSaves || !games) return [];
     
-    const playedGameIds = new Set(gameSaves.map(save => save.gameTemplate));
-    return games.filter(game => !playedGameIds.has(game._id)).slice(0, 15);
+    // Get unique games from recent saves, sorted by most recent
+    const recentGameIds = gameSaves
+      .sort((a, b) => b.createdTime - a.createdTime)
+      .map(save => save.gameTemplate)
+      .filter((gameId, index, array) => array.indexOf(gameId) === index) // Remove duplicates
+      .slice(0, 4); // Get only first 4
+    
+    return games.filter(game => recentGameIds.includes(game._id));
   };
   return (
     <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
@@ -138,11 +144,11 @@ export default function GamesPage() {
           </div>
         </div>
         
-        {/* User-Focused Game Sections */}
-        {games === undefined ? (
+        {/* Game Lists Sections */}
+        {games === undefined || gameLists === undefined ? (
           // Skeleton loading for games
           <div className="space-y-8 mb-8">
-            {['Popular Games', 'Your Favorites', 'Discover New'].map((section, index) => (
+            {['Loading...'].map((section, index) => (
               <div key={index}>
                 <div className="h-6 bg-gray-200 rounded animate-pulse w-32 mb-4"></div>
                 <div className="grid grid-cols-2 gap-3">
@@ -182,120 +188,111 @@ export default function GamesPage() {
           </div>
         ) : (
           <div className="space-y-8 mb-8">
-            {/* Popular Games Section */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Fire size={20} className="text-orange-500" />
-                <h2 className="text-lg font-semibold text-gray-800">Popüler Oyunlar</h2>
+            {/* Recently Played Games Section */}
+            {getRecentlyPlayedGames().length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">Son Oynadıkların</h2>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                  {getRecentlyPlayedGames().map((game) => (
+                    <div
+                      key={game._id}
+                      className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                      style={{
+                        padding: '16px',
+                        height: '100px',
+                        width: '140px',
+                        boxShadow: '0 0 8px 5px #297dff0a'
+                      }}
+                      onClick={() => handleGameSelect(game._id)}
+                    >
+                      <div className="flex flex-col justify-center items-center text-center h-full">
+                        <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                        <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
+                          {game.name}
+                        </h3>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {getPopularGames().map((game) => (
-                  <div
-                    key={game._id}
-                    className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
-                    style={{
-                      padding: '16px',
-                      height: '100px',
-                      width: '140px',
-                      boxShadow: '0 0 8px 5px #297dff0a'
-                    }}
-                    onClick={() => handleGameSelect(game._id)}
-                  >
-                    <div className="flex flex-col justify-center items-center text-center h-full">
-                      <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
-                      <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
-                        {game.name}
-                      </h3>
-                      {game.description && (
-                        <p className="text-xs text-gray-500 line-clamp-2">
-                          {game.description}
-                        </p>
-                      )}
+            )}
+
+            {/* Dynamic Game Lists */}
+            {gameLists && gameLists.length > 0 ? (
+              gameLists.map((list) => {
+                const gamesInList = getGamesInList(list._id);
+                if (gamesInList.length === 0) return null;
+                
+                return (
+                  <div key={list._id}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-lg font-semibold text-gray-800">{list.name}</h2>
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      {gamesInList.map((game) => (
+                        <div
+                          key={game._id}
+                          className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                          style={{
+                            padding: '16px',
+                            height: '100px',
+                            width: '140px',
+                            boxShadow: '0 0 8px 5px #297dff0a'
+                          }}
+                          onClick={() => handleGameSelect(game._id)}
+                        >
+                          <div className="flex flex-col justify-center items-center text-center h-full">
+                            <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                            <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
+                              {game.name}
+                            </h3>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Your Favorite Games Section */}
-            {getFavoriteGames().length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Star size={20} className="text-yellow-500" />
-                  <h2 className="text-lg font-semibold text-gray-800">Favori Oyunlarınız</h2>
-                </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {getFavoriteGames().map((game) => (
-                    <div
-                      key={game._id}
-                      className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
-                      style={{
-                        padding: '16px',
-                        height: '100px',
-                        width: '140px',
-                        boxShadow: '0 0 8px 5px #297dff0a'
-                      }}
-                      onClick={() => handleGameSelect(game._id)}
-                    >
-                      <div className="flex flex-col justify-center items-center text-center h-full">
-                        <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
-                        <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
-                          {game.name}
-                        </h3>
-                        {game.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2">
-                            {game.description}
-                          </p>
-                        )}
+                );
+              })
+            ) : (
+              /* Fallback: Your Favorite Games Section */
+              getFavoriteGames().length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Star size={20} className="text-yellow-500" />
+                    <h2 className="text-lg font-semibold text-gray-800">Favori Oyunlarınız</h2>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {getFavoriteGames().map((game) => (
+                      <div
+                        key={game._id}
+                        className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                        style={{
+                          padding: '16px',
+                          height: '100px',
+                          width: '140px',
+                          boxShadow: '0 0 8px 5px #297dff0a'
+                        }}
+                        onClick={() => handleGameSelect(game._id)}
+                      >
+                        <div className="flex flex-col justify-center items-center text-center h-full">
+                          <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                          <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
+                            {game.name}
+                          </h3>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )
             )}
 
-            {/* Discover New Games Section */}
-            {getDiscoverGames().length > 0 && (
+            {/* Show all games if no lists or favorites */}
+            {(!gameLists || gameLists.length === 0) && getFavoriteGames().length === 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkle size={20} className="text-purple-500" />
-                  <h2 className="text-lg font-semibold text-gray-800">Yeni Oyunlar Keşfedin</h2>
-                </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {getDiscoverGames().map((game) => (
-                    <div
-                      key={game._id}
-                      className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
-                      style={{
-                        padding: '16px',
-                        height: '100px',
-                        width: '140px',
-                        boxShadow: '0 0 8px 5px #297dff0a'
-                      }}
-                      onClick={() => handleGameSelect(game._id)}
-                    >
-                      <div className="flex flex-col justify-center items-center text-center h-full">
-                        <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
-                        <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
-                          {game.name}
-                        </h3>
-                        {game.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2">
-                            {game.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Show all games if no specific sections have content */}
-            {getFavoriteGames().length === 0 && getDiscoverGames().length === 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkle size={20} className="text-blue-500" />
                   <h2 className="text-lg font-semibold text-gray-800">Tüm Oyunlar</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -316,17 +313,41 @@ export default function GamesPage() {
                         <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
                           {game.name}
                         </h3>
-                        {game.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2">
-                            {game.description}
-                          </p>
-                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Tüm Oyunlar - Always show as last section */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Tüm Oyunlar</h2>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {games?.map((game) => (
+                  <div
+                    key={game._id}
+                    className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                    style={{
+                      padding: '16px',
+                      height: '100px',
+                      width: '140px',
+                      boxShadow: '0 0 8px 5px #297dff0a'
+                    }}
+                    onClick={() => handleGameSelect(game._id)}
+                  >
+                    <div className="flex flex-col justify-center items-center text-center h-full">
+                      <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                      <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
+                        {game.name}
+                      </h3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
         

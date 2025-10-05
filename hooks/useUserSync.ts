@@ -14,8 +14,11 @@ export function useUserSync() {
 
   useEffect(() => {
     if (isLoaded && user && !hasRedirected.current) {
-      // Don't redirect if we're already on onboarding page
-      if (window.location.pathname === '/onboarding') {
+      // Only run redirect logic on specific pages
+      const currentPath = window.location.pathname;
+      const shouldCheckOnboarding = currentPath === '/' || currentPath === '/games' || currentPath === '/profile';
+      
+      if (!shouldCheckOnboarding) {
         return;
       }
 
@@ -28,7 +31,6 @@ export function useUserSync() {
           firebaseId: user.uid,
           name: userName,
           email: user.email || '',
-          avatar: user.photoURL || undefined,
         }).then((userData) => {
           console.log('User data received:', userData);
           console.log('User onboarding finished:', userData?.isOnboardingFinished);
@@ -39,8 +41,8 @@ export function useUserSync() {
             console.log('User needs onboarding, redirecting to /onboarding');
             hasRedirected.current = true;
             router.push('/onboarding');
-          } else {
-            // User completed onboarding, redirect to games
+          } else if (currentPath === '/') {
+            // User completed onboarding, redirect to games from home page
             console.log('User completed onboarding, redirecting to /games');
             hasRedirected.current = true;
             router.push('/games');

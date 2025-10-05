@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useAuth } from "@/components/FirebaseAuthProvider";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 // Page enum for active state
 export type PageType = "games" | "history" | "contacts" | "profile";
@@ -62,6 +64,14 @@ export default function Sidebar({ currentPage }: SidebarProps) {
   const router = useRouter();
   const items = getNavigationItems({});
 
+  // Get current user data to access player avatar
+  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
+  const player = useQuery(api.players.getPlayerById, 
+    currentUser?.playerId ? { id: currentUser.playerId } : "skip"
+  );
+
   const isActive = (page: PageType) => {
     return currentPage === page;  
   };
@@ -101,15 +111,22 @@ export default function Sidebar({ currentPage }: SidebarProps) {
         {/* Sidebar Footer */}
         <div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center gap-3 px-3 py-2 mb-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
+            {player?.avatar ? (
+              <img 
+                src={player.avatar} 
+                alt="User Avatar" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.displayName || user?.email?.split('@')[0] || 'Kullanıcı'}
-                
+                {player?.name || user?.displayName || user?.email?.split('@')[0] || 'Kullanıcı'}
               </p>
               <p className="text-xs text-gray-500 truncate">
                 {user?.email || 'user@example.com'}

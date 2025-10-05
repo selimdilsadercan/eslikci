@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus, MagnifyingGlass } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 import GameRulesTab from '@/components/GameRulesTab';
 import GameAskTab from '@/components/GameAskTab';
@@ -57,6 +57,8 @@ function CreateGameContent() {
   const [createModalType, setCreateModalType] = useState<'player' | 'group' | null>(null);
   const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<Id<'players'> | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchBar, setShowSearchBar] = useState(false);
 
   // Redirect to home page if user is not signed in
   useEffect(() => {
@@ -287,6 +289,14 @@ function CreateGameContent() {
   };
 
 
+  // Filter players based on search query
+  const filterPlayers = (playerList: typeof players) => {
+    if (!searchQuery.trim()) return playerList;
+    return playerList?.filter(player => 
+      player.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+  };
+
   // Group players by their group, excluding the current user's player
   const groupedPlayers = players?.reduce((acc, player) => {
     // Skip the current user's player since it's shown in the "Ben" section
@@ -301,6 +311,15 @@ function CreateGameContent() {
     acc[groupId].push(player);
     return acc;
   }, {} as Record<string, typeof players>) || {};
+
+  // Filter grouped players based on search query
+  const filteredGroupedPlayers = Object.keys(groupedPlayers).reduce((acc, groupId) => {
+    const filteredPlayers = filterPlayers(groupedPlayers[groupId]);
+    if (filteredPlayers && filteredPlayers.length > 0) {
+      acc[groupId] = filteredPlayers;
+    }
+    return acc;
+  }, {} as Record<string, typeof players>);
 
   // Combine all players including current user
   const allPlayers = [
@@ -426,115 +445,96 @@ function CreateGameContent() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4 -mx-0.5">
                 <h2 className="text-lg font-semibold text-gray-800">Oyuncu Seç</h2>
-                <button
-                  onClick={() => openCreateModal('player')}
-                  className="text-blue-500 hover:text-blue-600 font-medium"
-                >
-                  Ekle
-                </button>
+                <div className="flex items-center gap-5">
+                  <button
+                    onClick={() => setShowSearchBar(!showSearchBar)}
+                    className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-2"
+                  >
+                    <MagnifyingGlass size={16} />
+                    Ara
+                  </button>
+                  <button
+                    onClick={() => openCreateModal('player')}
+                    className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-2"
+                  >
+                    <Plus size={16} />
+                    Ekle
+                  </button>
+                </div>
               </div>
 
-              {/* Current User */}
-              {currentUserAsPlayer && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-600 mb-2">Ben</h3>
-                  <div className="space-y-0.5">
-                    <div
-                      className="flex items-center justify-between py-1"
-                    >
-                      <div 
-                        className="flex items-center space-x-3 cursor-pointer flex-1"
-                        onClick={() => openEditPlayerModal(currentUserAsPlayer._id)}
-                      >
-                        {currentUserAsPlayer.avatar ? (
-                          <img
-                            src={currentUserAsPlayer.avatar}
-                            alt={currentUserAsPlayer.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
-                          </div>
-                        )}
-                        <span className="font-normal text-black text-sm">{currentUserAsPlayer.name}</span>
-                      </div>
-                      <button
-                        onClick={() => togglePlayer(currentUserAsPlayer._id)}
-                        className={`w-5 h-5 border-2 flex items-center justify-center ${
-                          selectedPlayers.includes(currentUserAsPlayer._id)
-                            ? 'bg-blue-500 border-blue-500'
-                            : 'bg-white border-blue-500'
-                        }`}
-                      >
-                        {selectedPlayers.includes(currentUserAsPlayer._id) && (
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
+              {/* Search Input - Conditionally shown */}
+              {showSearchBar && (
+                <div className="mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Oyuncu ara..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Ungrouped Players */}
-              {groupedPlayers.ungrouped && groupedPlayers.ungrouped.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-600 mb-2">Gruplandırılmamış</h3>
-                  <div className="space-y-0.5">
-                    {groupedPlayers.ungrouped.map((player) => (
+              {/* Player Selection Container with Max Height and Scroll */}
+              <div className="max-h-92 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {/* Current User */}
+                {currentUserAsPlayer && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-600 mb-2">Ben</h3>
+                    <div className="space-y-0.5">
                       <div
-                        key={player._id}
                         className="flex items-center justify-between py-1"
                       >
                         <div 
                           className="flex items-center space-x-3 cursor-pointer flex-1"
-                          onClick={() => openEditPlayerModal(player._id)}
+                          onClick={() => openEditPlayerModal(currentUserAsPlayer._id)}
                         >
-                          {player.avatar ? (
+                          {currentUserAsPlayer.avatar ? (
                             <img
-                              src={player.avatar}
-                              alt={player.name}
+                              src={currentUserAsPlayer.avatar}
+                              alt={currentUserAsPlayer.name}
                               className="w-8 h-8 rounded-full object-cover"
                             />
                           ) : (
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                              <span className="text-blue-600 font-semibold text-sm">{currentUserAsPlayer.initial}</span>
                             </div>
                           )}
-                          <span className="font-normal text-black text-sm truncate max-w-[200px]">{player.name}</span>
+                          <span className="font-normal text-black text-sm">{currentUserAsPlayer.name}</span>
                         </div>
                         <button
-                          onClick={() => togglePlayer(player._id)}
+                          onClick={() => togglePlayer(currentUserAsPlayer._id)}
                           className={`w-5 h-5 border-2 flex items-center justify-center ${
-                            selectedPlayers.includes(player._id)
+                            selectedPlayers.includes(currentUserAsPlayer._id)
                               ? 'bg-blue-500 border-blue-500'
                               : 'bg-white border-blue-500'
                           }`}
                         >
-                          {selectedPlayers.includes(player._id) && (
+                          {selectedPlayers.includes(currentUserAsPlayer._id) && (
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           )}
                         </button>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Grouped Players */}
-              {groups?.map((group) => {
-                const groupPlayers = groupedPlayers[group._id] || [];
-                if (groupPlayers.length === 0) return null;
-                
-                return (
-                  <div key={group._id} className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-600 mb-2">{group.name}</h3>
+                {/* Ungrouped Players */}
+                {filteredGroupedPlayers.ungrouped && filteredGroupedPlayers.ungrouped.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-600 mb-2">Gruplandırılmamış</h3>
                     <div className="space-y-0.5">
-                      {groupPlayers.map((player) => (
+                      {filteredGroupedPlayers.ungrouped.map((player) => (
                         <div
                           key={player._id}
                           className="flex items-center justify-between py-1"
@@ -574,8 +574,60 @@ function CreateGameContent() {
                       ))}
                     </div>
                   </div>
-                );
-              })}
+                )}
+
+                {/* Grouped Players */}
+                {groups?.map((group) => {
+                  const groupPlayers = filteredGroupedPlayers[group._id] || [];
+                  if (groupPlayers.length === 0) return null;
+                  
+                  return (
+                    <div key={group._id} className="mb-6">
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">{group.name}</h3>
+                      <div className="space-y-0.5">
+                        {groupPlayers.map((player) => (
+                          <div
+                            key={player._id}
+                            className="flex items-center justify-between py-1"
+                          >
+                            <div 
+                              className="flex items-center space-x-3 cursor-pointer flex-1"
+                              onClick={() => openEditPlayerModal(player._id)}
+                            >
+                              {player.avatar ? (
+                                <img
+                                  src={player.avatar}
+                                  alt={player.name}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-blue-600 font-semibold text-sm">{player.initial}</span>
+                                </div>
+                              )}
+                              <span className="font-normal text-black text-sm truncate max-w-[200px]">{player.name}</span>
+                            </div>
+                            <button
+                              onClick={() => togglePlayer(player._id)}
+                              className={`w-5 h-5 border-2 flex items-center justify-center ${
+                                selectedPlayers.includes(player._id)
+                                  ? 'bg-blue-500 border-blue-500'
+                                  : 'bg-white border-blue-500'
+                              }`}
+                            >
+                              {selectedPlayers.includes(player._id) && (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </>
           ) : (
             // Game Settings State

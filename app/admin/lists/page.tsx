@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, Plus, PencilSimple, Trash, GameController, DotsSix, ListBullets } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, PencilSimple, Trash, ListBullets, DotsSix } from '@phosphor-icons/react';
 import {
   DndContext,
   closestCenter,
@@ -28,12 +28,12 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-export default function AdminPage() {
+export default function ListsPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newGameName, setNewGameName] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [newListName, setNewListName] = useState('');
+  const [newListEmoji, setNewListEmoji] = useState('');
 
   // Drag and drop sensors with mobile support
   const sensors = useSensors(
@@ -53,11 +53,11 @@ export default function AdminPage() {
     })
   );
 
-  // Fetch games from Convex - ALWAYS call hooks first
-  const games = useQuery(api.games.getGames) || [];
-  const createGame = useMutation(api.games.createGame);
-  const deleteGame = useMutation(api.games.deleteGame);
-  const updateGameIndices = useMutation(api.games.updateGameIndices);
+  // Fetch game lists from Convex
+  const gameLists = useQuery(api.gameLists.getAllGameLists) || [];
+  const createGameList = useMutation(api.gameLists.createGameList);
+  const deleteGameList = useMutation(api.gameLists.deleteGameList);
+  const updateGameListOrder = useMutation(api.gameLists.updateGameListOrder);
 
   // Redirect to home page if user is not signed in
   useEffect(() => {
@@ -65,13 +65,6 @@ export default function AdminPage() {
       router.push('/');
     }
   }, [isLoaded, isSignedIn, router]);
-
-  // Focus input when modal opens
-  useEffect(() => {
-    if (showAddModal && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [showAddModal]);
 
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
@@ -86,85 +79,75 @@ export default function AdminPage() {
   }
 
   const handleBack = () => {
-    router.push('/profile');
+    router.push('/admin');
   };
 
-  const handleAddGame = async () => {
-    if (!newGameName.trim()) return;
+  const handleAddList = async () => {
+    if (!newListName.trim()) return;
 
     try {
-      await createGame({
-        name: newGameName.trim(),
-        rules: '',
-        settings: {
-          gameplay: 'herkes-tek',
-          calculationMode: 'NoPoints',
-          roundWinner: 'Highest',
-          hideTotalColumn: false
-        }
+      await createGameList({
+        name: newListName.trim(),
+        emoji: newListEmoji.trim() || undefined,
+        gameIds: [],
       });
       
-      setNewGameName('');
+      setNewListName('');
+      setNewListEmoji('');
       setShowAddModal(false);
     } catch (error) {
-      console.error('Error creating game:', error);
+      console.error('Error creating game list:', error);
     }
   };
 
-  const handleEditGame = (gameId: Id<'games'>) => {
-    router.push(`/admin/edit-game?gameId=${gameId}`);
+  const handleEditList = (listId: Id<'gameLists'>) => {
+    router.push(`/admin/edit-list?listId=${listId}`);
   };
 
-  const handleManageLists = () => {
-    router.push('/admin/lists');
-  };
-
-  const handleDeleteGame = async (gameId: Id<'games'>) => {
-    if (confirm('Bu oyunu silmek istediğinizden emin misiniz?')) {
+  const handleDeleteList = async (listId: Id<'gameLists'>) => {
+    if (confirm('Bu listeyi silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteGame({ id: gameId });
+        await deleteGameList({ id: listId });
       } catch (error) {
-        console.error('Error deleting game:', error);
+        console.error('Error deleting game list:', error);
       }
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newGameName.trim()) {
-      handleAddGame();
+    if (e.key === 'Enter' && newListName.trim()) {
+      handleAddList();
     }
   };
-
-
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = games.findIndex((game) => game._id === active.id);
-      const newIndex = games.findIndex((game) => game._id === over?.id);
+      const oldIndex = gameLists.findIndex((list) => list._id === active.id);
+      const newIndex = gameLists.findIndex((list) => list._id === over?.id);
 
-      const newGames = arrayMove(games, oldIndex, newIndex);
+      const newLists = arrayMove(gameLists, oldIndex, newIndex);
 
-      // Update indices
-      const updates = newGames.map((game, index) => ({
-        id: game._id,
-        index: index
+      // Update order indices
+      const updates = newLists.map((list, index) => ({
+        id: list._id,
+        order: index + 1
       }));
 
       try {
-        await updateGameIndices({ updates });
+        await updateGameListOrder({ updates });
       } catch (error) {
-        console.error('Error updating game order:', error);
+        console.error('Error updating list order:', error);
       }
     }
   };
 
   // Sortable item component
-  function SortableItem({ game, onEdit, onDelete }: { 
-    game: any; 
-    onEdit: (id: Id<'games'>) => void; 
-    onDelete: (id: Id<'games'>) => void; 
+  function SortableItem({ list, onEdit, onDelete }: { 
+    list: any; 
+    onEdit: (id: Id<'gameLists'>) => void; 
+    onDelete: (id: Id<'gameLists'>) => void; 
   }) {
     const {
       attributes,
@@ -173,7 +156,7 @@ export default function AdminPage() {
       transform,
       transition,
       isDragging,
-    } = useSortable({ id: game._id });
+    } = useSortable({ id: list._id });
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -201,29 +184,38 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-          <div className="col-span-5">
-            <h3 className="text-sm font-medium text-gray-900">
-              {game.name}
-            </h3>
-            {game.description && (
-              <p className="text-sm text-gray-500 mt-1">{game.description}</p>
-            )}
+          <div className="col-span-6">
+            <div className="flex items-center gap-2">
+              {list.emoji && <span className="text-lg">{list.emoji}</span>}
+              <h3 className="text-sm font-medium text-gray-900">
+                {list.name}
+              </h3>
+            </div>
           </div>
-                <div className="col-span-3">
-                  <span className="text-sm text-gray-600">
-                    {game.emoji || '🎮'}
-                  </span>
-                </div>
-          <div className="col-span-3">
+          <div className="col-span-2">
+            <span className="text-sm text-gray-600">
+              {list.gameIds.length} oyun
+            </span>
+          </div>
+          <div className="col-span-2">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              list.isActive 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-gray-100 text-gray-800'
+            }`}>
+              {list.isActive ? 'Aktif' : 'Pasif'}
+            </span>
+          </div>
+          <div className="col-span-1">
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => onEdit(game._id)}
+                onClick={() => onEdit(list._id)}
                 className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
               >
                 <PencilSimple size={16} weight="regular" />
               </button>
               <button
-                onClick={() => onDelete(game._id)}
+                onClick={() => onDelete(list._id)}
                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
               >
                 <Trash size={16} weight="regular" />
@@ -247,37 +239,28 @@ export default function AdminPage() {
             >
               <ArrowLeft size={20} weight="regular" className="text-gray-600" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-800">Oyunlar</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Oyun Listeleri</h1>
           </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleManageLists}
-              className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-            >
-              <ListBullets size={20} weight="regular" />
-              <span>Listeler</span>
-            </button>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-            >
-              <Plus size={20} weight="regular" />
-              <span>Ekle</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            <Plus size={20} weight="regular" />
+            <span>Yeni Liste</span>
+          </button>
         </div>
       </div>
 
-      {/* Games Table - Add top padding to account for fixed header */}
+      {/* Lists Table - Add top padding to account for fixed header */}
       <div className="px-6 py-6 pt-24">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Mevcut Oyunlar ({games.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Mevcut Listeler ({gameLists.length})</h2>
         </div>
         
-        {games.length === 0 ? (
+        {gameLists.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-lg">
-            <GameController size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Henüz oyun eklenmemiş</p>
+            <ListBullets size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">Henüz liste eklenmemiş</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -287,13 +270,16 @@ export default function AdminPage() {
                 <div className="col-span-1 text-sm font-medium text-gray-700">
                   
                 </div>
-                <div className="col-span-5 text-sm font-medium text-gray-700">
-                  Oyun Adı
+                <div className="col-span-6 text-sm font-medium text-gray-700">
+                  Liste Adı
                 </div>
-                <div className="col-span-3 text-sm font-medium text-gray-700">
-                  Emoji
+                <div className="col-span-2 text-sm font-medium text-gray-700">
+                  Oyun Sayısı
                 </div>
-                <div className="col-span-3 text-sm font-medium text-gray-700">
+                <div className="col-span-2 text-sm font-medium text-gray-700">
+                  Durum
+                </div>
+                <div className="col-span-1 text-sm font-medium text-gray-700">
                   İşlemler
                 </div>
               </div>
@@ -305,14 +291,14 @@ export default function AdminPage() {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={games.map(game => game._id)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={gameLists.map(list => list._id)} strategy={verticalListSortingStrategy}>
                 <div className="divide-y divide-gray-200">
-                  {games.map((game) => (
+                  {gameLists.map((list) => (
                     <SortableItem
-                      key={game._id}
-                      game={game}
-                      onEdit={handleEditGame}
-                      onDelete={handleDeleteGame}
+                      key={list._id}
+                      list={list}
+                      onEdit={handleEditList}
+                      onDelete={handleDeleteList}
                     />
                   ))}
                 </div>
@@ -322,41 +308,52 @@ export default function AdminPage() {
         )}
       </div>
 
-        {/* Add Game Modal */}
-        {showAddModal && (
+      {/* Add List Modal */}
+      {showAddModal && (
+        <div 
+          className="fixed inset-0 bg-[#00000080] flex items-center justify-center p-4 z-50"
+          onClick={() => setShowAddModal(false)}
+        >
           <div 
-            className="fixed inset-0 bg-[#00000080] flex items-center justify-center p-4 z-50"
-            onClick={() => setShowAddModal(false)}
+            className="bg-white rounded-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div 
-              className="bg-white rounded-2xl p-6 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Yeni Oyun Ekle</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Yeni Liste Ekle</h3>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Oyun Adı *
+                  Liste Adı *
                 </label>
                 <input
-                  ref={inputRef}
                   type="text"
-                  value={newGameName}
-                  onChange={(e) => setNewGameName(e.target.value)}
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  placeholder="Oyun adını girin"
+                  placeholder="Liste adını girin"
                 />
               </div>
 
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Emoji
+                </label>
+                <input
+                  type="text"
+                  value={newListEmoji}
+                  onChange={(e) => setNewListEmoji(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  placeholder="🔥 (isteğe bağlı)"
+                />
+              </div>
             </div>
 
             <div className="flex space-x-3 mt-6">
               <button
-                onClick={handleAddGame}
-                disabled={!newGameName.trim()}
+                onClick={handleAddList}
+                disabled={!newListName.trim()}
                 className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 disabled:bg-gray-300"
               >
                 Ekle
@@ -371,7 +368,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

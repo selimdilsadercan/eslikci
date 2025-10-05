@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, FloppyDisk, X, Plus } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, X, Plus, ListBullets, Check } from '@phosphor-icons/react';
 import RichTextEditor from '@/components/RichTextEditor';
 
 function EditGameContent() {
@@ -35,7 +35,6 @@ function EditGameContent() {
   }
   
   const [gameName, setGameName] = useState('');
-  const [gameCategory, setGameCategory] = useState('');
   const [gameEmoji, setGameEmoji] = useState('');
   const [gameRules, setGameRules] = useState('');
   const [rulesSections, setRulesSections] = useState<Array<{id: string, title: string, content: string}>>([]);
@@ -46,16 +45,19 @@ function EditGameContent() {
   const [hideTotalColumn, setHideTotalColumn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('genel');
+  const [selectedLists, setSelectedLists] = useState<Id<'gameLists'>[]>([]);
 
   // Fetch game data
   const game = useQuery(api.games.getGameById, gameId ? { id: gameId } : "skip");
+  const gameLists = useQuery(api.gameLists.getAllGameLists);
   const updateGame = useMutation(api.games.updateGame);
+  const addGamesToList = useMutation(api.gameLists.addGamesToList);
+  const removeGamesFromList = useMutation(api.gameLists.removeGamesFromList);
 
   // Populate form when game data loads
   useEffect(() => {
     if (game) {
       setGameName(game.name);
-      setGameCategory(game.category || '');
       setGameEmoji(game.emoji || '');
       setGameRules(game.rules || '');
       setGameplay(game.settings?.gameplay || 'herkes-tek');
@@ -78,6 +80,16 @@ function EditGameContent() {
       }
     }
   }, [game]);
+
+  // Load current list assignments
+  useEffect(() => {
+    if (game && gameLists) {
+      const currentLists = gameLists.filter(list => 
+        list.gameIds.includes(game._id)
+      ).map(list => list._id);
+      setSelectedLists(currentLists);
+    }
+  }, [game, gameLists]);
 
   const handleBack = () => {
     router.push('/admin');
@@ -112,7 +124,6 @@ function EditGameContent() {
       await updateGame({
         id: gameId,
         name: gameName.trim(),
-        category: gameCategory.trim(),
         emoji: gameEmoji.trim(),
         rules: JSON.stringify(rulesSections),
         settings: {
@@ -123,6 +134,26 @@ function EditGameContent() {
           hideTotalColumn,
         }
       });
+
+      // Update list assignments
+      if (gameLists) {
+        const currentLists = gameLists.filter(list => 
+          list.gameIds.includes(gameId)
+        ).map(list => list._id);
+        
+        const listsToAdd = selectedLists.filter(id => !currentLists.includes(id));
+        const listsToRemove = currentLists.filter(id => !selectedLists.includes(id));
+
+        // Add to new lists
+        for (const listId of listsToAdd) {
+          await addGamesToList({ listId, gameIds: [gameId] });
+        }
+        
+        // Remove from old lists
+        for (const listId of listsToRemove) {
+          await removeGamesFromList({ listId, gameIds: [gameId] });
+        }
+      }
       
       router.push('/admin');
     } catch (error) {
@@ -176,20 +207,30 @@ function EditGameContent() {
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'genel'
                 ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
             }`}
           >
-            Genel Ayarlar
+            Genel
           </button>
           <button
             onClick={() => setActiveTab('kurallar')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'kurallar'
                 ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
             }`}
           >
             Kurallar
+          </button>
+          <button
+            onClick={() => setActiveTab('listeler')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'listeler'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+            }`}
+          >
+            Listeler
           </button>
         </div>
       </div>
@@ -216,18 +257,6 @@ function EditGameContent() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kategori
-                  </label>
-                  <input
-                    type="text"
-                    value={gameCategory}
-                    onChange={(e) => setGameCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Oyun kategorisini girin (örn: Kart Oyunu, Strateji, vb.)"
-                  />
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -489,6 +518,75 @@ function EditGameContent() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'listeler' && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Oyun Listeleri</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Bu oyunu hangi listelerde göstermek istediğinizi seçin.
+            </p>
+            
+            {gameLists === undefined ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+                <p className="text-gray-600">Listeler yükleniyor...</p>
+              </div>
+            ) : gameLists.length === 0 ? (
+              <div className="text-center py-8">
+                <ListBullets size={48} className="text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Henüz liste oluşturulmamış</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  <a href="/admin/lists" className="text-blue-500 hover:text-blue-600">
+                    Liste oluşturmak için tıklayın
+                  </a>
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {gameLists.map((list) => (
+                  <div
+                    key={list._id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                      selectedLists.includes(list._id)
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                    onClick={() => {
+                      setSelectedLists(prev => 
+                        prev.includes(list._id)
+                          ? prev.filter(id => id !== list._id)
+                          : [...prev, list._id]
+                      );
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        {selectedLists.includes(list._id) ? (
+                          <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
+                            <Check size={12} className="text-white" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 border-2 border-gray-300 rounded"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          {list.emoji && <span className="text-lg">{list.emoji}</span>}
+                          <h4 className="text-sm font-medium text-gray-900 truncate">
+                            {list.name}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {list.gameIds.length} oyun
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

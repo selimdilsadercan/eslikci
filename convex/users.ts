@@ -46,7 +46,6 @@ export const createUser = mutation({
     firebaseId: v.string(),
     name: v.string(),
     email: v.optional(v.string()),
-    avatar: v.optional(v.string()),
     isAdmin: v.optional(v.boolean()),
     isOnboardingFinished: v.optional(v.boolean()),
   },
@@ -75,7 +74,6 @@ export const createUser = mutation({
       clerkId: args.firebaseId, // Use Firebase ID as Clerk ID for compatibility
       name: args.name,
       email: args.email,
-      avatar: args.avatar,
       isActive: true,
       isAdmin: args.isAdmin || false,
       isOnboardingFinished: args.isOnboardingFinished || false,
@@ -83,7 +81,7 @@ export const createUser = mutation({
     });
 
     // Create a player for this user
-    const playerId = await createPlayerForUser(ctx, userId, args.name, args.avatar);
+    const playerId = await createPlayerForUser(ctx, userId, args.name);
     
     // Update user with playerId
     await ctx.db.patch(userId, { playerId: playerId });
@@ -97,7 +95,6 @@ export const updateUser = mutation({
     firebaseId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
-    avatar: v.optional(v.string()),
     isOnboardingFinished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -116,13 +113,12 @@ export const updateUser = mutation({
 });
 
 // Helper function to create a player for a user
-const createPlayerForUser = async (ctx: any, userId: any, name: string, avatar?: string) => {
+const createPlayerForUser = async (ctx: any, userId: any, name: string) => {
   const initial = name.charAt(0).toUpperCase();
   const playerId = await ctx.db.insert("players", {
     userId: userId,
     name: name,
     initial: initial,
-    avatar: avatar,
     isActive: true,
     createdAt: Date.now(),
   });
@@ -134,7 +130,6 @@ export const getOrCreateUser = mutation({
     firebaseId: v.string(),
     name: v.string(),
     email: v.optional(v.string()),
-    avatar: v.optional(v.string()),
     isAdmin: v.optional(v.boolean()),
     isOnboardingFinished: v.optional(v.boolean()),
   },
@@ -151,7 +146,6 @@ export const getOrCreateUser = mutation({
         firebaseId: args.firebaseId,
         name: args.name,
         email: args.email,
-        avatar: args.avatar,
         isActive: true,
         isAdmin: args.isAdmin || false,
         isOnboardingFinished: args.isOnboardingFinished || false,
@@ -159,7 +153,7 @@ export const getOrCreateUser = mutation({
       });
 
       // Create a player for this user
-      const playerId = await createPlayerForUser(ctx, userId, args.name, args.avatar);
+      const playerId = await createPlayerForUser(ctx, userId, args.name);
       
       // Update user with playerId
       await ctx.db.patch(userId, { playerId: playerId });
@@ -170,8 +164,7 @@ export const getOrCreateUser = mutation({
       if (user.name !== args.name) {
         await ctx.db.patch(user._id, { 
           name: args.name,
-          email: args.email,
-          avatar: args.avatar 
+          email: args.email
         });
         
         // Also update the associated player
@@ -208,7 +201,7 @@ export const syncUserWithPlayer = mutation({
     }
 
     // Create a player for this user
-    const playerId = await createPlayerForUser(ctx, user._id, user.name, user.avatar);
+    const playerId = await createPlayerForUser(ctx, user._id, user.name);
     
     // Update user with playerId
     await ctx.db.patch(user._id, { playerId: playerId });

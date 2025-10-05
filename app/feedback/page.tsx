@@ -55,7 +55,6 @@ export default function FeedbackPage() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-        <Header />
         
         <div className="px-4 py-6">
           <button
@@ -92,7 +91,7 @@ export default function FeedbackPage() {
       <Header />
 
       {/* Main Content */}
-      <div className="px-4 py-6">
+      <div className="px-4 py-6 pt-24 lg:pt-6">
         {/* Back Button */}
         <button
           onClick={() => router.back()}

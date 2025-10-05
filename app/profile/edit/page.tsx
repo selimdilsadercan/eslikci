@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/FirebaseAuthProvider";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import AvatarGenerator from "@/components/AvatarGenerator";
 
@@ -14,6 +14,7 @@ export default function EditProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [avatarName, setAvatarName] = useState("");
+  const [currentAvatar, setCurrentAvatar] = useState<string>("");
 
   // Get current user and player from Convex
   const currentUser = useQuery(api.users.getUserByFirebaseId, 
@@ -23,10 +24,14 @@ export default function EditProfilePage() {
     currentUser ? { userId: currentUser._id } : "skip"
   );
 
+  // Mutations
+  const updatePlayer = useMutation(api.players.updatePlayer);
+
   useEffect(() => {
     if (currentUserAsPlayer) {
       setDisplayName(currentUserAsPlayer.name || "");
       setAvatarName(currentUserAsPlayer.name || "");
+      setCurrentAvatar(currentUserAsPlayer.avatar || "");
     } else if (user) {
       setDisplayName(user.displayName || "");
       setAvatarName(user.displayName || user.email?.split('@')[0] || "");
@@ -34,13 +39,23 @@ export default function EditProfilePage() {
   }, [currentUserAsPlayer, user]);
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !currentUserAsPlayer) return;
     
     setIsLoading(true);
     try {
+      // Update Firebase profile
       await updateProfile(user, {
         displayName: displayName.trim()
       });
+
+      // Update player in Convex database
+      await updatePlayer({
+        id: currentUserAsPlayer._id,
+        name: displayName.trim(),
+        avatar: currentAvatar,
+        initial: displayName.trim().charAt(0).toUpperCase()
+      });
+
       router.push('/profile');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -51,6 +66,10 @@ export default function EditProfilePage() {
 
   const handleCancel = () => {
     router.push('/profile');
+  };
+
+  const handleAvatarChange = (avatarUrl: string) => {
+    setCurrentAvatar(avatarUrl);
   };
 
   return (
@@ -90,7 +109,8 @@ export default function EditProfilePage() {
                 name={avatarName || displayName || 'User'} 
                 size={120}
                 className="mx-auto"
-                initialAvatar={currentUserAsPlayer?.avatar}
+                initialAvatar={currentAvatar || currentUserAsPlayer?.avatar}
+                onAvatarChange={handleAvatarChange}
               />
             </div>
           </div>

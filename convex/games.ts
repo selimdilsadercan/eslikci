@@ -31,10 +31,7 @@ export const getGameById = query({
 export const createGame = mutation({
   args: {
     name: v.string(),
-    description: v.optional(v.string()),
     rules: v.optional(v.string()),
-    banner: v.optional(v.string()),
-    category: v.optional(v.string()),
     emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),
@@ -56,10 +53,7 @@ export const createGame = mutation({
     
     return await ctx.db.insert("games", {
       name: args.name,
-      description: args.description,
       rules: args.rules,
-      banner: args.banner,
-      category: args.category,
       emoji: args.emoji,
       settings: args.settings || {},
       isActive: true,
@@ -73,10 +67,7 @@ export const updateGame = mutation({
   args: {
     id: v.id("games"),
     name: v.optional(v.string()),
-    description: v.optional(v.string()),
     rules: v.optional(v.string()),
-    banner: v.optional(v.string()),
-    category: v.optional(v.string()),
     emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),

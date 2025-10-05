@@ -1,98 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AdMob } from '@capacitor-community/admob';
-import { Capacitor } from '@capacitor/core';
-import { usePro } from './ProProvider';
-
 // Hook for easier usage
 export function useInterstitialAd(callbacks?: {
   onAdClosed?: () => void;
   onAdFailedToLoad?: (error: any) => void;
   onAdLoaded?: () => void;
 }) {
-  const { isPro, isLoading: proLoading } = usePro();
-  const [isAdReady, setIsAdReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Don't initialize ads for pro users
-    if (isPro || proLoading) {
-      return;
-    }
-
-    if (Capacitor.isNativePlatform()) {
-      initializeAd();
-    }
-  }, [isPro, proLoading]);
-
-  const initializeAd = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Initialize AdMob if not already initialized
-      await AdMob.initialize({
-        testingDevices: [], // Empty array for production
-        initializeForTesting: false, // Set to false for production
-      });
-
-      // Prepare interstitial ad
-      await AdMob.prepareInterstitial({
-        adId: 'interstitial', // This will use the interstitial ID from capacitor.config.ts
-        isTesting: true, // Use test ads for interstitials to prevent crashes
-      });
-
-      setIsAdReady(true);
-      callbacks?.onAdLoaded?.();
-    } catch (error) {
-      console.error('AdMob interstitial error:', error);
-      callbacks?.onAdFailedToLoad?.(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Ads are disabled globally
   const showInterstitial = async () => {
-    // Don't show ads for pro users
-    if (isPro || proLoading) {
-      return true; // Return true to continue with the action
-    }
-
-    if (!Capacitor.isNativePlatform()) {
-      // Show placeholder for web development
-      console.log('Interstitial Ad (Web Preview) - Would show full-screen ad');
-      callbacks?.onAdClosed?.();
-      return true;
-    }
-    
-    if (!isAdReady) {
-      console.log('Ad not ready');
-      return false;
-    }
-
-    try {
-      await AdMob.showInterstitial();
-      
-      // Call onAdClosed callback after a short delay
-      setTimeout(() => {
-        callbacks?.onAdClosed?.();
-        // Prepare next ad
-        initializeAd();
-      }, 1000);
-      
-      return true;
-    } catch (error) {
-      console.error('Error showing interstitial:', error);
-      callbacks?.onAdFailedToLoad?.(error);
-      return false;
-    }
+    // Always return true to continue with the action without showing ads
+    callbacks?.onAdClosed?.();
+    return true;
   };
 
   return {
     showInterstitial,
-    isAdReady,
-    isLoading,
-    prepareAd: initializeAd
+    isAdReady: false,
+    isLoading: false,
+    prepareAd: () => Promise.resolve()
   };
 }
 
