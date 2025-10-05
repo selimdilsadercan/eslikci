@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, FloppyDisk, X, Plus, ListBullets, Check } from '@phosphor-icons/react';
 import RichTextEditor from '@/components/RichTextEditor';
+import Sidebar from '@/components/Sidebar';
 
 function EditGameContent() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -44,6 +45,7 @@ function EditGameContent() {
   const [pointsPerRound, setPointsPerRound] = useState('Single');
   const [hideTotalColumn, setHideTotalColumn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rulesMode, setRulesMode] = useState<'text' | 'json'>('text');
   const [activeTab, setActiveTab] = useState('genel');
   const [selectedLists, setSelectedLists] = useState<Id<'gameLists'>[]>([]);
 
@@ -102,6 +104,44 @@ function EditGameContent() {
       content: ''
     };
     setRulesSections([...rulesSections, newSection]);
+  };
+
+  const convertToJson = () => {
+    const jsonRules = JSON.stringify(rulesSections, null, 2);
+    setGameRules(jsonRules);
+    setRulesMode('json');
+  };
+
+  const convertToText = () => {
+    try {
+      const parsedRules = JSON.parse(gameRules);
+      if (Array.isArray(parsedRules)) {
+        setRulesSections(parsedRules);
+        setRulesMode('text');
+      }
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      alert('Geçersiz JSON formatı!');
+    }
+  };
+
+  const validateAndSaveJson = () => {
+    try {
+      const parsedRules = JSON.parse(gameRules);
+      if (Array.isArray(parsedRules)) {
+        // Validate that each rule has required fields
+        const isValid = parsedRules.every(rule => 
+          rule.id && rule.title && rule.content !== undefined
+        );
+        
+        if (isValid) {
+          setRulesSections(parsedRules);
+          setRulesMode('text');
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+    }
   };
 
   const updateRulesSection = (id: string, field: 'title' | 'content', value: string) => {
@@ -175,9 +215,14 @@ function EditGameContent() {
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <div className="bg-white shadow-sm">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="admin" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
@@ -457,19 +502,40 @@ function EditGameContent() {
 
         {activeTab === 'kurallar' && (
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Oyun Kuralları</h3>
-              <button
-                onClick={addRulesSection}
-                className="flex items-center space-x-2 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 text-sm"
-              >
-                <Plus size={16} weight="regular" />
-                <span>Bölüm Ekle</span>
-              </button>
+            </div>
+
+            {/* Inner Tabs for Rules Mode */}
+            <div className="mb-6">
+              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
+                <button
+                  onClick={() => setRulesMode('text')}
+                  className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    rulesMode === 'text'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+                  }`}
+                >
+                  Metin Modu
+                </button>
+                <button
+                  onClick={() => setRulesMode('json')}
+                  className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    rulesMode === 'json'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+                  }`}
+                >
+                  JSON Modu
+                </button>
+              </div>
             </div>
             
-            <div className="space-y-4">
-              {rulesSections.map((section, index) => (
+            {/* Rules Content based on Mode */}
+            {rulesMode === 'text' ? (
+              <div className="space-y-4">
+                {rulesSections.map((section, index) => (
                 <div key={section.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-md font-medium text-gray-800">
@@ -511,13 +577,48 @@ function EditGameContent() {
                 </div>
               ))}
               
-              {rulesSections.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <p>Henüz kural bölümü eklenmemiş</p>
-                  <p className="text-sm">Yukarıdaki "Bölüm Ekle" butonuna tıklayarak başlayın</p>
+                {rulesSections.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Henüz kural bölümü eklenmemiş</p>
+                    <p className="text-sm">Aşağıdaki "Bölüm Ekle" butonuna tıklayarak başlayın</p>
+                  </div>
+                )}
+                
+                {/* Add Section Button */}
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={addRulesSection}
+                    className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                  >
+                    <Plus size={16} weight="regular" />
+                    <span>Bölüm Ekle</span>
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    JSON Kurallar
+                  </label>
+                  <textarea
+                    value={gameRules}
+                    onChange={(e) => setGameRules(e.target.value)}
+                    className="w-full h-96 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-mono text-sm"
+                    placeholder='[{"id":"1","title":"Bölüm Başlığı","content":"<p>Bölüm içeriği...</p>"}]'
+                  />
+                </div>
+                
+                <div className="flex justify-center">
+                  <button
+                    onClick={validateAndSaveJson}
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  >
+                    JSON'u Doğrula ve Kaydet
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -589,6 +690,7 @@ function EditGameContent() {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -2,22 +2,28 @@
 
 import { useState } from 'react';
 import { useQuery } from 'convex/react';
+import { useAuth } from '@/components/FirebaseAuthProvider';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+import { CrownSimple } from '@phosphor-icons/react';
 
 interface GameAskTabProps {
   gameId: Id<'games'>;
 }
 
 export default function GameAskTab({ gameId }: GameAskTabProps) {
+  const { user } = useAuth();
   const [chatMessage, setChatMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
 
+  // Simple pro mode check - you can modify this logic as needed
+  const isPro = user?.email?.includes('pro') || user?.email?.includes('admin') || false;
+
   const gameTemplate = useQuery(api.games.getGameById, { id: gameId });
 
   const handleChatSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); 
     if (!chatMessage.trim() || isChatLoading) return;
 
     const userMessage = chatMessage.trim();
@@ -59,8 +65,29 @@ export default function GameAskTab({ gameId }: GameAskTabProps) {
     }
   };
 
+  // Show pro upgrade UI if user is not pro
+  if (!isPro) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+            <CrownSimple size={32} className="text-purple-500" weight="fill" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">Pro Özellik</h3>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Kural Asistanı özelliği sadece Pro üyeler için kullanılabilir. 
+            Oyun kuralları hakkında sorularınızı sorabilir ve anında yanıt alabilirsiniz.
+          </p>
+          <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-lg font-medium">
+            Premium Ol
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 flex flex-col h-full bg-gray-50">
+    <div className="flex-1 flex flex-col h-full">
       <div className="flex items-center mb-4 px-4 pt-4">
         <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3 shadow-sm">
           <span className="text-white text-lg">🤖</span>

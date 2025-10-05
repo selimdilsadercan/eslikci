@@ -67,6 +67,7 @@ export const updateGameSave = mutation({
     name: v.optional(v.string()),
     results: v.optional(v.string()),
     laps: v.optional(v.array(v.array(v.number()))),
+    teamLaps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))),
     settings: v.optional(v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
       calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),

@@ -51,3 +51,125 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* Rich text content styling */
+.rich-text-content {
+  color: #374151;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.rich-text-content p {
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.rich-text-content ul {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.rich-text-content ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+  list-style-type: decimal;
+}
+
+.rich-text-content li {
+  margin: 4px 0;
+  color: #374151;
+}
+
+.rich-text-content li p {
+  margin: 0;
+  display: inline;
+}
+
+.rich-text-content strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.rich-text-content b {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.rich-text-content h1,
+.rich-text-content h2,
+.rich-text-content h3,
+.rich-text-content h4,
+.rich-text-content h5,
+.rich-text-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rich-text-content h1 {
+  font-size: 18px;
+}
+
+.rich-text-content h2 {
+  font-size: 16px;
+}
+
+.rich-text-content h3 {
+  font-size: 15px;
+}
+
+.rich-text-content a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.rich-text-content a:hover {
+  color: #2563eb;
+}
+
+.rich-text-content code {
+  background-color: #f3f4f6;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.rich-text-content pre {
+  background-color: #f3f4f6;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.rich-text-content pre code {
+  background: none;
+  padding: 0;
+  color: #1f2937;
+}
+
+.rich-text-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.rich-text-content th,
+.rich-text-content td {
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.rich-text-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rich-text-content td {
+  color: #374151;
+}

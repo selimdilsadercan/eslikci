@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, Plus, PencilSimple, Trash, GameController, DotsSix, ListBullets } from '@phosphor-icons/react';
+import Sidebar from '@/components/Sidebar';
 import {
   DndContext,
   closestCenter,
@@ -135,6 +136,23 @@ export default function AdminPage() {
     }
   };
 
+  const getRuleSectionsCount = (game: any) => {
+    if (!game.rules) return 0;
+    
+    try {
+      // Try to parse as JSON first (structured rules)
+      const parsedRules = JSON.parse(game.rules);
+      if (Array.isArray(parsedRules)) {
+        return parsedRules.length;
+      }
+    } catch (e) {
+      // If not JSON, count HTML sections or return 0
+      return 0;
+    }
+    
+    return 0;
+  };
+
 
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -201,17 +219,24 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-          <div className="col-span-5">
-            <h3 className="text-sm font-medium text-gray-900">
-              {game.name}
-            </h3>
+          <div className="col-span-6 md:col-span-6">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">
+                {game.emoji || '🎮'}
+              </span>
+              <h3 className="text-sm font-medium text-gray-900">
+                {game.name}
+              </h3>
+            </div>
           </div>
-                <div className="col-span-3">
-                  <span className="text-sm text-gray-600">
-                    {game.emoji || '🎮'}
-                  </span>
-                </div>
-          <div className="col-span-3">
+          <div className="hidden md:block col-span-2">
+            <div className="flex items-center justify-start">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {getRuleSectionsCount(game)} bölüm
+              </span>
+            </div>
+          </div>
+          <div className="col-span-5 md:col-span-3">
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => onEdit(game._id)}
@@ -233,9 +258,14 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="admin" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Fixed Header */}
+        <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white shadow-sm z-50">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
@@ -284,13 +314,13 @@ export default function AdminPage() {
                 <div className="col-span-1 text-sm font-medium text-gray-700">
                   
                 </div>
-                <div className="col-span-5 text-sm font-medium text-gray-700">
+                <div className="col-span-6 md:col-span-6 text-sm font-medium text-gray-700">
                   Oyun Adı
                 </div>
-                <div className="col-span-3 text-sm font-medium text-gray-700">
-                  Emoji
+                <div className="hidden md:block col-span-2 text-sm font-medium text-gray-700">
+                  Kurallar
                 </div>
-                <div className="col-span-3 text-sm font-medium text-gray-700">
+                <div className="col-span-5 md:col-span-3 text-sm font-medium text-gray-700">
                   İşlemler
                 </div>
               </div>
@@ -368,7 +398,7 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-
+      </div>
     </div>
   );
 }

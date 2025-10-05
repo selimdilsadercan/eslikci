@@ -6,11 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X, ChartBar, ListBullets, ChatCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, Minus, Gear, CrownSimple, Trash, ArrowCounterClockwise, X, ChartBar, ListBullets, ChatCircle, Spade } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import GameRulesTab from '@/components/GameRulesTab';
 import GameAskTab from '@/components/GameAskTab';
+import PokerAssistantTab from '@/components/PokerAssistantTab';
+import BottomInputArea from '@/components/BottomInputArea';
 import { useInterstitialAd } from '@/components/InterstitialAd';
 import AdBanner from '@/components/AdBanner'; 
 
@@ -192,20 +194,40 @@ function GameSessionContent() {
   };
 
   const undoLastRound = async () => {
-    if (!gameSaveId || !gameSave?.laps) return;
+    if (!gameSaveId) return;
     
-    try {
-      // Remove the last round from all players
-      const updatedLaps = gameSave.laps.map(playerLaps => 
-        playerLaps.slice(0, -1) // Remove last element
-      );
+    // Check if it's team mode and has teamLaps
+    if (gameSave?.settings.gameplay === 'takimli') {
+      if (!gameSave?.teamLaps || gameSave.teamLaps.length === 0) return;
       
-      await updateGameSave({
-        id: gameSaveId as Id<'gameSaves'>,
-        laps: updatedLaps as any // Type assertion for now
-      });
-    } catch (error) {
-      console.error('Error undoing last round:', error);
+      try {
+        // Remove the last round from teamLaps
+        const updatedTeamLaps = gameSave.teamLaps.slice(0, -1);
+        
+        await updateGameSave({
+          id: gameSaveId as Id<'gameSaves'>,
+          teamLaps: updatedTeamLaps
+        });
+      } catch (error) {
+        console.error('Error undoing last team round:', error);
+      }
+    } else {
+      // Individual mode - use laps
+      if (!gameSave?.laps || gameSave.laps.length === 0) return;
+      
+      try {
+        // Remove the last round from all players
+        const updatedLaps = gameSave.laps.map(playerLaps => 
+          playerLaps.slice(0, -1) // Remove last element
+        );
+        
+        await updateGameSave({
+          id: gameSaveId as Id<'gameSaves'>,
+          laps: updatedLaps as any // Type assertion for now
+        });
+      } catch (error) {
+        console.error('Error undoing last individual round:', error);
+      }
     }
   };
 
@@ -213,10 +235,19 @@ function GameSessionContent() {
     if (!gameSaveId) return;
     
     try {
-      await updateGameSave({
-        id: gameSaveId as Id<'gameSaves'>,
-        laps: []
-      });
+      if (gameSave?.settings.gameplay === 'takimli') {
+        // Team mode - reset teamLaps
+        await updateGameSave({
+          id: gameSaveId as Id<'gameSaves'>,
+          teamLaps: []
+        });
+      } else {
+        // Individual mode - reset laps
+        await updateGameSave({
+          id: gameSaveId as Id<'gameSaves'>,
+          laps: []
+        });
+      }
     } catch (error) {
       console.error('Error resetting rounds:', error);
     }
@@ -236,6 +267,7 @@ function GameSessionContent() {
   const handleConfirm = () => {
     if (confirmAction) {
       confirmAction();
+      setShowConfirmModal(false);
     }
   };
 
@@ -579,10 +611,10 @@ function GameSessionContent() {
 
         {/* Navigation Tabs */}
         <div className="px-4 py-2 border-b border-gray-200">
-          <div className="flex">
+          <div className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('puan-tablosu')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'puan-tablosu'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -591,9 +623,22 @@ function GameSessionContent() {
               <ChartBar size={16} />
               <span>Puanlar</span>
             </button>
+            {gameSave?.gameTemplate === 'j973hj02fpn4jjr9txpb84fy717rfekq' && (
+              <button
+                onClick={() => setActiveTab('poker-helper')}
+                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+                  activeTab === 'poker-helper'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600'
+                }`}
+              >
+                <Spade size={16} />
+                <span>Poker</span>
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('kural-sor')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'kural-sor'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -604,7 +649,7 @@ function GameSessionContent() {
             </button>
             <button
               onClick={() => setActiveTab('tum-kurallar')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'tum-kurallar'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -828,458 +873,42 @@ function GameSessionContent() {
           <GameRulesTab gameId={gameSave.gameTemplate} />
         ) : activeTab === 'kural-sor' ? (
           <GameAskTab gameId={gameSave.gameTemplate} />
+        ) : activeTab === 'poker-helper' ? (
+          <PokerAssistantTab />
         ) : null}
       </div>
 
-      {/* Fixed Bottom Area - Hide when Tüm Kurallar or Kural Sor tab is selected */}
-      {activeTab !== 'tum-kurallar' && activeTab !== 'kural-sor' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg" style={{ zIndex: 60 }}>
-        {showSettings ? (
-          /* Settings Modal */
-          <div className="p-4 border-b border-gray-200">
-            <div className="space-y-3">
-              <button 
-                onClick={() => handleConfirmAction(undoLastRound, {
-                  title: "Son Turu Geri Al",
-                  message: "Son turu geri almak istediğinizden emin misiniz?",
-                  confirmText: "Geri Al",
-                  isDestructive: true
-                })}
-                className="flex items-center space-x-2 text-red-600 hover:text-red-700 w-full justify-start py-2"
-              >
-                <ArrowCounterClockwise size={16} />
-                <span className="text-sm font-medium">Son Turu Geri Al</span>
-              </button>
-              <button 
-                onClick={() => handleConfirmAction(resetAllRounds, {
-                  title: "Turları Sıfırla",
-                  message: "Tüm turları sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-                  confirmText: "Sıfırla",
-                  isDestructive: true
-                })}
-                className="flex items-center space-x-2 text-red-600 hover:text-red-700 w-full justify-start py-2"
-              >
-                <Trash size={16} />
-                <span className="text-sm font-medium">Turları Sıfırla</span>
-              </button>
-              <div className="flex items-center space-x-2">
-                <label htmlFor="hideTotalColumn" className="text-sm font-medium text-gray-700">
-                  Toplam Sütununu Gizle:
-                </label>
-                <input
-                  type="checkbox"
-                  id="hideTotalColumn"
-                  checked={gameSave?.settings.hideTotalColumn || false}
-                  onChange={toggleHideTotalColumn}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Current Round Score Input */
-          <div className="p-4 border-b border-gray-200">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-6 max-h-100 overflow-y-auto place-content-center pb-4">
-              {gameSave?.settings.gameplay === 'takimli' ? (
-                // Team Mode - Show Teams for Score Input (one input per team)
-                <>
-                  {/* Red Team Score Input */}
-                  <div className="flex flex-col space-y-2 items-end">
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="flex items-center flex-row">
-                        <div className="relative mr-2">
-                          {redTeamPlayers && redTeamPlayers.length > 0 ? (
-                            <div className="flex -space-x-1">
-                              {redTeamPlayers.slice(0, 2).map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
-                                  style={{ zIndex: Math.min(redTeamPlayers.length - index, 5) }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
-                                      className="w-6 h-6 rounded-full object-cover border border-white"
-                                    />
-                                  ) : (
-                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center border border-white">
-                                      <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              {redTeamPlayers.length > 2 && (
-                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center border border-white">
-                                  <span className="text-gray-600 font-semibold text-xs">+{redTeamPlayers.length - 2}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-xs">K</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="font-medium text-gray-800 text-sm truncate max-w-[100px]">
-                          {redTeamPlayers?.map(p => p.name).join(', ') || 'Kırmızı Takım'}
-                        </span>
-                      </div>
-                      
-                      {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                        /* Crown Mode for Teams */
-                        <button
-                          onClick={() => {
-                            setCrownWinners(prev => ({
-                              ...prev,
-                              'redTeam': !prev['redTeam']
-                            }));
-                          }}
-                          className={`p-1 ${
-                            crownWinners['redTeam'] 
-                              ? 'text-blue-600' 
-                              : 'text-gray-400'
-                          }`}
-                        >
-                          <CrownSimple size={20} weight="fill" />
-                        </button>
-                      ) : gameSave?.settings.pointsPerRound === 'Multiple' ? (
-                        /* Multiple Scores Mode for Teams - Multiple input fields with horizontal buttons */
-                        <div className="flex flex-col items-center space-y-2">
-                          {(multipleScores['redTeam'] || [0]).map((score, scoreIndex) => (
-                            <div key={scoreIndex} className="flex flex-col items-center space-y-1">
-                              <input
-                                type="text"
-                                value={score || ''}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value) || 0;
-                                  setMultipleScores(prev => {
-                                    const currentScores = prev['redTeam'] || [0];
-                                    const updatedScores = [...currentScores];
-                                    updatedScores[scoreIndex] = Math.max(0, value);
-                                    return {
-                                      ...prev,
-                                      'redTeam': updatedScores
-                                    };
-                                  });
-                                }}
-                                className="w-24 h-12 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                                placeholder="0"
-                              />
-                            </div>
-                          ))}
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => setMultipleScores(prev => ({
-                                ...prev,
-                                'redTeam': [...(prev['redTeam'] || []), 0]
-                              }))}
-                              className="w-6 h-6 flex items-center justify-center"
-                            >
-                              <Plus size={18} className="text-gray-600" weight="bold" />
-                            </button>
-                            <button
-                              onClick={() => setMultipleScores(prev => ({
-                                ...prev,
-                                'redTeam': prev['redTeam']?.slice(0, -1) || []
-                              }))}
-                              disabled={(multipleScores['redTeam'] || [0]).length <= 1}
-                              className={`w-6 h-6 flex items-center justify-center ${
-                                (multipleScores['redTeam'] || [0]).length <= 1 
-                                  ? 'opacity-30 cursor-not-allowed' 
-                                  : ''
-                              }`}
-                            >
-                              <Minus size={18} className="text-gray-600" weight="bold" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Single Score Mode for Teams - Direct input field */
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="text"
-                            value={currentScores['redTeam'] || ''}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value) || 0;
-                              setCurrentScores(prev => ({
-                                ...prev,
-                                'redTeam': Math.max(0, value)
-                              }));
-                            }}
-                            className="w-20 h-10 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                            placeholder="0"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Blue Team Score Input */}
-                  <div className="flex flex-col space-y-2 items-start">
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="flex items-center flex-row">
-                        <div className="relative mr-2">
-                          {blueTeamPlayers && blueTeamPlayers.length > 0 ? (
-                            <div className="flex -space-x-1">
-                              {blueTeamPlayers.slice(0, 2).map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
-                                  style={{ zIndex: Math.min(blueTeamPlayers.length - index, 5) }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
-                                      className="w-6 h-6 rounded-full object-cover border border-white"
-                                    />
-                                  ) : (
-                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center border border-white">
-                                      <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              {blueTeamPlayers.length > 2 && (
-                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center border border-white">
-                                  <span className="text-gray-600 font-semibold text-xs">+{blueTeamPlayers.length - 2}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-xs">M</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="font-medium text-gray-800 text-sm truncate max-w-[100px]">
-                          {blueTeamPlayers?.map(p => p.name).join(', ') || 'Mavi Takım'}
-                        </span>
-                      </div>
-                      
-                      {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                        /* Crown Mode for Teams */
-                        <button
-                          onClick={() => {
-                            setCrownWinners(prev => ({
-                              ...prev,
-                              'blueTeam': !prev['blueTeam']
-                            }));
-                          }}
-                          className={`p-1 ${
-                            crownWinners['blueTeam'] 
-                              ? 'text-blue-600' 
-                              : 'text-gray-400'
-                          }`}
-                        >
-                          <CrownSimple size={20} weight="fill" />
-                        </button>
-                      ) : gameSave?.settings.pointsPerRound === 'Multiple' ? (
-                        /* Multiple Scores Mode for Teams - Multiple input fields with horizontal buttons */
-                        <div className="flex flex-col items-center space-y-2">
-                          {(multipleScores['blueTeam'] || [0]).map((score, scoreIndex) => (
-                            <div key={scoreIndex} className="flex flex-col items-center space-y-1">
-                              <input
-                                type="text"
-                                value={score || ''}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value) || 0;
-                                  setMultipleScores(prev => {
-                                    const currentScores = prev['blueTeam'] || [0];
-                                    const updatedScores = [...currentScores];
-                                    updatedScores[scoreIndex] = Math.max(0, value);
-                                    return {
-                                      ...prev,
-                                      'blueTeam': updatedScores
-                                    };
-                                  });
-                                }}
-                                className="w-24 h-12 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                                placeholder="0"
-                              />
-                            </div>
-                          ))}
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => setMultipleScores(prev => ({
-                                ...prev,
-                                'blueTeam': [...(prev['blueTeam'] || []), 0]
-                              }))}
-                              className="w-6 h-6 flex items-center justify-center"
-                            >
-                              <Plus size={18} className="text-gray-600" weight="bold" />
-                            </button>
-                            <button
-                              onClick={() => setMultipleScores(prev => ({
-                                ...prev,
-                                'blueTeam': prev['blueTeam']?.slice(0, -1) || []
-                              }))}
-                              disabled={(multipleScores['blueTeam'] || [0]).length <= 1}
-                              className={`w-6 h-6 flex items-center justify-center ${
-                                (multipleScores['blueTeam'] || [0]).length <= 1 
-                                  ? 'opacity-30 cursor-not-allowed' 
-                                  : ''
-                              }`}
-                            >
-                              <Minus size={18} className="text-gray-600" weight="bold" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Single Score Mode for Teams - Direct input field */
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="text"
-                            value={currentScores['blueTeam'] || ''}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value) || 0;
-                              setCurrentScores(prev => ({
-                                ...prev,
-                                'blueTeam': Math.max(0, value)
-                              }));
-                            }}
-                            className="w-20 h-10 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                            placeholder="0"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                // Individual Mode - Show Individual Players for Score Input
-                gamePlayers.map((player, index) => (
-                <div key={player._id} className={`flex flex-col space-y-2 ${
-                  index % 2 === 0 ? 'items-end' : 'items-start'
-                }`}>
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className={`flex items-center ${
-                      gameSave?.settings.calculationMode === 'NoPoints' ? 'justify-center' : ''
-                    }`}>
-                      {player.avatar ? (
-                        <img
-                          src={player.avatar}
-                          alt={player.name}
-                          className="w-6 h-6 rounded-full object-cover mr-2"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                          <span className="text-blue-600 font-semibold text-xs">{player.initial}</span>
-                        </div>
-                      )}
-                      <span className="font-medium text-gray-800 text-sm truncate max-w-[200px]">{player.name}</span>
-                    </div>
-                    
-                    {gameSave?.settings.calculationMode === 'NoPoints' ? (
-                      /* Crown Mode - Toggle crown for 1 point */
-                      <button
-                        onClick={() => toggleCrown(player._id)}
-                        className={`p-1 ${
-                          crownWinners[player._id] 
-                            ? 'text-blue-600' 
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        <CrownSimple size={20} weight="fill" />
-                      </button>
-                    ) : gameSave?.settings.pointsPerRound === 'Multiple' ? (
-                      /* Multiple Scores Mode - Multiple input fields with horizontal buttons */
-                      <div className="flex flex-col items-center space-y-2">
-                        {(multipleScores[player._id] || [0]).map((score, scoreIndex) => (
-                          <div key={scoreIndex} className="flex flex-col items-center space-y-1">
-                            <input
-                              type="text"
-                              value={score || ''}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value) || 0;
-                                updateMultipleScore(player._id, scoreIndex, value);
-                              }}
-                              className="w-24 h-12 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                              placeholder="0"
-                            />
-                            
-                          </div>
-                        ))}
-                        <div className="flex items-center space-x-2">
-                               <button
-                                 onClick={() => addScoreInput(player._id)}
-                                 className="w-6 h-6 flex items-center justify-center"
-                               >
-                                 <Plus size={18} className="text-gray-600" weight="bold" />
-                               </button>
-                               <button
-                                 onClick={() => removeScoreInput(player._id)}
-                                 disabled={(multipleScores[player._id] || [0]).length <= 1}
-                                 className={`w-6 h-6 flex items-center justify-center ${
-                                   (multipleScores[player._id] || [0]).length <= 1 
-                                     ? 'opacity-30 cursor-not-allowed' 
-                                     : ''
-                                 }`}
-                               >
-                                 <Minus size={18} className="text-gray-600" weight="bold" />
-                               </button>
-                             </div>
-                      </div>
-                    ) : (
-                      /* Single Score Mode - Direct input field */
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="text"
-                          value={currentScores[player._id] || ''}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
-                            setCurrentScores(prev => ({
-                              ...prev,
-                              [player._id]: Math.max(0, value)
-                            }));
-                          }}
-                          className="w-20 h-10 bg-white border-2 rounded-lg text-center font-medium text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
-                          placeholder="0"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={endRound}
-              className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg font-medium text-center hover:bg-blue-600"
-            >
-              {getNextRoundNumber()}. Turu Bitir
-            </button>
-            <button 
-              onClick={() => setShowSettings(!showSettings)}
-              className={`ml-2 w-12 h-12 rounded-xl flex items-center justify-center ${
-                showSettings 
-                  ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                  : 'border-2 border-blue-500 text-blue-500 bg-white hover:bg-blue-50'
-              }`}
-            >
-              {showSettings ? (
-                <X size={20} weight="bold" />
-              ) : (
-                <Gear size={20} weight="bold" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
+      {/* Fixed Bottom Area - Now using BottomInputArea component */}
+      <BottomInputArea
+        activeTab={activeTab}
+        gameSave={gameSave}
+        gamePlayers={gamePlayers}
+        redTeamPlayers={redTeamPlayers}
+        blueTeamPlayers={blueTeamPlayers}
+        currentScores={currentScores}
+        setCurrentScores={setCurrentScores}
+        multipleScores={multipleScores}
+        setMultipleScores={setMultipleScores}
+        crownWinners={crownWinners}
+        setCrownWinners={setCrownWinners}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+        showConfirmModal={showConfirmModal}
+        setShowConfirmModal={setShowConfirmModal}
+        confirmModalConfig={confirmModalConfig}
+        setConfirmModalConfig={setConfirmModalConfig}
+        setConfirmAction={setConfirmAction}
+        addScoreInput={addScoreInput}
+        removeScoreInput={removeScoreInput}
+        updateMultipleScore={updateMultipleScore}
+        toggleCrown={toggleCrown}
+        undoLastRound={undoLastRound}
+        resetAllRounds={resetAllRounds}
+        toggleHideTotalColumn={toggleHideTotalColumn}
+        endRound={endRound}
+        getNextRoundNumber={getNextRoundNumber}
+        handleConfirmAction={handleConfirmAction}
+      />
 
       {/* Confirm Modal */}
       <ConfirmModal

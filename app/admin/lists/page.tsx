@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, Plus, PencilSimple, Trash, ListBullets, DotsSix } from '@phosphor-icons/react';
+import Sidebar from '@/components/Sidebar';
 import {
   DndContext,
   closestCenter,
@@ -228,9 +229,14 @@ export default function ListsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="admin" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Fixed Header */}
+        <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white shadow-sm z-50">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
@@ -368,6 +374,7 @@ export default function ListsPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

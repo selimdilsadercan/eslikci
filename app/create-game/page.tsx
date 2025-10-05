@@ -6,10 +6,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus, MagnifyingGlass } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus, MagnifyingGlass, Spade } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 import GameRulesTab from '@/components/GameRulesTab';
 import GameAskTab from '@/components/GameAskTab';
+import PokerAssistantTab from '@/components/PokerAssistantTab';
 import CreateModal from '@/components/CreateModal';
 import EditPlayerModal from '@/components/EditPlayerModal';
 
@@ -384,10 +385,10 @@ function CreateGameContent() {
 
         {/* Navigation Tabs */}
         <div className="px-4 py-2 border-b border-gray-200">
-          <div className="flex">
+          <div className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('oyun-kur')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'oyun-kur'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -396,9 +397,22 @@ function CreateGameContent() {
               <ChartBar size={16} />
               <span>Oyun Kur</span>
             </button>
+            {gameId === 'j973hj02fpn4jjr9txpb84fy717rfekq' && (
+              <button
+                onClick={() => setActiveTab('poker-helper')}
+                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+                  activeTab === 'poker-helper'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600'
+                }`}
+              >
+                <Spade size={16} />
+                <span>Poker</span>
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('sor')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'sor'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -409,7 +423,7 @@ function CreateGameContent() {
             </button>
             <button
               onClick={() => setActiveTab('kurallar')}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
                 activeTab === 'kurallar'
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600'
@@ -423,7 +437,7 @@ function CreateGameContent() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col px-4 pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
+      <div className="flex-1 flex flex-col pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
         {activeTab === 'oyun-kur' ? (
           <div className="flex-1 overflow-y-auto">
             {/* Content will be handled by the bottom panel based on currentStep */}
@@ -432,6 +446,8 @@ function CreateGameContent() {
           <GameAskTab gameId={gameId as Id<'games'>} />
         ) : activeTab === 'kurallar' ? (
           <GameRulesTab gameId={gameId as Id<'games'>} />
+        ) : activeTab === 'poker-helper' ? (
+          <PokerAssistantTab />
         ) : null}
       </div>
 
