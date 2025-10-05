@@ -24,6 +24,9 @@ export default function OnboardingPage() {
   const currentUser = useQuery(api.users.getUserByFirebaseId, 
     user?.uid ? { firebaseId: user.uid } : "skip"
   );
+  const player = useQuery(api.players.getPlayerById, 
+    currentUser?.playerId ? { id: currentUser.playerId } : "skip"
+  );
   const updateUser = useMutation(api.users.updateUser);
   const updatePlayer = useMutation(api.players.updatePlayer);
 
@@ -43,20 +46,19 @@ export default function OnboardingPage() {
 
   // Set existing avatar if user has one
   useEffect(() => {
-    if (currentUser && currentUser.avatar && !selectedAvatar) {
-      setSelectedAvatar(currentUser.avatar);
+    if (player && player.avatar && !selectedAvatar) {
+      setSelectedAvatar(player.avatar);
     }
-  }, [currentUser, selectedAvatar]);
+  }, [player, selectedAvatar]);
 
   const handleCompleteOnboarding = async () => {
     if (!user || !currentUser || !selectedAvatar) return;
 
     setIsCompleting(true);
     try {
-      // Update user with avatar and mark onboarding as finished
+      // Update user to mark onboarding as finished
       await updateUser({
         firebaseId: user.uid,
-        avatar: selectedAvatar,
         isOnboardingFinished: true,
       });
 
@@ -331,7 +333,7 @@ export default function OnboardingPage() {
                 name={currentUser.name || 'User'}
                 size={120}
                 onAvatarChange={setSelectedAvatar}
-                initialAvatar={currentUser.avatar}
+                initialAvatar={player?.avatar}
                 className="mb-4"
               />
             </div>

@@ -253,11 +253,6 @@ export default function EditListPage() {
                             {game.name}
                           </h3>
                         </div>
-                        {game.description && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                            {game.description}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>

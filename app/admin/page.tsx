@@ -205,9 +205,6 @@ export default function AdminPage() {
             <h3 className="text-sm font-medium text-gray-900">
               {game.name}
             </h3>
-            {game.description && (
-              <p className="text-sm text-gray-500 mt-1">{game.description}</p>
-            )}
           </div>
                 <div className="col-span-3">
                   <span className="text-sm text-gray-600">

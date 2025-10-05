@@ -53,8 +53,7 @@ export default function SearchPage() {
       setFilteredGames(games);
     } else {
       const filtered = games.filter(game => 
-        game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (game.description && game.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        game.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredGames(filtered);
     }
