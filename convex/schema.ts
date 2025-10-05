@@ -45,6 +45,7 @@ export default defineSchema({
     rules: v.optional(v.string()),
     banner: v.optional(v.string()),
     category: v.optional(v.string()),
+    emoji: v.optional(v.string()), // New emoji field
     settings: v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),
@@ -82,4 +83,13 @@ export default defineSchema({
   }).index("by_user", ["userId"])
     .index("by_game", ["gameTemplate"])
     .index("by_created_time", ["createdTime"]),
+
+  recentSearches: defineTable({
+    userId: v.id("users"),
+    gameId: v.id("games"),
+    gameName: v.string(),
+    searchQuery: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"])
+    .index("by_user_created", ["userId", "createdAt"]),
 });

@@ -136,6 +136,8 @@ export default function AdminPage() {
     }
   };
 
+
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 

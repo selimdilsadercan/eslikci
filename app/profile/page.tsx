@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
+import Header from "@/components/Header";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Crown, Star } from "lucide-react";
@@ -25,16 +26,24 @@ export default function ProfilePage() {
   const currentUserAsPlayer = useQuery(api.players.getPlayerByUserId, 
     currentUser ? { userId: currentUser._id } : "skip"
   );
+  const isAdmin = useQuery(api.users.isUserAdmin, 
+    user?.uid ? { firebaseId: user.uid } : "skip"
+  );
 
   return (
       <div className="min-h-screen w-full pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+        {/* Header for mobile screens */}
+        <div className="lg:hidden">
+          <Header />
+        </div>
+        
         {/* Sidebar for wide screens */}
         <Sidebar currentPage="profile" />
         
         {/* Main content area */}
         <div className="lg:ml-64">
-          {/* Main Content with bottom padding for fixed bottom navigation */}
-          <div className="pt-12 px-6 pb-24">
+            {/* Main Content with bottom padding for fixed bottom navigation */}
+            <div className="pt-20 lg:pt-6 px-6 pb-24">
           <div className="max-w-sm mx-auto">
             {/* Profile Header */}
             <div className="text-center mb-8">
@@ -101,6 +110,31 @@ export default function ProfilePage() {
                   </div>
                 </Link>
               </div>
+
+              {/* Admin Panel - Only show if user is admin */}
+              {isAdmin && (
+                <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">
+                  <button
+                    onClick={() => router.push('/admin')}
+                    className="w-full flex items-center gap-3 text-gray-700"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="font-semibold">Admin Paneli</h3>
+                      <p className="text-sm text-gray-500">Oyunları yönet</p>
+                    </div>
+                    <div className="text-gray-500">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* Edit Profile */}
               <div className="bg-white/80 rounded-2xl p-4 border border-gray-200 shadow-sm">

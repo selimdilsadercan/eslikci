@@ -11,6 +11,7 @@ import CreateModal from '@/components/CreateModal';
 import EditPlayerModal from '@/components/EditPlayerModal';
 import Sidebar from '@/components/Sidebar';
 import AppBar from '@/components/AppBar';
+import Header from '@/components/Header';
 
 export default function ContactsPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -75,13 +76,18 @@ export default function ContactsPage() {
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header for mobile screens */}
+      <div className="lg:hidden">
+        <Header />
+      </div>
+      
       {/* Sidebar for wide screens */}
       <Sidebar currentPage="contacts" />
       
       {/* Main content area */}
       <div className="lg:ml-64">
-        {/* Main Content */}
-        <div className="px-4 py-6 pt-8">
+            {/* Main Content */}
+            <div className="px-4 py-6 pt-20 lg:pt-6">
 
         {/* Current User */}
         {currentUserAsPlayer === undefined ? (

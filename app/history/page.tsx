@@ -11,6 +11,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import AdBanner from '@/components/AdBanner';
 import Sidebar from '@/components/Sidebar';
 import AppBar from '@/components/AppBar';
+import Header from '@/components/Header';
 import { useState } from 'react';
 
 export default function HistoryPage() {
@@ -156,13 +157,18 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Header for mobile screens */}
+      <div className="lg:hidden">
+        <Header />
+      </div>
+      
       {/* Sidebar for wide screens */}
       <Sidebar currentPage="history" />
       
       {/* Main content area */}
       <div className="lg:ml-64">
-        {/* Main Content */}
-        <div className="px-4 py-6 pt-8">
+            {/* Main Content */}
+            <div className="px-4 py-6 pt-20 lg:pt-6">
         
         {/* Game History List */}
         <div className="space-y-6">

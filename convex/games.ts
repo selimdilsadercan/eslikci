@@ -35,6 +35,7 @@ export const createGame = mutation({
     rules: v.optional(v.string()),
     banner: v.optional(v.string()),
     category: v.optional(v.string()),
+    emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),
@@ -59,6 +60,7 @@ export const createGame = mutation({
       rules: args.rules,
       banner: args.banner,
       category: args.category,
+      emoji: args.emoji,
       settings: args.settings || {},
       isActive: true,
       index: maxIndex + 1,
@@ -75,6 +77,7 @@ export const updateGame = mutation({
     rules: v.optional(v.string()),
     banner: v.optional(v.string()),
     category: v.optional(v.string()),
+    emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),

@@ -18,6 +18,7 @@ import type * as gameSaves from "../gameSaves.js";
 import type * as games from "../games.js";
 import type * as groups from "../groups.js";
 import type * as players from "../players.js";
+import type * as recentSearches from "../recentSearches.js";
 import type * as users from "../users.js";
 
 /**
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   games: typeof games;
   groups: typeof groups;
   players: typeof players;
+  recentSearches: typeof recentSearches;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
