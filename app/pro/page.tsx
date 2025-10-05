@@ -5,7 +5,6 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { usePro } from '@/components/ProProvider';
 import ProUpgrade from '@/components/ProUpgrade';
 import BillingDebug from '@/components/BillingDebug';
-import AppBar from '@/components/AppBar';
 import { Crown, Calendar, Zap, Star, Check, ArrowLeft, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -83,7 +82,7 @@ export default function ProPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
       {/* Header with Back Button */}
       <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2 px-4">
         <div className="max-w-md mx-auto flex items-center justify-between">

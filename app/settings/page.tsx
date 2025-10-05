@@ -5,9 +5,9 @@ import { useAuth } from '@/components/FirebaseAuthProvider';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import AppBar from '@/components/AppBar';
-import Header from '@/components/Header';
 import ConfirmModal from '@/components/ConfirmModal';
+import Sidebar from '@/components/Sidebar';
+import AppBar from '@/components/AppBar';
 import { ArrowLeft, ArrowClockwise } from '@phosphor-icons/react';
 
 export default function SettingsPage() {
@@ -53,12 +53,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
+    <div className="min-h-screen w-full pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="profile" />
       
-      {/* Main Content */}
-      <div className="pt-8 px-6 pb-24">
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Main Content */}
+        <div className="pt-12 px-6 pb-24">
         <div className="max-w-sm mx-auto">
           {/* Settings Sections */}
           <div className="space-y-3">
@@ -127,6 +129,12 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        </div>
+      </div>
+
+      {/* AppBar for mobile screens */}
+      <div className="lg:hidden">
+        <AppBar currentPage="profile" />
       </div>
       
       {/* Restart Onboarding Confirmation Modal */}

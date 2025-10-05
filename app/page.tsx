@@ -29,10 +29,13 @@ export default function Home() {
   if (!isSignedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
-        <div className="text-center">
+        <div className="text-center w-full max-w-md px-4">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Eşlikçi</h1>
           <p className="text-gray-600 mb-6">Your companion app for table games</p>
-          <FirebaseAuthButton />
+          {/* White card wrapper for wide screens only */}
+          <div className="lg:bg-white lg:rounded-xl lg:shadow-lg lg:p-8 lg:border lg:border-gray-100">
+            <FirebaseAuthButton />
+          </div>
         </div>
       </div>
     );

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import AppBar from "@/components/AppBar";
 import AvatarGenerator from "@/components/AvatarGenerator";
 
 export default function EditProfilePage() {
@@ -55,7 +54,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-green-50 pb-20 lg:pb-0">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="px-6 py-4">
@@ -131,7 +130,6 @@ export default function EditProfilePage() {
       </div>
 
       {/* App Bar */}
-      <AppBar currentPage="profile" />
     </div>
   );
 }

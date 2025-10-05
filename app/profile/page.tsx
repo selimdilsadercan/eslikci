@@ -1,13 +1,13 @@
 "use client";
 
-import AppBar from "@/components/AppBar";
-import Header from "@/components/Header";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useAuth } from "@/components/FirebaseAuthProvider";
 import { usePro } from "@/components/ProProvider";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Sidebar from "@/components/Sidebar";
+import AppBar from "@/components/AppBar";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Crown, Star } from "lucide-react";
@@ -27,12 +27,14 @@ export default function ProfilePage() {
   );
 
   return (
-      <div className="min-h-screen w-full" style={{ backgroundColor: '#f4f6f9' }}>
-        {/* Header */}
-        <Header />
+      <div className="min-h-screen w-full pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+        {/* Sidebar for wide screens */}
+        <Sidebar currentPage="profile" />
         
-        {/* Main Content with bottom padding for fixed bottom navigation */}
-        <div className="pt-8 px-6 pb-24">
+        {/* Main content area */}
+        <div className="lg:ml-64">
+          {/* Main Content with bottom padding for fixed bottom navigation */}
+          <div className="pt-12 px-6 pb-24">
           <div className="max-w-sm mx-auto">
             {/* Profile Header */}
             <div className="text-center mb-8">
@@ -209,10 +211,13 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+          </div>
         </div>
         
-        {/* App Bar */}
-        <AppBar currentPage="profile" />
+        {/* AppBar for mobile screens */}
+        <div className="lg:hidden">
+          <AppBar currentPage="profile" />
+        </div>
         
         {/* Logout Confirmation Modal */}
         <ConfirmModal

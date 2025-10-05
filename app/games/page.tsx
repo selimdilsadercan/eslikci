@@ -7,9 +7,9 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Plus, MagnifyingGlass } from '@phosphor-icons/react';
 import AddGameModal from '@/components/AddGameModal';
-import AppBar from '@/components/AppBar';
-import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
+import Sidebar from '@/components/Sidebar';
+import AppBar from '@/components/AppBar';
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -65,12 +65,14 @@ export default function GamesPage() {
     router.push('/search');
   };
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
-
-      {/* Main Content */}
-      <div className="px-4 py-6">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="games" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Main Content */}
+        <div className="px-4 py-6 pt-8">
         {/* Search Button */}
         <div className="mb-6">
           <div className="relative">
@@ -173,6 +175,10 @@ export default function GamesPage() {
             })()}
           </div>
         )}
+        
+        {/* Banner Ad */}
+        <AdBanner position="bottom" className="mx-4 mb-4" />
+        </div>
       </div>
 
       {/* Add Game Modal */}
@@ -182,11 +188,10 @@ export default function GamesPage() {
         onAddGame={handleAddGame}
       />
 
-      {/* Banner Ad */}
-      <AdBanner position="bottom" className="mx-4 mb-4" />
-
-      {/* App Bar */}
-      <AppBar currentPage="games" />
+      {/* AppBar for mobile screens */}
+      <div className="lg:hidden">
+        <AppBar currentPage="games" />
+      </div>
     </div>
   );
 }

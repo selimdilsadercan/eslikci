@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import AppBar from '@/components/AppBar';
 import ConfirmModal from '@/components/ConfirmModal';
-import Header from '@/components/Header';
 import AdBanner from '@/components/AdBanner';
+import Sidebar from '@/components/Sidebar';
+import AppBar from '@/components/AppBar';
 import { useState } from 'react';
 
 export default function HistoryPage() {
@@ -155,12 +155,14 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
-
-      {/* Main Content */}
-      <div className="px-4 py-6">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="history" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Main Content */}
+        <div className="px-4 py-6 pt-8">
         
         {/* Game History List */}
         <div className="space-y-6">
@@ -267,13 +269,16 @@ export default function HistoryPage() {
             </div>
           )}
         </div>
+        
+        {/* Banner Ad */}
+        <AdBanner position="bottom" className="mx-4 mb-4" />
+        </div>
       </div>
 
-      {/* Banner Ad */}
-      <AdBanner position="bottom" className="mx-4 mb-4" />
-
-      {/* App Bar */}
-      <AppBar currentPage="history" />
+      {/* AppBar for mobile screens */}
+      <div className="lg:hidden">
+        <AppBar currentPage="history" />
+      </div>
 
       {/* Confirm Modal */}
       <ConfirmModal

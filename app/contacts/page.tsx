@@ -9,8 +9,8 @@ import { Id } from '@/convex/_generated/dataModel';
 import { Plus, PencilSimple, Users } from '@phosphor-icons/react';
 import CreateModal from '@/components/CreateModal';
 import EditPlayerModal from '@/components/EditPlayerModal';
+import Sidebar from '@/components/Sidebar';
 import AppBar from '@/components/AppBar';
-import Header from '@/components/Header';
 
 export default function ContactsPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -74,12 +74,14 @@ export default function ContactsPage() {
 
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-      {/* Header */}
-      <Header />
-
-      {/* Main Content */}
-      <div className="px-4 py-6">
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+      {/* Sidebar for wide screens */}
+      <Sidebar currentPage="contacts" />
+      
+      {/* Main content area */}
+      <div className="lg:ml-64">
+        {/* Main Content */}
+        <div className="px-4 py-6 pt-8">
 
         {/* Current User */}
         {currentUserAsPlayer === undefined ? (
@@ -307,6 +309,7 @@ export default function ContactsPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Modals */}
@@ -341,8 +344,10 @@ export default function ContactsPage() {
         <span className="font-medium text-sm">Ekle</span>
       </button>
 
-      {/* App Bar */}
-      <AppBar currentPage="contacts" />
+      {/* AppBar for mobile screens */}
+      <div className="lg:hidden">
+        <AppBar currentPage="contacts" />
+      </div>
     </div>
   );
 }
