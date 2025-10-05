@@ -37,7 +37,6 @@ export const createUser = mutation({
     firebaseId: v.string(),
     name: v.string(),
     email: v.optional(v.string()),
-    avatar: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -60,7 +59,6 @@ export const createUser = mutation({
       firebaseId: args.firebaseId,
       name: args.name,
       email: args.email,
-      avatar: args.avatar,
       isActive: true,
       createdAt: Date.now(),
     });
