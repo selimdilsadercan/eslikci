@@ -98,18 +98,39 @@ export default function GamesPage() {
     return games.filter(game => list.gameIds.includes(game._id));
   };
 
-  // Get recently played games
+  // Get recently played games with fallback to random games
   const getRecentlyPlayedGames = () => {
-    if (!gameSaves || !games) return [];
+    if (!games) return [];
+    
+    // If no game saves, return random games
+    if (!gameSaves || gameSaves.length === 0) {
+      const shuffledGames = [...games].sort(() => Math.random() - 0.5);
+      return shuffledGames.slice(0, 8);
+    }
     
     // Get unique games from recent saves, sorted by most recent
     const recentGameIds = gameSaves
       .sort((a, b) => b.createdTime - a.createdTime)
       .map(save => save.gameTemplate)
       .filter((gameId, index, array) => array.indexOf(gameId) === index) // Remove duplicates
-      .slice(0, 4); // Get only first 4
+      .slice(0, 8); // Get up to 8 games
     
-    return games.filter(game => recentGameIds.includes(game._id));
+    const recentGames = games.filter(game => recentGameIds.includes(game._id));
+    
+    // If we have less than 8 recent games, fill with random games
+    if (recentGames.length < 8) {
+      const remainingSlots = 8 - recentGames.length;
+      const usedGameIds = new Set(recentGames.map(game => game._id));
+      const availableGames = games.filter(game => !usedGameIds.has(game._id));
+      
+      // Shuffle and take random games
+      const shuffledGames = [...availableGames].sort(() => Math.random() - 0.5);
+      const randomGames = shuffledGames.slice(0, remainingSlots);
+      
+      return [...recentGames, ...randomGames];
+    }
+    
+    return recentGames;
   };
   return (
     <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
@@ -189,35 +210,31 @@ export default function GamesPage() {
         ) : (
           <div className="space-y-8 mb-8">
             {/* Recently Played Games Section */}
-            {getRecentlyPlayedGames().length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800">Son Oynadıkların</h2>
-                </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div>
+                <div className="grid grid-cols-2 gap-3">
                   {getRecentlyPlayedGames().map((game) => (
                     <div
                       key={game._id}
-                      className="bg-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                      className="bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 hover:scale-105"
                       style={{
-                        padding: '16px',
-                        height: '100px',
-                        width: '140px',
-                        boxShadow: '0 0 8px 5px #297dff0a'
+                        padding: '12px',
+                        height: '50px',
+                        minHeight: '50px'
                       }}
                       onClick={() => handleGameSelect(game._id)}
                     >
-                      <div className="flex flex-col justify-center items-center text-center h-full">
-                        <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
-                        <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
-                          {game.name}
-                        </h3>
+                      <div className="flex items-center h-full">
+                        <div className="text-2xl mr-3 flex-shrink-0">{game.emoji || "🎮"}</div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-800 text-sm leading-tight truncate">
+                            {game.name}
+                          </h3>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
 
             {/* Dynamic Game Lists */}
             {gameLists && gameLists.length > 0 ? (
