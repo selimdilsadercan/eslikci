@@ -211,7 +211,7 @@ export default function GamesPage() {
           <div className="space-y-8 mb-8">
             {/* Recently Played Games Section */}
             <div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {getRecentlyPlayedGames().map((game) => (
                     <div
                       key={game._id}
