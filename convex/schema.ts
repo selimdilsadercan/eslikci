@@ -41,12 +41,14 @@ export default defineSchema({
   games: defineTable({
     name: v.string(),
     rules: v.optional(v.string()),
+    rulesPdf: v.optional(v.id("_storage")), // PDF file storage ID
     emoji: v.optional(v.string()), // New emoji field
     settings: v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),
       roundWinner: v.optional(v.string()),
       pointsPerRound: v.optional(v.string()),
+      scoringTiming: v.optional(v.string()), // "tur-sonu" or "oyun-sonu"
       hideTotalColumn: v.optional(v.boolean()),
     }),
     isActive: v.boolean(),
@@ -70,6 +72,7 @@ export default defineSchema({
       roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
       pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
       penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
+      scoringTiming: v.optional(v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))),
       hideTotalColumn: v.boolean(),
     }),
     createdTime: v.number(),

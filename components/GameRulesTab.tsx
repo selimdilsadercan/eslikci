@@ -3,6 +3,7 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
+import PdfPageRenderer from './PdfPageRenderer';
 
 interface GameRulesTabProps {
   gameId: Id<'games'>;
@@ -13,8 +14,14 @@ export default function GameRulesTab({ gameId }: GameRulesTabProps) {
 
   return (
     <div className="flex-1 overflow-y-auto px-4">
-      
-      {gameTemplate?.rules ? (
+      {/* Show PDF if available */}
+      {gameTemplate?.rulesPdf ? (
+        <PdfPageRenderer 
+          pdfId={gameTemplate.rulesPdf} 
+          fileName={`${gameTemplate.name} - Kurallar.pdf`}
+        />
+      ) : gameTemplate?.rules ? (
+        /* Show text rules if no PDF */
         <div className="space-y-4">
           {(() => {
             try {
@@ -52,6 +59,7 @@ export default function GameRulesTab({ gameId }: GameRulesTabProps) {
           })()}
         </div>
       ) : (
+        /* Show empty state if no rules or PDF */
         <div className="text-center py-12">
           <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
             <span className="text-gray-400 text-3xl">📋</span>

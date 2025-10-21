@@ -32,6 +32,7 @@ export const createGame = mutation({
   args: {
     name: v.string(),
     rules: v.optional(v.string()),
+    rulesPdf: v.optional(v.id("_storage")),
     emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),
@@ -54,6 +55,7 @@ export const createGame = mutation({
     return await ctx.db.insert("games", {
       name: args.name,
       rules: args.rules,
+      rulesPdf: args.rulesPdf,
       emoji: args.emoji,
       settings: args.settings || {},
       isActive: true,
@@ -68,6 +70,7 @@ export const updateGame = mutation({
     id: v.id("games"),
     name: v.optional(v.string()),
     rules: v.optional(v.string()),
+    rulesPdf: v.optional(v.id("_storage")),
     emoji: v.optional(v.string()),
     settings: v.optional(v.object({
       gameplay: v.optional(v.string()),
@@ -102,6 +105,17 @@ export const updateGameIndices = mutation({
       ctx.db.patch(update.id, { index: update.index })
     );
     await Promise.all(promises);
+  },
+});
+
+export const deleteGamePdf = mutation({
+  args: { id: v.id("games") },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.id);
+    if (game?.rulesPdf) {
+      await ctx.storage.delete(game.rulesPdf);
+      await ctx.db.patch(args.id, { rulesPdf: undefined });
+    }
   },
 });
 

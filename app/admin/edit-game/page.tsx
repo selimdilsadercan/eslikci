@@ -9,6 +9,8 @@ import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, FloppyDisk, X, Plus, ListBullets, Check } from '@phosphor-icons/react';
 import RichTextEditor from '@/components/RichTextEditor';
 import Sidebar from '@/components/Sidebar';
+import PdfUpload from '@/components/PdfUpload';
+import PdfViewer from '@/components/PdfViewer';
 
 function EditGameContent() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -48,6 +50,7 @@ function EditGameContent() {
   const [rulesMode, setRulesMode] = useState<'text' | 'json'>('text');
   const [activeTab, setActiveTab] = useState('genel');
   const [selectedLists, setSelectedLists] = useState<Id<'gameLists'>[]>([]);
+  const [rulesPdfId, setRulesPdfId] = useState<Id<'_storage'> | undefined>(undefined);
 
   // Fetch game data
   const game = useQuery(api.games.getGameById, gameId ? { id: gameId } : "skip");
@@ -67,6 +70,7 @@ function EditGameContent() {
       setRoundWinner(game.settings?.roundWinner || 'Highest');
       setPointsPerRound((game.settings as any)?.pointsPerRound || 'Single');
       setHideTotalColumn(game.settings?.hideTotalColumn || false);
+      setRulesPdfId(game.rulesPdf);
       
       // Parse rules sections if they exist
       if (game.rules) {
@@ -201,6 +205,14 @@ function EditGameContent() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePdfUploadComplete = (pdfId: Id<'_storage'>) => {
+    setRulesPdfId(pdfId);
+  };
+
+  const handlePdfDelete = () => {
+    setRulesPdfId(undefined);
   };
 
   if (!game) {
@@ -501,36 +513,61 @@ function EditGameContent() {
         )}
 
         {activeTab === 'kurallar' && (
-          <div>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Oyun Kuralları</h3>
-            </div>
+          <div className="space-y-6">
+            {/* PDF Upload Section */}
+            <PdfUpload
+              gameId={gameId}
+              currentPdfId={rulesPdfId}
+              onUploadComplete={handlePdfUploadComplete}
+              onDelete={handlePdfDelete}
+            />
 
-            {/* Inner Tabs for Rules Mode */}
-            <div className="mb-6">
-              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
-                <button
-                  onClick={() => setRulesMode('text')}
-                  className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    rulesMode === 'text'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
-                  }`}
-                >
-                  Metin Modu
-                </button>
-                <button
-                  onClick={() => setRulesMode('json')}
-                  className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    rulesMode === 'json'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
-                  }`}
-                >
-                  JSON Modu
-                </button>
+            {/* PDF Preview Section */}
+            {rulesPdfId && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">PDF Önizleme</h3>
+                <PdfViewer 
+                  pdfId={rulesPdfId} 
+                  fileName={`${gameName} - Kurallar.pdf`}
+                />
               </div>
-            </div>
+            )}
+
+            {/* Text Rules Section */}
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Metin Kuralları</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  PDF yüklediyseniz, bu kurallar PDF ile birlikte görüntülenecek. 
+                  PDF yoksa sadece bu kurallar gösterilir.
+                </p>
+              </div>
+
+              {/* Inner Tabs for Rules Mode */}
+              <div className="mb-6">
+                <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
+                  <button
+                    onClick={() => setRulesMode('text')}
+                    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      rulesMode === 'text'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+                    }`}
+                  >
+                    Metin Modu
+                  </button>
+                  <button
+                    onClick={() => setRulesMode('json')}
+                    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      rulesMode === 'json'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+                    }`}
+                  >
+                    JSON Modu
+                  </button>
+                </div>
+              </div>
             
             {/* Rules Content based on Mode */}
             {rulesMode === 'text' ? (
@@ -619,6 +656,7 @@ function EditGameContent() {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
 
