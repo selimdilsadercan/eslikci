@@ -45,6 +45,7 @@ function EditGameContent() {
   const [calculationMode, setCalculationMode] = useState('NoPoints');
   const [roundWinner, setRoundWinner] = useState('Highest');
   const [pointsPerRound, setPointsPerRound] = useState('Single');
+  const [scoringTiming, setScoringTiming] = useState('tur-sonu');
   const [hideTotalColumn, setHideTotalColumn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rulesMode, setRulesMode] = useState<'text' | 'json'>('text');
@@ -69,6 +70,7 @@ function EditGameContent() {
       setCalculationMode(game.settings?.calculationMode || 'NoPoints');
       setRoundWinner(game.settings?.roundWinner || 'Highest');
       setPointsPerRound((game.settings as any)?.pointsPerRound || 'Single');
+      setScoringTiming((game.settings as any)?.scoringTiming || 'tur-sonu');
       setHideTotalColumn(game.settings?.hideTotalColumn || false);
       setRulesPdfId(game.rulesPdf);
       
@@ -175,6 +177,7 @@ function EditGameContent() {
           calculationMode,
           roundWinner,
           pointsPerRound,
+          scoringTiming,
           hideTotalColumn,
         }
       });
@@ -391,6 +394,35 @@ function EditGameContent() {
                       style={calculationMode === 'Points' ? { backgroundColor: '#365376' } : {}}
                     >
                       Puanlı
+                    </button>
+                  </div>
+                </div>
+
+                {/* Puanlama Zamanı */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Puanlama:</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setScoringTiming('tur-sonu')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        scoringTiming === 'tur-sonu'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={scoringTiming === 'tur-sonu' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Tur Sonu
+                    </button>
+                    <button
+                      onClick={() => setScoringTiming('oyun-sonu')}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                        scoringTiming === 'oyun-sonu'
+                          ? 'text-white'
+                          : 'text-gray-800'
+                      }`}
+                      style={scoringTiming === 'oyun-sonu' ? { backgroundColor: '#365376' } : {}}
+                    >
+                      Oyun Sonu
                     </button>
                   </div>
                 </div>

@@ -101,6 +101,7 @@ export default function AdminPage() {
           gameplay: 'herkes-tek',
           calculationMode: 'NoPoints',
           roundWinner: 'Highest',
+          scoringTiming: 'tur-sonu',
           hideTotalColumn: false
         }
       });

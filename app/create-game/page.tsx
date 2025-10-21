@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus, MagnifyingGlass, Spade } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Crown, ChartBar, ListBullets, ChatCircle, Plus, MagnifyingGlass, Spade, CaretDown } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 import GameRulesTab from '@/components/GameRulesTab';
 import GameAskTab from '@/components/GameAskTab';
@@ -52,8 +52,10 @@ function CreateGameContent() {
     calculationMode: game?.settings?.calculationMode || 'NoPoints',
     roundWinner: game?.settings?.roundWinner || 'Highest',
     pointsPerRound: (game?.settings as any)?.pointsPerRound || 'Single',
+    scoringTiming: (game?.settings as any)?.scoringTiming || 'tur-sonu',
     hideTotalColumn: game?.settings?.hideTotalColumn || false
   });
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createModalType, setCreateModalType] = useState<'player' | 'group' | null>(null);
   const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
@@ -76,6 +78,7 @@ function CreateGameContent() {
         calculationMode: game.settings.calculationMode || 'NoPoints',
         roundWinner: game.settings.roundWinner || 'Highest',
         pointsPerRound: (game.settings as any)?.pointsPerRound || 'Single',
+        scoringTiming: (game.settings as any)?.scoringTiming || 'tur-sonu',
         hideTotalColumn: game.settings.hideTotalColumn || false
       });
     }
@@ -150,6 +153,7 @@ function CreateGameContent() {
             calculationMode: gameSettings.calculationMode as 'NoPoints' | 'Points',
             roundWinner: gameSettings.roundWinner as 'Highest' | 'Lowest',
             pointsPerRound: gameSettings.pointsPerRound as 'Single' | 'Multiple' | undefined,
+            scoringTiming: gameSettings.scoringTiming as 'tur-sonu' | 'oyun-sonu' | undefined,
             hideTotalColumn: gameSettings.hideTotalColumn,
           },
           userId: currentUser._id,
@@ -755,147 +759,195 @@ function CreateGameContent() {
                   </div>
                 </div>
 
-                {/* Hesaplama Modu */}
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Hesaplama Modu:</h2>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => updateGameSetting('calculationMode', 'NoPoints')}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                        gameSettings.calculationMode === 'NoPoints'
-                          ? 'text-white'
-                          : 'text-gray-800'
-                      }`}
-                      style={gameSettings.calculationMode === 'NoPoints' ? { backgroundColor: '#365376' } : {}}
-                    >
-                      Puansız
-                    </button>
-                    <button
-                      onClick={() => updateGameSetting('calculationMode', 'Points')}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                        gameSettings.calculationMode === 'Points'
-                          ? 'text-white'
-                          : 'text-gray-800'
-                      }`}
-                      style={gameSettings.calculationMode === 'Points' ? { backgroundColor: '#365376' } : {}}
-                    >
-                      Puanlı
-                    </button>
-                  </div>
-                </div>
-
-                {/* Tur Kazananı - Conditional based on calculation mode */}
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Kazanan:</h2>
-                  <div className="flex gap-2">
-                    {gameSettings.calculationMode === 'NoPoints' ? (
-                      // Options for Puansız mode
-                      <>
-                        <button
-                          onClick={() => updateGameSetting('roundWinner', 'Highest')}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                            gameSettings.roundWinner === 'Highest'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          <span>↑</span>
-                          <span>En Yüksek</span>
-                        </button>
-                        <button
-                          onClick={() => updateGameSetting('roundWinner', 'Lowest')}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                            gameSettings.roundWinner === 'Lowest'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          <span>↓</span>
-                          <span>En Düşük</span>
-                        </button>
-                      </>
-                    ) : gameSettings.calculationMode === 'Points' ? (
-                      // Options for Puanlı mode
-                      <>
-                        <button
-                          onClick={() => updateGameSetting('roundWinner', 'Highest')}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                            gameSettings.roundWinner === 'Highest'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          <span>↑</span>
-                          <span>En Yüksek</span>
-                        </button>
-                        <button
-                          onClick={() => updateGameSetting('roundWinner', 'Lowest')}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                            gameSettings.roundWinner === 'Lowest'
-                              ? 'text-white'
-                              : 'text-gray-800'
-                          }`}
-                          style={gameSettings.roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
-                        >
-                          <span>↓</span>
-                          <span>En Düşük</span>
-                        </button>
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-
-                {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
-                {gameSettings.calculationMode === 'Points' && (
-                  <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Tur İçi Puan Sayısı:</h2>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => updateGameSetting('pointsPerRound', 'Single')}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
-                          gameSettings.pointsPerRound === 'Single'
-                            ? 'text-white'
-                            : 'text-gray-800'
-                        }`}
-                        style={gameSettings.pointsPerRound === 'Single' ? { backgroundColor: '#365376' } : {}}
-                      >
-                        Tek
-                      </button>
-                      <button
-                        onClick={() => updateGameSetting('pointsPerRound', 'Multiple')}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
-                          gameSettings.pointsPerRound === 'Multiple'
-                            ? 'text-white'
-                            : 'text-gray-800'
-                        }`}
-                        style={gameSettings.pointsPerRound === 'Multiple' ? { backgroundColor: '#365376' } : {}}
-                      >
-                        Çok
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* Toplam Sütununu Gizle */}
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Toplam Sütununu Gizle:</h2>
+                {/* Advanced Settings - Collapsible */}
+                <div className="space-y-4">
                   <button
-                    onClick={() => updateGameSetting('hideTotalColumn', !gameSettings.hideTotalColumn)}
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                      gameSettings.hideTotalColumn
-                        ? 'border-gray-300'
-                        : 'border-gray-300'
-                    }`}
-                    style={gameSettings.hideTotalColumn ? { backgroundColor: '#365376' } : {}}
+                    onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                    className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    {gameSettings.hideTotalColumn && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
+                    <h2 className="text-sm font-semibold text-gray-800">Gelişmiş Ayarlar</h2>
+                    <CaretDown 
+                      size={16} 
+                      className={`text-gray-600 transition-transform duration-200 ${
+                        showAdvancedSettings ? 'rotate-180' : ''
+                      }`} 
+                    />
                   </button>
+
+                  {showAdvancedSettings && (
+                    <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                      {/* Hesaplama Modu */}
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Hesaplama Modu:</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateGameSetting('calculationMode', 'NoPoints')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                              gameSettings.calculationMode === 'NoPoints'
+                                ? 'text-white'
+                                : 'text-gray-800'
+                            }`}
+                            style={gameSettings.calculationMode === 'NoPoints' ? { backgroundColor: '#365376' } : {}}
+                          >
+                            Puansız
+                          </button>
+                          <button
+                            onClick={() => updateGameSetting('calculationMode', 'Points')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                              gameSettings.calculationMode === 'Points'
+                                ? 'text-white'
+                                : 'text-gray-800'
+                            }`}
+                            style={gameSettings.calculationMode === 'Points' ? { backgroundColor: '#365376' } : {}}
+                          >
+                            Puanlı
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Puanlama */}
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Puanlama:</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateGameSetting('scoringTiming', 'tur-sonu')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                              gameSettings.scoringTiming === 'tur-sonu'
+                                ? 'text-white'
+                                : 'text-gray-800'
+                            }`}
+                            style={gameSettings.scoringTiming === 'tur-sonu' ? { backgroundColor: '#365376' } : {}}
+                          >
+                            Tur Sonu
+                          </button>
+                          <button
+                            onClick={() => updateGameSetting('scoringTiming', 'oyun-sonu')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                              gameSettings.scoringTiming === 'oyun-sonu'
+                                ? 'text-white'
+                                : 'text-gray-800'
+                            }`}
+                            style={gameSettings.scoringTiming === 'oyun-sonu' ? { backgroundColor: '#365376' } : {}}
+                          >
+                            Oyun Sonu
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tur Kazananı - Conditional based on calculation mode */}
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Kazanan:</h3>
+                        <div className="flex gap-2">
+                          {gameSettings.calculationMode === 'NoPoints' ? (
+                            // Options for Puansız mode
+                            <>
+                              <button
+                                onClick={() => updateGameSetting('roundWinner', 'Highest')}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                                  gameSettings.roundWinner === 'Highest'
+                                    ? 'text-white'
+                                    : 'text-gray-800'
+                                }`}
+                                style={gameSettings.roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
+                              >
+                                <span>↑</span>
+                                <span>En Yüksek</span>
+                              </button>
+                              <button
+                                onClick={() => updateGameSetting('roundWinner', 'Lowest')}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                                  gameSettings.roundWinner === 'Lowest'
+                                    ? 'text-white'
+                                    : 'text-gray-800'
+                                }`}
+                                style={gameSettings.roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
+                              >
+                                <span>↓</span>
+                                <span>En Düşük</span>
+                              </button>
+                            </>
+                          ) : gameSettings.calculationMode === 'Points' ? (
+                            // Options for Puanlı mode
+                            <>
+                              <button
+                                onClick={() => updateGameSetting('roundWinner', 'Highest')}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                                  gameSettings.roundWinner === 'Highest'
+                                    ? 'text-white'
+                                    : 'text-gray-800'
+                                }`}
+                                style={gameSettings.roundWinner === 'Highest' ? { backgroundColor: '#365376' } : {}}
+                              >
+                                <span>↑</span>
+                                <span>En Yüksek</span>
+                              </button>
+                              <button
+                                onClick={() => updateGameSetting('roundWinner', 'Lowest')}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
+                                  gameSettings.roundWinner === 'Lowest'
+                                    ? 'text-white'
+                                    : 'text-gray-800'
+                                }`}
+                                style={gameSettings.roundWinner === 'Lowest' ? { backgroundColor: '#365376' } : {}}
+                              >
+                                <span>↓</span>
+                                <span>En Düşük</span>
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
+                      {gameSettings.calculationMode === 'Points' && (
+                        <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
+                          <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Tur İçi Puan Sayısı:</h3>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => updateGameSetting('pointsPerRound', 'Single')}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                                gameSettings.pointsPerRound === 'Single'
+                                  ? 'text-white'
+                                  : 'text-gray-800'
+                              }`}
+                              style={gameSettings.pointsPerRound === 'Single' ? { backgroundColor: '#365376' } : {}}
+                            >
+                              Tek
+                            </button>
+                            <button
+                              onClick={() => updateGameSetting('pointsPerRound', 'Multiple')}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                                gameSettings.pointsPerRound === 'Multiple'
+                                  ? 'text-white'
+                                  : 'text-gray-800'
+                              }`}
+                              style={gameSettings.pointsPerRound === 'Multiple' ? { backgroundColor: '#365376' } : {}}
+                            >
+                              Çok
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Toplam Sütununu Gizle */}
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">Toplam Sütununu Gizle:</h3>
+                        <button
+                          onClick={() => updateGameSetting('hideTotalColumn', !gameSettings.hideTotalColumn)}
+                          className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                            gameSettings.hideTotalColumn
+                              ? 'border-gray-300'
+                              : 'border-gray-300'
+                          }`}
+                          style={gameSettings.hideTotalColumn ? { backgroundColor: '#365376' } : {}}
+                        >
+                          {gameSettings.hideTotalColumn && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
