@@ -7,6 +7,7 @@ import { Id } from '@/convex/_generated/dataModel';
 interface GameImageProps {
   game: {
     _id: string;
+    name: string;
     emoji?: string;
     imageFile?: Id<'_storage'>;
   };
