@@ -11,6 +11,7 @@ import AdBanner from '@/components/AdBanner';
 import Sidebar from '@/components/Sidebar';
 import AppBar from '@/components/AppBar';
 import Header from '@/components/Header';
+import GameImage from '@/components/GameImage';
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -224,7 +225,7 @@ export default function GamesPage() {
                       onClick={() => handleGameSelect(game._id)}
                     >
                       <div className="flex items-center h-full">
-                        <div className="text-2xl mr-3 flex-shrink-0">{game.emoji || "🎮"}</div>
+                        <GameImage game={game} size="md" className="mr-3 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-gray-800 text-sm leading-tight truncate">
                             {game.name}
@@ -261,7 +262,7 @@ export default function GamesPage() {
                           onClick={() => handleGameSelect(game._id)}
                         >
                           <div className="flex flex-col justify-center items-center text-center h-full">
-                            <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                            <GameImage game={game} size="lg" className="mb-1" />
                             <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
                               {game.name}
                             </h3>
@@ -294,7 +295,7 @@ export default function GamesPage() {
                         onClick={() => handleGameSelect(game._id)}
                       >
                         <div className="flex flex-col justify-center items-center text-center h-full">
-                          <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                          <GameImage game={game} size="lg" className="mb-1" />
                           <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
                             {game.name}
                           </h3>
@@ -326,7 +327,7 @@ export default function GamesPage() {
                       onClick={() => handleGameSelect(game._id)}
                     >
                       <div className="flex flex-col justify-center items-center text-center h-full">
-                        <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                        <GameImage game={game} size="lg" className="mb-1" />
                         <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
                           {game.name}
                         </h3>
@@ -356,7 +357,7 @@ export default function GamesPage() {
                     onClick={() => handleGameSelect(game._id)}
                   >
                     <div className="flex flex-col justify-center items-center text-center h-full">
-                      <div className="text-2xl mb-1">{game.emoji || "🎮"}</div>
+                      <GameImage game={game} size="lg" className="mb-1" />
                       <h3 className="font-medium text-gray-800 text-sm leading-tight mb-1">
                         {game.name}
                       </h3>

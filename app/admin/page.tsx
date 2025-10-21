@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/components/FirebaseAuthProvider';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, Plus, PencilSimple, Trash, GameController, DotsSix, ListBullets } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, PencilSimple, Trash, GameController, DotsSix, ListBullets, MagnifyingGlass, FunnelSimple } from '@phosphor-icons/react';
 import Sidebar from '@/components/Sidebar';
+import ImageUpload from '@/components/ImageUpload';
+import GameImage from '@/components/GameImage';
 import {
   DndContext,
   closestCenter,
@@ -29,12 +31,43 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-export default function AdminPage() {
+function AdminPageContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGameName, setNewGameName] = useState('');
+  const [newGameEmoji, setNewGameEmoji] = useState('');
+  const [newGameImageFile, setNewGameImageFile] = useState<Id<'_storage'> | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get filter values from URL params
+  const selectedListFilter = searchParams.get('list') || 'all';
+  const searchTerm = searchParams.get('search') || '';
+
+  // Function to update URL parameters
+  const updateUrlParams = (newParams: { list?: string; search?: string }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (newParams.list !== undefined) {
+      if (newParams.list === 'all') {
+        params.delete('list');
+      } else {
+        params.set('list', newParams.list);
+      }
+    }
+    
+    if (newParams.search !== undefined) {
+      if (newParams.search === '') {
+        params.delete('search');
+      } else {
+        params.set('search', newParams.search);
+      }
+    }
+    
+    const newUrl = params.toString() ? `?${params.toString()}` : '/admin';
+    router.push(newUrl);
+  };
 
   // Drag and drop sensors with mobile support
   const sensors = useSensors(
@@ -54,8 +87,11 @@ export default function AdminPage() {
     })
   );
 
-  // Fetch games from Convex - ALWAYS call hooks first
-  const games = useQuery(api.games.getGames) || [];
+  console.log('Sensors configured:', sensors);
+
+  // Fetch games and lists from Convex - ALWAYS call hooks first
+  const games = useQuery(api.games.getGamesWithLists) || [];
+  const gameLists = useQuery(api.gameLists.getGameLists) || [];
   const createGame = useMutation(api.games.createGame);
   const deleteGame = useMutation(api.games.deleteGame);
   const updateGameIndices = useMutation(api.games.updateGameIndices);
@@ -96,6 +132,8 @@ export default function AdminPage() {
     try {
       await createGame({
         name: newGameName.trim(),
+        emoji: newGameEmoji.trim(),
+        imageFile: newGameImageFile,
         rules: '',
         settings: {
           gameplay: 'herkes-tek',
@@ -107,6 +145,8 @@ export default function AdminPage() {
       });
       
       setNewGameName('');
+      setNewGameEmoji('');
+      setNewGameImageFile(undefined);
       setShowAddModal(false);
     } catch (error) {
       console.error('Error creating game:', error);
@@ -154,16 +194,35 @@ export default function AdminPage() {
     return 0;
   };
 
+  // Filter games based on search term and list filter
+  const filteredGames = games.filter(game => {
+    const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesList = selectedListFilter === 'all' || game.listName === selectedListFilter;
+    return matchesSearch && matchesList;
+  });
+
+  // Get unique list names for filter dropdown
+  const uniqueListNames = Array.from(new Set(games.map(game => game.listName))).sort();
+
 
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      const oldIndex = games.findIndex((game) => game._id === active.id);
-      const newIndex = games.findIndex((game) => game._id === over?.id);
+    console.log('Drag end event:', { active: active.id, over: over?.id });
 
-      const newGames = arrayMove(games, oldIndex, newIndex);
+    if (active.id !== over?.id && over?.id) {
+      const oldIndex = filteredGames.findIndex((game) => game._id === active.id);
+      const newIndex = filteredGames.findIndex((game) => game._id === over.id);
+
+      console.log('Indices:', { oldIndex, newIndex });
+
+      if (oldIndex === -1 || newIndex === -1) {
+        console.error('Could not find game indices');
+        return;
+      }
+
+      const newGames = arrayMove(filteredGames, oldIndex, newIndex);
 
       // Update indices
       const updates = newGames.map((game, index) => ({
@@ -171,8 +230,11 @@ export default function AdminPage() {
         index: index
       }));
 
+      console.log('Updates to send:', updates);
+
       try {
         await updateGameIndices({ updates });
+        console.log('Successfully updated game order');
       } catch (error) {
         console.error('Error updating game order:', error);
       }
@@ -199,6 +261,8 @@ export default function AdminPage() {
       transition,
     };
 
+    console.log('SortableItem rendered for game:', game._id, 'isDragging:', isDragging);
+
     return (
       <div
         ref={setNodeRef}
@@ -215,19 +279,28 @@ export default function AdminPage() {
                 style={{ touchAction: 'none' }}
                 {...attributes}
                 {...listeners}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
                 <DotsSix size={20} className="text-gray-800" />
               </div>
             </div>
           </div>
-          <div className="col-span-6 md:col-span-6">
+          <div className="col-span-4 md:col-span-4">
             <div className="flex items-center gap-2">
-              <span className="text-lg">
-                {game.emoji || '🎮'}
-              </span>
+              <GameImage game={game} size="sm" />
               <h3 className="text-sm font-medium text-gray-900">
                 {game.name}
               </h3>
+            </div>
+          </div>
+          <div className="hidden md:block col-span-2">
+            <div className="flex items-center justify-start">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                {game.listName}
+              </span>
             </div>
           </div>
           <div className="hidden md:block col-span-2">
@@ -299,13 +372,49 @@ export default function AdminPage() {
       {/* Games Table - Add top padding to account for fixed header */}
       <div className="px-6 py-6 pt-24">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Mevcut Oyunlar ({games.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Mevcut Oyunlar ({filteredGames.length})</h2>
         </div>
         
-        {games.length === 0 ? (
+        {/* Search and Filter Controls */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlass size={20} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => updateUrlParams({ search: e.target.value })}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Oyun adı ara..."
+            />
+          </div>
+          
+          {/* List Filter */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FunnelSimple size={20} className="text-gray-400" />
+            </div>
+            <select
+              value={selectedListFilter}
+              onChange={(e) => updateUrlParams({ list: e.target.value })}
+              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white appearance-none text-gray-800"
+            >
+              <option value="all" className="text-gray-800 bg-white">Tüm Listeler</option>
+              {uniqueListNames.map(listName => (
+                <option key={listName} value={listName} className="text-gray-800 bg-white">{listName}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        
+        {filteredGames.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-lg">
             <GameController size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Henüz oyun eklenmemiş</p>
+            <p className="text-gray-500">
+              {games.length === 0 ? 'Henüz oyun eklenmemiş' : 'Arama kriterlerinize uygun oyun bulunamadı'}
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -315,8 +424,11 @@ export default function AdminPage() {
                 <div className="col-span-1 text-sm font-medium text-gray-700">
                   
                 </div>
-                <div className="col-span-6 md:col-span-6 text-sm font-medium text-gray-700">
+                <div className="col-span-4 md:col-span-4 text-sm font-medium text-gray-700">
                   Oyun Adı
+                </div>
+                <div className="hidden md:block col-span-2 text-sm font-medium text-gray-700">
+                  Liste
                 </div>
                 <div className="hidden md:block col-span-2 text-sm font-medium text-gray-700">
                   Kurallar
@@ -331,11 +443,17 @@ export default function AdminPage() {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
+              onDragStart={(event) => {
+                console.log('Drag started:', event.active.id);
+              }}
+              onDragOver={(event) => {
+                console.log('Drag over:', event.active.id, 'over:', event.over?.id);
+              }}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={games.map(game => game._id)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={filteredGames.map(game => game._id)} strategy={verticalListSortingStrategy}>
                 <div className="divide-y divide-gray-200">
-                  {games.map((game) => (
+                  {filteredGames.map((game) => (
                     <SortableItem
                       key={game._id}
                       game={game}
@@ -378,6 +496,31 @@ export default function AdminPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Emoji
+                </label>
+                <input
+                  type="text"
+                  value={newGameEmoji}
+                  onChange={(e) => setNewGameEmoji(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  placeholder="🎮"
+                  maxLength={2}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Resim Dosyası Yükle
+                </label>
+                <ImageUpload
+                  value={newGameImageFile}
+                  onChange={setNewGameImageFile}
+                  previewSize="sm"
+                  accept="image/*"
+                />
+              </div>
 
             </div>
 
@@ -401,5 +544,20 @@ export default function AdminPage() {
       )}
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AdminPageContent />
+    </Suspense>
   );
 }

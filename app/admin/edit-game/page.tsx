@@ -11,6 +11,7 @@ import RichTextEditor from '@/components/RichTextEditor';
 import Sidebar from '@/components/Sidebar';
 import PdfUpload from '@/components/PdfUpload';
 import PdfViewer from '@/components/PdfViewer';
+import ImageUpload from '@/components/ImageUpload';
 
 function EditGameContent() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -39,6 +40,7 @@ function EditGameContent() {
   
   const [gameName, setGameName] = useState('');
   const [gameEmoji, setGameEmoji] = useState('');
+  const [gameImageFile, setGameImageFile] = useState<Id<'_storage'> | undefined>(undefined);
   const [gameRules, setGameRules] = useState('');
   const [rulesSections, setRulesSections] = useState<Array<{id: string, title: string, content: string}>>([]);
   const [gameplay, setGameplay] = useState('herkes-tek');
@@ -65,6 +67,7 @@ function EditGameContent() {
     if (game) {
       setGameName(game.name);
       setGameEmoji(game.emoji || '');
+      setGameImageFile(game.imageFile);
       setGameRules(game.rules || '');
       setGameplay(game.settings?.gameplay || 'herkes-tek');
       setCalculationMode(game.settings?.calculationMode || 'NoPoints');
@@ -100,7 +103,7 @@ function EditGameContent() {
   }, [game, gameLists]);
 
   const handleBack = () => {
-    router.push('/admin');
+    router.back();
   };
 
   const addRulesSection = () => {
@@ -171,6 +174,7 @@ function EditGameContent() {
         id: gameId,
         name: gameName.trim(),
         emoji: gameEmoji.trim(),
+        imageFile: gameImageFile,
         rules: JSON.stringify(rulesSections),
         settings: {
           gameplay,
@@ -202,7 +206,7 @@ function EditGameContent() {
         }
       }
       
-      router.push('/admin');
+      router.back();
     } catch (error) {
       console.error('Error updating game:', error);
     } finally {
@@ -330,6 +334,21 @@ function EditGameContent() {
                     placeholder="Oyun emojisini girin (örn: 🎮, 🃏, ⚡)"
                     maxLength={2}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Resim Dosyası Yükle
+                  </label>
+                  <ImageUpload
+                    value={gameImageFile}
+                    onChange={setGameImageFile}
+                    previewSize="md"
+                    accept="image/*"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Resim dosyası yüklemek için yukarıdaki alana tıklayın veya dosyayı sürükleyin
+                  </p>
                 </div>
 
               </div>

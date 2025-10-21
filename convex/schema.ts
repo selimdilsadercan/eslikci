@@ -43,6 +43,7 @@ export default defineSchema({
     rules: v.optional(v.string()),
     rulesPdf: v.optional(v.id("_storage")), // PDF file storage ID
     emoji: v.optional(v.string()), // New emoji field
+    imageFile: v.optional(v.id("_storage")), // Uploaded image file storage ID
     settings: v.object({
       gameplay: v.optional(v.string()),
       calculationMode: v.optional(v.string()),

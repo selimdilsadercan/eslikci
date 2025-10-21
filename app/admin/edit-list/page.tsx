@@ -7,6 +7,8 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { ArrowLeft, Plus, Trash, GameController, Check } from '@phosphor-icons/react';
+import Sidebar from '@/components/Sidebar';
+import GameImage from '@/components/GameImage';
 
 function EditListPageContent() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -248,7 +250,7 @@ function EditListPageContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
-                          <span className="text-lg">{game.emoji || "🎮"}</span>
+                          <GameImage game={game} size="sm" />
                           <h3 className="text-sm font-medium text-gray-900 truncate">
                             {game.name}
                           </h3>

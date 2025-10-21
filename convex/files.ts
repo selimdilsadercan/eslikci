@@ -14,3 +14,17 @@ export const getFileUrl = query({
     return await ctx.storage.getUrl(args.id);
   },
 });
+
+export const getImageUrl = query({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
+
+export const deleteFile = mutation({
+  args: { id: v.id("_storage") },
+  handler: async (ctx, args) => {
+    return await ctx.storage.delete(args.id);
+  },
+});

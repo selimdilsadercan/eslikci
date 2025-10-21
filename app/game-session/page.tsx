@@ -11,6 +11,8 @@ import GameRulesTab from '@/components/GameRulesTab';
 import GameAskTab from '@/components/GameAskTab';
 import PokerAssistantTab from '@/components/PokerAssistantTab';
 import PuanlarTab from '@/components/PuanlarTab';
+import WyrmspanHorizontalScorepad from '@/components/WyrmspanHorizontalScorepad';
+import CatanHorizontalScorepad from '@/components/CatanHorizontalScorepad';
 import { useInterstitialAd } from '@/components/InterstitialAd';
 
 function GameSessionContent() {
@@ -100,6 +102,12 @@ function GameSessionContent() {
   }
   
   const gameName = gameSave?.name || 'Oyun';
+  
+  // Check if this is a Wyrmspan game
+  const isWyrmspanGame = gameSave?.gameTemplate === 'j977daz379q5h1d266v0gkfq1h7swdvp';
+  
+  // Check if this is a Catan game
+  const isCatanGame = gameSave?.gameTemplate === 'j97468qwc0r8f3n0a04bhpgtz57sww2t';
 
   const handleBack = () => {
     // Show interstitial ad when navigating back (if ad is ready)
@@ -160,7 +168,7 @@ function GameSessionContent() {
               }`}
             >
               <ChartBar size={16} />
-              <span>Puanlar</span>
+              <span>{isWyrmspanGame || isCatanGame ? 'Puanlama' : 'Puanlar'}</span>
             </button>
             {gameSave?.gameTemplate === 'j973hj02fpn4jjr9txpb84fy717rfekq' && (
               <button
@@ -204,13 +212,19 @@ function GameSessionContent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col pt-32 pb-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
         {activeTab === 'puan-tablosu' ? (
-          <PuanlarTab
-            gameSaveId={gameSaveId as Id<'gameSaves'>}
-            isAdReady={isAdReady}
-            showInterstitial={async () => {
-              await showInterstitial();
-            }}
-          />
+          isWyrmspanGame ? (
+            <WyrmspanHorizontalScorepad gameSaveId={gameSaveId as Id<'gameSaves'>} />
+          ) : isCatanGame ? (
+            <CatanHorizontalScorepad gameSaveId={gameSaveId as Id<'gameSaves'>} />
+          ) : (
+            <PuanlarTab
+              gameSaveId={gameSaveId as Id<'gameSaves'>}
+              isAdReady={isAdReady}
+              showInterstitial={async () => {
+                await showInterstitial();
+              }}
+            />
+          )
         ) : activeTab === 'tum-kurallar' ? (
           <GameRulesTab gameId={gameSave.gameTemplate} />
         ) : activeTab === 'kural-sor' ? (

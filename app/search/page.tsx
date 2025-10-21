@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { MagnifyingGlass, ArrowLeft } from '@phosphor-icons/react';
 import Sidebar from '@/components/Sidebar';
+import GameImage from '@/components/GameImage';
 
 export default function SearchPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -174,10 +175,8 @@ export default function SearchPage() {
                       }}
                       onClick={() => handleGameSelect(game._id)}
                     >
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-2xl">
-                          {game.emoji || "🎮"}
-                        </span>
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 overflow-hidden">
+                        <GameImage game={game} size="lg" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800 text-base">
@@ -269,10 +268,8 @@ export default function SearchPage() {
                       }}
                       onClick={() => handleGameSelect(game._id)}
                     >
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-2xl">
-                          {game.emoji || "🎮"}
-                        </span>
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 overflow-hidden">
+                        <GameImage game={game} size="lg" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800 text-base">
