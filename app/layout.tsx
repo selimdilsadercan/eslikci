@@ -27,44 +27,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} antialiased`}
-      >
-        <StatusBarComponent 
-          backgroundColor="#ffffff"
-          style="light"
-          overlay={false}
-        />
+      <body className={`${inter.variable} antialiased`}>
+        <StatusBarComponent overlay={false} />
         <BackButtonHandler />
         <FirebaseAuthProvider>
           <ConvexClientProvider>
             <ProProvider>
-              <UserSyncWrapper>
-                {children}
-              </UserSyncWrapper>
+              <UserSyncWrapper>{children}</UserSyncWrapper>
             </ProProvider>
           </ConvexClientProvider>
         </FirebaseAuthProvider>
-        <Toaster 
+        <Toaster
           position="top-center"
           toastOptions={{
             duration: 2000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: "#363636",
+              color: "#fff",
             },
             success: {
               duration: 1500,
               style: {
-                background: '#10B981',
-                color: '#fff',
+                background: "#10B981",
+                color: "#fff",
               },
             },
             error: {
               duration: 2500,
               style: {
-                background: '#EF4444',
-                color: '#fff',
+                background: "#EF4444",
+                color: "#fff",
               },
             },
           }}

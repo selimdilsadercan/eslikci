@@ -70,7 +70,7 @@ export default function ListsPage() {
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -229,7 +229,7 @@ export default function ListsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: '#f4f6f9' }}>
+    <div className="min-h-screen pb-20 lg:pb-0" style={{ backgroundColor: 'var(--background)' }}>
       {/* Sidebar for wide screens */}
       <Sidebar currentPage="admin" />
       

@@ -1,28 +1,37 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '@/components/FirebaseAuthProvider';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { ArrowLeft, Plus, Trash, GameController, Check } from '@phosphor-icons/react';
-import Sidebar from '@/components/Sidebar';
-import GameImage from '@/components/GameImage';
+import { useState, useEffect, Suspense } from "react";
+import { useAuth } from "@/components/FirebaseAuthProvider";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import {
+  ArrowLeft,
+  Plus,
+  Trash,
+  GameController,
+  Check,
+} from "@phosphor-icons/react";
+import Sidebar from "@/components/Sidebar";
+import GameImage from "@/components/GameImage";
 
 function EditListPageContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const listId = searchParams.get('listId') as Id<'gameLists'>;
-  
-  const [listName, setListName] = useState('');
-  const [listEmoji, setListEmoji] = useState('');
+  const listId = searchParams.get("listId") as Id<"gameLists">;
+
+  const [listName, setListName] = useState("");
+  const [listEmoji, setListEmoji] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [selectedGames, setSelectedGames] = useState<Id<'games'>[]>([]);
+  const [selectedGames, setSelectedGames] = useState<Id<"games">[]>([]);
 
   // Fetch data from Convex
-  const gameList = useQuery(api.gameLists.getGameList, listId ? { id: listId } : "skip");
+  const gameList = useQuery(
+    api.gameLists.getGameList,
+    listId ? { id: listId } : "skip"
+  );
   const games = useQuery(api.games.getGames);
   const updateGameList = useMutation(api.gameLists.updateGameList);
   const addGamesToList = useMutation(api.gameLists.addGamesToList);
@@ -31,7 +40,7 @@ function EditListPageContent() {
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push('/');
+      router.push("/");
     }
   }, [isLoaded, isSignedIn, router]);
 
@@ -39,7 +48,7 @@ function EditListPageContent() {
   useEffect(() => {
     if (gameList) {
       setListName(gameList.name);
-      setListEmoji(gameList.emoji || '');
+      setListEmoji(gameList.emoji || "");
       setIsActive(gameList.isActive);
       setSelectedGames(gameList.gameIds);
     }
@@ -48,7 +57,10 @@ function EditListPageContent() {
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--background)" }}
+      >
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -59,7 +71,10 @@ function EditListPageContent() {
 
   if (!gameList) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--background)" }}
+      >
         <div className="text-center">
           <p className="text-gray-600">Liste bulunamadı</p>
         </div>
@@ -68,7 +83,7 @@ function EditListPageContent() {
   }
 
   const handleBack = () => {
-    router.push('/admin/lists');
+    router.push("/admin/lists");
   };
 
   const handleSave = async () => {
@@ -81,37 +96,41 @@ function EditListPageContent() {
         emoji: listEmoji.trim() || undefined,
         isActive,
       });
-      
+
       // Update games in list
       const currentGameIds = gameList.gameIds;
-      const gamesToAdd = selectedGames.filter(id => !currentGameIds.includes(id));
-      const gamesToRemove = currentGameIds.filter(id => !selectedGames.includes(id));
+      const gamesToAdd = selectedGames.filter(
+        (id) => !currentGameIds.includes(id)
+      );
+      const gamesToRemove = currentGameIds.filter(
+        (id) => !selectedGames.includes(id)
+      );
 
       if (gamesToAdd.length > 0) {
         await addGamesToList({ listId, gameIds: gamesToAdd });
       }
-      
+
       if (gamesToRemove.length > 0) {
         await removeGamesFromList({ listId, gameIds: gamesToRemove });
       }
 
-      router.push('/admin/lists');
+      router.push("/admin/lists");
     } catch (error) {
-      console.error('Error updating game list:', error);
+      console.error("Error updating game list:", error);
     }
   };
 
-  const handleGameToggle = (gameId: Id<'games'>) => {
-    setSelectedGames(prev => 
-      prev.includes(gameId) 
-        ? prev.filter(id => id !== gameId)
+  const handleGameToggle = (gameId: Id<"games">) => {
+    setSelectedGames((prev) =>
+      prev.includes(gameId)
+        ? prev.filter((id) => id !== gameId)
         : [...prev, gameId]
     );
   };
 
   const handleSelectAll = () => {
     if (games) {
-      setSelectedGames(games.map(game => game._id));
+      setSelectedGames(games.map((game) => game._id));
     }
   };
 
@@ -120,12 +139,15 @@ function EditListPageContent() {
   };
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+    <div
+      className="min-h-screen pb-20"
+      style={{ backgroundColor: "var(--background)" }}
+    >
       {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <button 
+            <button
               onClick={handleBack}
               className="p-2 hover:bg-gray-100 rounded-lg"
             >
@@ -148,8 +170,10 @@ function EditListPageContent() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* List Details */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Liste Bilgileri</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Liste Bilgileri
+            </h2>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -163,7 +187,6 @@ function EditListPageContent() {
                   placeholder="Liste adını girin"
                 />
               </div>
-
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -186,7 +209,10 @@ function EditListPageContent() {
                   onChange={(e) => setIsActive(e.target.checked)}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Liste aktif
                 </label>
               </div>
@@ -223,7 +249,10 @@ function EditListPageContent() {
               </div>
             ) : games.length === 0 ? (
               <div className="text-center py-8">
-                <GameController size={48} className="text-gray-400 mx-auto mb-4" />
+                <GameController
+                  size={48}
+                  className="text-gray-400 mx-auto mb-4"
+                />
                 <p className="text-gray-500">Henüz oyun eklenmemiş</p>
               </div>
             ) : (
@@ -233,8 +262,8 @@ function EditListPageContent() {
                     key={game._id}
                     className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
                       selectedGames.includes(game._id)
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                     onClick={() => handleGameToggle(game._id)}
                   >
@@ -270,14 +299,19 @@ function EditListPageContent() {
 
 export default function EditListPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
-        <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{ backgroundColor: "var(--background)" }}
+        >
+          <div className="text-center">
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <EditListPageContent />
     </Suspense>
   );

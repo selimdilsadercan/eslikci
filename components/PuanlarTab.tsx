@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import AdBanner from '@/components/AdBanner';
 import BottomInputArea from '@/components/BottomInputArea';
 import ConfirmModal from '@/components/ConfirmModal';
+import MunchkinScoreboard from '@/components/MunchkinScoreboard';
 
 interface PuanlarTabProps {
   gameSaveId: Id<'gameSaves'>;
@@ -480,6 +481,14 @@ export default function PuanlarTab({
       return maxRounds + 1; // Next round number
     }
   };
+
+  // Check if this is the Munchkin game
+  const isMunchkinGame = gameSave?.gameTemplate === 'j97bcby3wt6dxz8xp0rccn1x657syj68';
+
+  // If it's the Munchkin game, show the MunchkinScoreboard instead of the regular score table
+  if (isMunchkinGame) {
+    return <MunchkinScoreboard gameSaveId={gameSaveId} />;
+  }
 
   return (
     <>

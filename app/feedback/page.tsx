@@ -1,25 +1,55 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ChatCircle, Star, Bug, Lightbulb, Heart, PaperPlaneTilt, User, DeviceMobile } from '@phosphor-icons/react';
-import Header from '@/components/Header';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  ChatCircle,
+  Star,
+  Bug,
+  Lightbulb,
+  Heart,
+  PaperPlaneTilt,
+  User,
+  DeviceMobile,
+} from "@phosphor-icons/react";
+import Header from "@/components/Header";
 
 export default function FeedbackPage() {
   const router = useRouter();
-  const [feedbackType, setFeedbackType] = useState('');
+  const [feedbackType, setFeedbackType] = useState("");
   const [rating, setRating] = useState(0);
-  const [message, setMessage] = useState('');
-  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
   const feedbackTypes = [
-    { id: 'feature', label: 'Yeni Özellik Öner', icon: DeviceMobile, description: 'Yeni özellik önerisi' },
-    { id: 'bug', label: 'Sorun/Hata Bildir', icon: Bug, description: 'Hata bildirimi' },
-    { id: 'account', label: 'Hesabım', icon: User, description: 'Hesap ile ilgili sorunlar' },
-    { id: 'general', label: 'Başka bir şey', icon: ChatCircle, description: 'Diğer konular' }
+    {
+      id: "feature",
+      label: "Yeni Özellik Öner",
+      icon: DeviceMobile,
+      description: "Yeni özellik önerisi",
+    },
+    {
+      id: "bug",
+      label: "Sorun/Hata Bildir",
+      icon: Bug,
+      description: "Hata bildirimi",
+    },
+    {
+      id: "account",
+      label: "Hesabım",
+      icon: User,
+      description: "Hesap ile ilgili sorunlar",
+    },
+    {
+      id: "general",
+      label: "Başka bir şey",
+      icon: ChatCircle,
+      description: "Diğer konular",
+    },
   ];
 
   const handleTypeSelection = (type: string) => {
@@ -33,20 +63,20 @@ export default function FeedbackPage() {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Here you would typically send the feedback to your backend
-      console.log('Feedback submitted:', {
+      console.log("Feedback submitted:", {
         type: feedbackType,
         rating,
         message,
         email,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       setIsSubmitted(true);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      console.error("Error submitting feedback:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -54,8 +84,10 @@ export default function FeedbackPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
-        
+      <div
+        className="min-h-screen pb-20"
+        style={{ backgroundColor: "var(--background)" }}
+      >
         <div className="px-4 py-6">
           <button
             onClick={() => router.back()}
@@ -69,12 +101,15 @@ export default function FeedbackPage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Heart size={32} className="text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Teşekkürler!</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Teşekkürler!
+            </h2>
             <p className="text-gray-600 mb-6">
-              Geri bildiriminiz başarıyla gönderildi. Değerli görüşleriniz uygulamayı geliştirmemize yardımcı olacak.
+              Geri bildiriminiz başarıyla gönderildi. Değerli görüşleriniz
+              uygulamayı geliştirmemize yardımcı olacak.
             </p>
             <button
-              onClick={() => router.push('/profile')}
+              onClick={() => router.push("/profile")}
               className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600"
             >
               Profile Dön
@@ -86,7 +121,10 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: '#f4f6f9' }}>
+    <div
+      className="min-h-screen pb-20"
+      style={{ backgroundColor: "var(--background)" }}
+    >
       {/* Header */}
       <Header />
 
@@ -108,8 +146,12 @@ export default function FeedbackPage() {
               <ChatCircle size={24} className="text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Geri Bildirim Gönder</h1>
-              <p className="text-gray-500 text-sm">Görüşleriniz bizim için değerli</p>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Geri Bildirim Gönder
+              </h1>
+              <p className="text-gray-500 text-sm">
+                Görüşleriniz bizim için değerli
+              </p>
             </div>
           </div>
 
@@ -129,15 +171,24 @@ export default function FeedbackPage() {
                       onClick={() => setFeedbackType(type.id)}
                       className={`p-4 rounded-lg border-2 transition-colors ${
                         feedbackType === type.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <Icon size={24} className={`mx-auto mb-2 ${
-                        feedbackType === type.id ? 'text-blue-600' : 'text-gray-400'
-                      }`} />
-                      <div className="text-sm font-medium text-gray-800">{type.label}</div>
-                      <div className="text-xs text-gray-500 mt-1">{type.description}</div>
+                      <Icon
+                        size={24}
+                        className={`mx-auto mb-2 ${
+                          feedbackType === type.id
+                            ? "text-blue-600"
+                            : "text-gray-400"
+                        }`}
+                      />
+                      <div className="text-sm font-medium text-gray-800">
+                        {type.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {type.description}
+                      </div>
                     </button>
                   );
                 })}
@@ -159,25 +210,30 @@ export default function FeedbackPage() {
                   >
                     <Star
                       size={32}
-                      weight={star <= rating ? 'fill' : 'regular'}
-                      className={star <= rating ? 'text-yellow-400' : 'text-gray-300'}
+                      weight={star <= rating ? "fill" : "regular"}
+                      className={
+                        star <= rating ? "text-yellow-400" : "text-gray-300"
+                      }
                     />
                   </button>
                 ))}
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                {rating === 0 && 'Değerlendirme seçin'}
-                {rating === 1 && 'Çok kötü'}
-                {rating === 2 && 'Kötü'}
-                {rating === 3 && 'Orta'}
-                {rating === 4 && 'İyi'}
-                {rating === 5 && 'Mükemmel'}
+                {rating === 0 && "Değerlendirme seçin"}
+                {rating === 1 && "Çok kötü"}
+                {rating === 2 && "Kötü"}
+                {rating === 3 && "Orta"}
+                {rating === 4 && "İyi"}
+                {rating === 5 && "Mükemmel"}
               </p>
             </div>
 
             {/* Message */}
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Mesajınız *
               </label>
               <textarea
@@ -196,7 +252,10 @@ export default function FeedbackPage() {
 
             {/* Email (Optional) */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 E-posta (İsteğe bağlı)
               </label>
               <input
@@ -208,7 +267,8 @@ export default function FeedbackPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="text-sm text-gray-500 mt-1">
-                E-posta adresinizi verirseniz, geri bildiriminize yanıt verebiliriz.
+                E-posta adresinizi verirseniz, geri bildiriminize yanıt
+                verebiliriz.
               </p>
             </div>
 

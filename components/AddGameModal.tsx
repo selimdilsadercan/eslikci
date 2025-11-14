@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { X } from '@phosphor-icons/react';
+import { useState } from "react";
+import { X } from "@phosphor-icons/react";
 
 interface AddGameModalProps {
   isOpen: boolean;
@@ -9,41 +9,47 @@ interface AddGameModalProps {
   onAddGame: (gameName: string) => void;
 }
 
-export default function AddGameModal({ isOpen, onClose, onAddGame }: AddGameModalProps) {
-  const [gameName, setGameName] = useState('');
+export default function AddGameModal({
+  isOpen,
+  onClose,
+  onAddGame,
+}: AddGameModalProps) {
+  const [gameName, setGameName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (gameName.trim()) {
       onAddGame(gameName.trim());
-      setGameName('');
+      setGameName("");
       onClose();
     }
   };
 
   const handleClose = () => {
-    setGameName('');
+    setGameName("");
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50 p-4"
       onClick={handleClose}
     >
-      <div 
-        className="bg-white rounded-lg w-full max-w-md shadow-xl" 
-        style={{ boxShadow: '0 0 8px 5px #297dff0a' }}
+      <div
+        className="bg-white dark:bg-[var(--card-background)] rounded-lg w-full max-w-md shadow-xl"
+        style={{ boxShadow: "0 0 8px 5px #297dff0a" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-black">Yeni Oyun Ekle</h2>
+          <h2 className="text-xl font-bold text-black dark:text-gray-200">
+            Yeni Oyun Ekle
+          </h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
           >
             <X size={24} />
           </button>

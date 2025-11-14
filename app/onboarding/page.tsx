@@ -1,30 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/components/FirebaseAuthProvider';
-import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import AvatarGenerator from '@/components/AvatarGenerator';
-import { ArrowRight, Check, ArrowLeft, GameController, ChartBar, Users, CrownSimple, ListBullets, ChatCircle, Plus, Minus, Gear, Star } from '@phosphor-icons/react';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/FirebaseAuthProvider";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import AvatarGenerator from "@/components/AvatarGenerator";
+import {
+  ArrowRight,
+  Check,
+  ArrowLeft,
+  GameController,
+  ChartBar,
+  Users,
+  CrownSimple,
+  ListBullets,
+  ChatCircle,
+  Plus,
+  Minus,
+  Gear,
+  Star,
+} from "@phosphor-icons/react";
 
 export default function OnboardingPage() {
   const { user, isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
-  const [selectedAvatar, setSelectedAvatar] = useState<string>('');
+  const [selectedAvatar, setSelectedAvatar] = useState<string>("");
   const [isCompleting, setIsCompleting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [demoScores, setDemoScores] = useState<{[key: string]: number}>({
-    'player1': 15,
-    'player2': 8,
-    'player3': 22
+  const [demoScores, setDemoScores] = useState<{ [key: string]: number }>({
+    player1: 15,
+    player2: 8,
+    player3: 22,
   });
 
   // Get current user from Convex
-  const currentUser = useQuery(api.users.getUserByFirebaseId, 
+  const currentUser = useQuery(
+    api.users.getUserByFirebaseId,
     user?.uid ? { firebaseId: user.uid } : "skip"
   );
-  const player = useQuery(api.players.getPlayerById, 
+  const player = useQuery(
+    api.players.getPlayerById,
     currentUser?.playerId ? { id: currentUser.playerId } : "skip"
   );
   const updateUser = useMutation(api.users.updateUser);
@@ -33,14 +49,14 @@ export default function OnboardingPage() {
   // Redirect if not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.replace('/');
+      router.replace("/");
     }
   }, [isLoaded, isSignedIn, router]);
 
   // Redirect if user is already onboarded
   useEffect(() => {
     if (currentUser && currentUser.isOnboardingFinished) {
-      router.replace('/games');
+      router.replace("/games");
     }
   }, [currentUser, router]);
 
@@ -71,9 +87,9 @@ export default function OnboardingPage() {
       }
 
       // Redirect to games page
-      router.replace('/games');
+      router.replace("/games");
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error("Error completing onboarding:", error);
     } finally {
       setIsCompleting(false);
     }
@@ -82,7 +98,7 @@ export default function OnboardingPage() {
   const handleGoBack = () => {
     if (currentStep === 1) {
       // If on first step, go back to home/login
-      router.replace('/');
+      router.replace("/");
     } else {
       // Go back to previous step
       setCurrentStep(currentStep - 1);
@@ -97,7 +113,10 @@ export default function OnboardingPage() {
 
   if (!isLoaded || !isSignedIn || !currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f4f6f9' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--background)" }}
+      >
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -107,35 +126,45 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen w-full pb-24" style={{ backgroundColor: '#f4f6f9' }}>
+    <div
+      className="min-h-screen w-full pb-24"
+      style={{ backgroundColor: "var(--background)" }}
+    >
       <div className="max-w-md mx-auto px-6 py-8">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
             {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= step ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    currentStep >= step
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
                   {currentStep > step ? <Check size={16} /> : step}
                 </div>
                 {step < 4 && (
-                  <div className={`w-8 h-1 ${currentStep >= step + 1 ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
+                  <div
+                    className={`w-8 h-1 ${currentStep >= step + 1 ? "bg-blue-500" : "bg-gray-200"}`}
+                  ></div>
                 )}
               </div>
             ))}
           </div>
           <h1 className="text-2xl font-bold text-gray-800 text-center">
-            {currentStep === 1 && 'Hoş Geldiniz!'}
-            {currentStep === 2 && 'Oyun Özellikleri'}
-            {currentStep === 3 && 'Puan Takibi'}
-            {currentStep === 4 && 'Avatar Seçin'}
+            {currentStep === 1 && "Hoş Geldiniz!"}
+            {currentStep === 2 && "Oyun Özellikleri"}
+            {currentStep === 3 && "Puan Takibi"}
+            {currentStep === 4 && "Avatar Seçin"}
           </h1>
           <p className="text-gray-600 text-center mt-2">
-            {currentStep === 1 && 'Eşlikçi\'ye hoş geldiniz! Uygulamanın özelliklerini keşfedelim.'}
-            {currentStep === 2 && 'Oyun oturumlarınızı yönetin ve takip edin'}
-            {currentStep === 3 && 'Gerçek zamanlı puan takibi ve yönetimi'}
-            {currentStep === 4 && 'Kendinizi temsil eden bir avatar seçin'}
+            {currentStep === 1 &&
+              "Eşlikçi'ye hoş geldiniz! Uygulamanın özelliklerini keşfedelim."}
+            {currentStep === 2 && "Oyun oturumlarınızı yönetin ve takip edin"}
+            {currentStep === 3 && "Gerçek zamanlı puan takibi ve yönetimi"}
+            {currentStep === 4 && "Kendinizi temsil eden bir avatar seçin"}
           </p>
         </div>
 
@@ -149,10 +178,10 @@ export default function OnboardingPage() {
               Merhaba {currentUser.name}!
             </h2>
             <p className="text-gray-600 mb-6">
-              Eşlikçi ile masa oyunlarınızı daha eğlenceli hale getirin. 
-              Puan takibi, oyuncu yönetimi ve daha fazlası!
+              Eşlikçi ile masa oyunlarınızı daha eğlenceli hale getirin. Puan
+              takibi, oyuncu yönetimi ve daha fazlası!
             </p>
-            
+
             {/* Feature highlights */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -164,12 +193,20 @@ export default function OnboardingPage() {
                 <p className="text-sm font-medium text-gray-800">Takım Modu</p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <CrownSimple size={24} className="text-yellow-500 mx-auto mb-2" />
+                <CrownSimple
+                  size={24}
+                  className="text-yellow-500 mx-auto mb-2"
+                />
                 <p className="text-sm font-medium text-gray-800">Kral Modu</p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <ListBullets size={24} className="text-purple-500 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-800">Oyun Kuralları</p>
+                <ListBullets
+                  size={24}
+                  className="text-purple-500 mx-auto mb-2"
+                />
+                <p className="text-sm font-medium text-gray-800">
+                  Oyun Kuralları
+                </p>
               </div>
             </div>
           </div>
@@ -193,7 +230,7 @@ export default function OnboardingPage() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Demo score table */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center py-2 border-b">
@@ -203,7 +240,9 @@ export default function OnboardingPage() {
                 <div className="flex justify-between items-center py-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold text-xs">A</span>
+                      <span className="text-blue-600 font-semibold text-xs">
+                        A
+                      </span>
                     </div>
                     <span className="text-sm">Ahmet</span>
                   </div>
@@ -212,7 +251,9 @@ export default function OnboardingPage() {
                 <div className="flex justify-between items-center py-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 font-semibold text-xs">E</span>
+                      <span className="text-green-600 font-semibold text-xs">
+                        E
+                      </span>
                     </div>
                     <span className="text-sm">Elif</span>
                   </div>
@@ -221,7 +262,9 @@ export default function OnboardingPage() {
                 <div className="flex justify-between items-center py-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                      <span className="text-purple-600 font-semibold text-xs">M</span>
+                      <span className="text-purple-600 font-semibold text-xs">
+                        M
+                      </span>
                     </div>
                     <span className="text-sm">Mehmet</span>
                   </div>
@@ -232,10 +275,10 @@ export default function OnboardingPage() {
 
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">
-                Oyun oturumlarınızı oluşturun, oyuncuları ekleyin ve puanları takip edin
+                Oyun oturumlarınızı oluşturun, oyuncuları ekleyin ve puanları
+                takip edin
               </p>
             </div>
-
           </div>
         )}
 
@@ -244,13 +287,15 @@ export default function OnboardingPage() {
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <h3 className="font-semibold text-gray-800 mb-4">Puan Girişi</h3>
-              
+
               {/* Demo score input */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold text-xs">A</span>
+                      <span className="text-blue-600 font-semibold text-xs">
+                        A
+                      </span>
                     </div>
                     <span className="text-sm font-medium">Ahmet</span>
                   </div>
@@ -258,23 +303,25 @@ export default function OnboardingPage() {
                     <button className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
                       <Minus size={12} />
                     </button>
-                    <input 
-                      type="text" 
-                      value="15" 
+                    <input
+                      type="text"
+                      value="15"
                       readOnly
                       className="w-16 h-8 bg-white border-2 rounded text-center font-medium text-gray-800"
-                      style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
+                      style={{ borderColor: "rgba(134, 189, 255, 0.4)" }}
                     />
                     <button className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
                       <Plus size={12} />
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 font-semibold text-xs">E</span>
+                      <span className="text-green-600 font-semibold text-xs">
+                        E
+                      </span>
                     </div>
                     <span className="text-sm font-medium">Elif</span>
                   </div>
@@ -282,12 +329,12 @@ export default function OnboardingPage() {
                     <button className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
                       <Minus size={12} />
                     </button>
-                    <input 
-                      type="text" 
-                      value="8" 
+                    <input
+                      type="text"
+                      value="8"
                       readOnly
                       className="w-16 h-8 bg-white border-2 rounded text-center font-medium text-gray-800"
-                      style={{ borderColor: 'rgba(134, 189, 255, 0.4)' }}
+                      style={{ borderColor: "rgba(134, 189, 255, 0.4)" }}
                     />
                     <button className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
                       <Plus size={12} />
@@ -305,7 +352,10 @@ export default function OnboardingPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                <CrownSimple size={24} className="text-yellow-500 mx-auto mb-2" />
+                <CrownSimple
+                  size={24}
+                  className="text-yellow-500 mx-auto mb-2"
+                />
                 <p className="text-sm font-medium text-gray-800">Kral Modu</p>
                 <p className="text-xs text-gray-500">Kazanan belirle</p>
               </div>
@@ -321,7 +371,6 @@ export default function OnboardingPage() {
                 Gerçek zamanlı puan takibi, çoklu puan modu ve gelişmiş yönetim
               </p>
             </div>
-
           </div>
         )}
 
@@ -330,15 +379,13 @@ export default function OnboardingPage() {
           <div className="space-y-6">
             <div className="text-center">
               <AvatarGenerator
-                name={currentUser.name || 'User'}
+                name={currentUser.name || "User"}
                 size={120}
                 onAvatarChange={setSelectedAvatar}
                 initialAvatar={player?.avatar}
                 className="mb-4"
               />
             </div>
-
-
           </div>
         )}
       </div>
@@ -355,7 +402,7 @@ export default function OnboardingPage() {
                 <ArrowLeft size={16} />
                 <span>Geri Dön</span>
               </button>
-              
+
               <button
                 onClick={handleCompleteOnboarding}
                 disabled={!selectedAvatar || isCompleting}
@@ -385,10 +432,10 @@ export default function OnboardingPage() {
                   <span>Geri Dön</span>
                 </button>
               )}
-              
+
               <button
                 onClick={handleNext}
-                className={`${currentStep === 1 ? 'w-full' : 'flex-1'} bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2`}
+                className={`${currentStep === 1 ? "w-full" : "flex-1"} bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2`}
               >
                 <span>Devam Et</span>
                 <ArrowRight size={16} />
