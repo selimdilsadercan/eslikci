@@ -178,7 +178,10 @@ function GameSessionContent() {
       style={{ backgroundColor: "var(--background)" }}
     >
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[var(--card-background)] shadow-sm">
+      <div
+        className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#100D16] shadow-sm"
+        style={{ opacity: 1 }}
+      >
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button onClick={handleBack} className="mr-4">
