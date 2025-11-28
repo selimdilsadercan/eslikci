@@ -72,209 +72,164 @@ export default function MunchkinScoreboard({
     return (
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-600 dark:text-gray-400">Loading...</div>
         </div>
       </div>
     );
   }
 
-  // Helper component for score cells
-  const ScoreCell = ({
-    playerId,
-    category,
-    label,
-    icon,
-  }: {
-    playerId: string;
-    category: keyof PlayerScore;
-    label: string;
-    icon: React.ReactNode;
-  }) => {
-    const scores = playerScores[playerId] || {
-      level: 1,
-      bonus: 0,
-      gender: "male",
-    };
-    const value = scores[category];
-
-    if (category === "gender") {
-      return (
-        <div className="min-w-[120px] py-3 px-3 flex items-center justify-center border-b border-gray-200">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => updatePlayerScore(playerId, "gender", "male")}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                value === "male"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
-            >
-              ♂
-            </button>
-            <button
-              onClick={() => updatePlayerScore(playerId, "gender", "female")}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                value === "female"
-                  ? "bg-pink-500 text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
-            >
-              ♀
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    if (category === "bonus") {
-      return (
-        <div className="min-w-[120px] py-3 px-3 flex items-center justify-center border-b border-gray-200">
-          <input
-            type="number"
-            value={value}
-            onChange={(e) =>
-              updatePlayerScore(
-                playerId,
-                "bonus",
-                parseInt(e.target.value) || 0
-              )
-            }
-            className="w-16 h-8 text-center text-lg font-bold text-gray-800 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-            min="0"
-          />
-        </div>
-      );
-    }
-
-    const numericValue = value as number;
-    return (
-      <div className="min-w-[120px] py-3 px-3 flex items-center justify-center border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => adjustValue(playerId, category as "level", -1)}
-            disabled={numericValue <= 1}
-            className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-              numericValue <= 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-red-500 text-white hover:bg-red-600"
-            }`}
-          >
-            <Minus size={12} />
-          </button>
-          <span className="text-lg font-bold text-gray-800 min-w-[2rem] text-center">
-            {numericValue}
-          </span>
-          <button
-            onClick={() => adjustValue(playerId, category as "level", 1)}
-            disabled={numericValue >= 10}
-            className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-              numericValue >= 10
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-green-500 text-white hover:bg-green-600"
-            }`}
-          >
-            <Plus size={12} />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // Define scoring categories
-  const scoringCategories = [
-    {
-      key: "level" as keyof PlayerScore,
-      label: "Level",
-      icon: <Crown size={16} className="text-amber-600" />,
-    },
-    {
-      key: "bonus" as keyof PlayerScore,
-      label: "Bonus",
-      icon: <span className="text-green-600 font-bold">+</span>,
-    },
-    {
-      key: "gender" as keyof PlayerScore,
-      label: "Gender",
-      icon: <span className="text-blue-600 font-bold">♂</span>,
-    },
-  ];
-
   return (
     <div
-      className="flex-1 overflow-x-auto overflow-y-auto"
+      className="flex-1 overflow-y-auto px-4 py-6"
       style={{ backgroundColor: "var(--background)" }}
     >
-      <div className="min-w-full">
-        {/* Table - Row by Row Rendering */}
-        <div className="px-2 py-2 flex flex-col min-h-max">
-          {/* Header Row with Player Names */}
-          <div className="flex min-w-max">
-            {/* Empty cell for category names */}
-            <div
-              className="w-32 py-4 sticky left-2 z-10"
-              style={{ backgroundColor: "var(--background)" }}
-            ></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
+        {gamePlayers.map((player) => {
+          const scores = playerScores[player._id] || {
+            level: 1,
+            bonus: 0,
+            gender: "male",
+          };
 
-            {/* Player Columns */}
-            {gamePlayers.map((player) => (
-              <div
-                key={player._id}
-                className="min-w-[120px] py-4 px-3 flex flex-col items-center border-b border-gray-200"
-              >
-                <div className="flex items-center space-x-2 mb-2">
-                  {player.avatar ? (
-                    <img
-                      src={player.avatar}
-                      alt={player.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                      <span className="text-amber-600 font-semibold text-sm">
-                        {player.initial}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <span className="font-medium text-gray-800 text-sm text-center">
-                  {player.name}
-                </span>
-                <div className="mt-2 text-lg font-bold text-gray-800">
-                  Level {playerScores[player._id]?.level || 1}
+          return (
+            <div
+              key={player._id}
+              className="bg-white dark:bg-[var(--card-background)] rounded-2xl p-4 border border-gray-200 dark:border-[var(--card-border)] shadow-sm hover:shadow-lg transition-shadow"
+            >
+              {/* Player Header */}
+              <div className="flex items-center space-x-3 mb-4">
+                {player.avatar ? (
+                  <img
+                    src={player.avatar}
+                    alt={player.name}
+                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 dark:from-amber-500 dark:to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-semibold text-lg">
+                      {player.initial}
+                    </span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-200 truncate">
+                    {player.name}
+                  </h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Level {scores.level}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Scoring Category Rows */}
-          {scoringCategories.map((category) => (
-            <div key={category.key} className="flex min-w-max">
-              {/* Category Name Column */}
-              <div
-                className="w-32 py-3 px-4 flex items-center border-b border-gray-200 sticky left-2 z-10"
-                style={{ backgroundColor: "var(--background)" }}
-              >
+              {/* Level Section */}
+              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-[var(--card-border)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Crown
+                      size={18}
+                      className="text-amber-600 dark:text-amber-400"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Level
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => adjustValue(player._id, "level", -1)}
+                      disabled={scores.level <= 1}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                        scores.level <= 1
+                          ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                          : "bg-red-500 dark:bg-red-600 text-white hover:bg-red-600 dark:hover:bg-red-700"
+                      }`}
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100 min-w-[2.5rem] text-center">
+                      {scores.level}
+                    </span>
+                    <button
+                      onClick={() => adjustValue(player._id, "level", 1)}
+                      disabled={scores.level >= 10}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                        scores.level >= 10
+                          ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                          : "bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700"
+                      }`}
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bonus Section */}
+              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-[var(--card-border)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-600 dark:text-green-400 font-bold text-base">
+                      +
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Bonus
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    value={scores.bonus}
+                    onChange={(e) =>
+                      updatePlayerScore(
+                        player._id,
+                        "bonus",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
+                    className="w-16 h-8 text-center text-base font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:border-transparent"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              {/* Gender Section */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  {category.icon}
-                  <span className="text-gray-800 font-medium text-sm">
-                    {category.label}
+                  <span className="text-blue-600 dark:text-blue-400 font-bold text-base">
+                    ♂
+                  </span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Gender
                   </span>
                 </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() =>
+                      updatePlayerScore(player._id, "gender", "male")
+                    }
+                    className={`w-10 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      scores.gender === "male"
+                        ? "bg-blue-500 dark:bg-blue-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <span className="text-base font-bold">♂</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      updatePlayerScore(player._id, "gender", "female")
+                    }
+                    className={`w-10 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      scores.gender === "female"
+                        ? "bg-pink-500 dark:bg-pink-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <span className="text-base font-bold">♀</span>
+                  </button>
+                </div>
               </div>
-
-              {/* Player Score Columns */}
-              {gamePlayers.map((player) => (
-                <ScoreCell
-                  key={`${player._id}-${category.key}`}
-                  playerId={player._id}
-                  category={category.key}
-                  label={category.label}
-                  icon={category.icon}
-                />
-              ))}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );

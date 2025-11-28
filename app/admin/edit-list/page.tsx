@@ -253,7 +253,7 @@ function EditListPageContent() {
                   size={48}
                   className="text-gray-400 mx-auto mb-4"
                 />
-                <p className="text-gray-500">Henüz oyun eklenmemiş</p>
+                <p className="text-gray-600 dark:text-gray-400">Henüz oyun eklenmemiş</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

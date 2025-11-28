@@ -158,7 +158,7 @@ export default function ContactsPage() {
                       e.stopPropagation();
                       handleEditPlayer(currentUserAsPlayer._id);
                     }}
-                    className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                    className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                   >
                     <PencilSimple size={16} />
                   </button>
@@ -227,7 +227,7 @@ export default function ContactsPage() {
                         e.stopPropagation();
                         handleEditPlayer(player._id);
                       }}
-                      className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                      className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                     >
                       <PencilSimple size={16} />
                     </button>
@@ -301,14 +301,14 @@ export default function ContactsPage() {
                               e.stopPropagation();
                               handleEditPlayer(player._id);
                             }}
-                            className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                            className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                           >
                             <PencilSimple size={16} />
                           </button>
                         </div>
                       ))
                     ) : (
-                      <div className="py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+                      <div className="py-4 text-center text-gray-600 dark:text-gray-400 text-sm">
                         Bu grupta henüz kişi yok
                       </div>
                     )}
@@ -342,7 +342,7 @@ export default function ContactsPage() {
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-[var(--foreground)] mb-3">
                     Henüz kişi eklenmemiş
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed mb-8">
+                  <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8">
                     Oyun arkadaşlarınızı ekleyerek başlayın. Gruplar oluşturun
                     ve oyun deneyiminizi paylaşın.
                   </p>

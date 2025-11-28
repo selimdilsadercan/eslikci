@@ -5,6 +5,7 @@ import { ConvexClientProvider } from "@/components/ConvexProvider";
 import { FirebaseAuthProvider } from "@/components/FirebaseAuthProvider";
 import { ProProvider } from "@/components/ProProvider";
 import { UserSyncWrapper } from "@/components/UserSyncWrapper";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import StatusBarComponent from "@/components/StatusBar";
 import BackButtonHandler from "@/components/BackButtonHandler";
 import { Toaster } from "react-hot-toast";
@@ -26,17 +27,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
         <StatusBarComponent overlay={false} />
         <BackButtonHandler />
-        <FirebaseAuthProvider>
-          <ConvexClientProvider>
-            <ProProvider>
-              <UserSyncWrapper>{children}</UserSyncWrapper>
-            </ProProvider>
-          </ConvexClientProvider>
-        </FirebaseAuthProvider>
+        <ThemeProvider>
+          <FirebaseAuthProvider>
+            <ConvexClientProvider>
+              <ProProvider>
+                <UserSyncWrapper>{children}</UserSyncWrapper>
+              </ProProvider>
+            </ConvexClientProvider>
+          </FirebaseAuthProvider>
+        </ThemeProvider>
         <Toaster
           position="top-center"
           toastOptions={{

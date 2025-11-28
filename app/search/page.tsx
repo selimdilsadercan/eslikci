@@ -230,7 +230,7 @@ export default function SearchPage() {
                               {game.name}
                             </h3>
                             {search.searchQuery && (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
                                 "{search.searchQuery}" ile arandı
                               </p>
                             )}
@@ -324,7 +324,7 @@ export default function SearchPage() {
               <h3 className="text-lg font-medium text-gray-600 mb-2">
                 Sonuç bulunamadı
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-600 dark:text-gray-400">
                 Aradığınız kriterlere uygun oyun bulunamadı
               </p>
             </div>

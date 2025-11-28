@@ -465,7 +465,7 @@ function AdminPageContent() {
                 weight="regular"
                 className="text-gray-400 mx-auto mb-4"
               />
-              <p className="text-gray-500">
+              <p className="text-gray-600 dark:text-gray-400">
                 {games.length === 0
                   ? "Henüz oyun eklenmemiş"
                   : "Arama kriterlerinize uygun oyun bulunamadı"}

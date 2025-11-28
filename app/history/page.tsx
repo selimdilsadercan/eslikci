@@ -307,7 +307,7 @@ export default function HistoryPage() {
                 <h3 className="text-lg font-medium text-gray-600 mb-2">
                   Henüz oyun geçmişi yok
                 </h3>
-                <p className="text-gray-500">
+                <p className="text-gray-600 dark:text-gray-400">
                   İlk oyununuzu oluşturarak başlayın
                 </p>
               </div>

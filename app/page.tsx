@@ -23,7 +23,7 @@ export default function Home() {
       >
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -36,8 +36,10 @@ export default function Home() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="text-center w-full max-w-md px-4">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Eşlikçi</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+            Eşlikçi
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             Your companion app for table games
           </p>
           {/* White card wrapper for wide screens only */}
@@ -56,7 +58,7 @@ export default function Home() {
     >
       <div className="text-center">
         <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
-        <p className="text-gray-600">Redirecting...</p>
+        <p className="text-gray-600 dark:text-gray-400">Redirecting...</p>
       </div>
     </div>
   );

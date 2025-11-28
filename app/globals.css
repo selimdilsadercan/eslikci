@@ -14,8 +14,28 @@
   --font-sans: var(--font-inter);
 }
 
+/* Light mode (default) */
+:root,
+:root.light,
+html.light {
+  --background: #f4f6f9;
+  --foreground: #171717;
+  --card-background: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode */
+.dark,
+html.dark {
+  --background: #03000a;
+  --foreground: #ededed;
+  --card-background: rgba(247, 247, 248, 0.05);
+  --card-border: rgba(247, 247, 248, 0.1);
+}
+
+/* System preference fallback (only if no class is set) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light):not(.dark) {
     --background: #03000a;
     --foreground: #ededed;
     --card-background: rgba(247, 247, 248, 0.05);
@@ -60,10 +80,8 @@ body {
   font-size: 14px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content {
-    color: #e5e7eb;
-  }
+.dark .rich-text-content {
+  color: #e5e7eb;
 }
 
 .rich-text-content p {
@@ -71,10 +89,8 @@ body {
   color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content p {
-    color: #e5e7eb;
-  }
+.dark .rich-text-content p {
+  color: #e5e7eb;
 }
 
 .rich-text-content ul {
@@ -94,10 +110,8 @@ body {
   color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content li {
-    color: #e5e7eb;
-  }
+.dark .rich-text-content li {
+  color: #e5e7eb;
 }
 
 .rich-text-content li p {
@@ -110,10 +124,8 @@ body {
   color: #1f2937;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content strong {
-    color: #f3f4f6;
-  }
+.dark .rich-text-content strong {
+  color: #f3f4f6;
 }
 
 .rich-text-content b {
@@ -121,10 +133,8 @@ body {
   color: #1f2937;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content b {
-    color: #f3f4f6;
-  }
+.dark .rich-text-content b {
+  color: #f3f4f6;
 }
 
 .rich-text-content h1,
@@ -138,15 +148,13 @@ body {
   color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content h1,
-  .rich-text-content h2,
-  .rich-text-content h3,
-  .rich-text-content h4,
-  .rich-text-content h5,
-  .rich-text-content h6 {
-    color: #f3f4f6;
-  }
+.dark .rich-text-content h1,
+.dark .rich-text-content h2,
+.dark .rich-text-content h3,
+.dark .rich-text-content h4,
+.dark .rich-text-content h5,
+.dark .rich-text-content h6 {
+  color: #f3f4f6;
 }
 
 .rich-text-content h1 {
@@ -179,11 +187,9 @@ body {
   color: #1f2937;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content code {
-    background-color: rgba(247, 247, 248, 0.1);
-    color: #e5e7eb;
-  }
+.dark .rich-text-content code {
+  background-color: rgba(247, 247, 248, 0.1);
+  color: #e5e7eb;
 }
 
 .rich-text-content pre {
@@ -194,10 +200,8 @@ body {
   margin: 12px 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content pre {
-    background-color: rgba(247, 247, 248, 0.1);
-  }
+.dark .rich-text-content pre {
+  background-color: rgba(247, 247, 248, 0.1);
 }
 
 .rich-text-content pre code {
@@ -206,10 +210,8 @@ body {
   color: #1f2937;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content pre code {
-    color: #e5e7eb;
-  }
+.dark .rich-text-content pre code {
+  color: #e5e7eb;
 }
 
 .rich-text-content table {
@@ -225,11 +227,9 @@ body {
   text-align: left;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content th,
-  .rich-text-content td {
-    border-color: rgba(247, 247, 248, 0.2);
-  }
+.dark .rich-text-content th,
+.dark .rich-text-content td {
+  border-color: rgba(247, 247, 248, 0.2);
 }
 
 .rich-text-content th {
@@ -238,19 +238,60 @@ body {
   color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content th {
-    background-color: rgba(247, 247, 248, 0.1);
-    color: #f3f4f6;
-  }
+.dark .rich-text-content th {
+  background-color: rgba(247, 247, 248, 0.1);
+  color: #f3f4f6;
 }
 
 .rich-text-content td {
   color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  .rich-text-content td {
-    color: #e5e7eb;
-  }
+.dark .rich-text-content td {
+  color: #e5e7eb;
+}
+
+/* Poker Chip Styles */
+.pokerchip {
+  display: inline-block;
+}
+.pokerchipOuter {
+  box-sizing: initial !important;
+  transform-origin: top left;
+  position: relative;
+  width: 151px;
+  height: 151px;
+  box-shadow:
+    0 0 5px 1px rgba(0, 0, 0, 0.5),
+    0 0 3px 0 rgba(0, 0, 0, 0.4) inset;
+  border-radius: 50%;
+  background-size: 151px 151px;
+  background-position: center center;
+}
+.innerChipBorder {
+  position: absolute;
+  z-index: 1;
+  width: 117px;
+  height: 117px;
+  border-radius: 50%;
+  top: 9px;
+  left: 9px;
+  background-size: 151px 151px;
+  background-position: center center;
+}
+.chipContent {
+  user-select: none;
+  z-index: 2;
+  position: absolute;
+  text-align: center;
+  font: bold 50px/111px Arial;
+  white-space: pre;
+  width: 111px;
+  height: 111px;
+  border-radius: 50%;
+  top: 20px;
+  left: 20px;
+  text-shadow:
+    -1px -1px 0px rgba(0, 0, 0, 0.3),
+    1px 1px 0px rgba(255, 255, 255, 0.2);
 }

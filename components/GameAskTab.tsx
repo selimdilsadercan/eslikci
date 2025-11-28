@@ -132,7 +132,7 @@ export default function GameAskTab({ gameId }: GameAskTabProps) {
             <h4 className="text-lg font-semibold text-gray-700 mb-2">
               Kural Asistanına Hoş Geldiniz
             </h4>
-            <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
               Oyun kuralları hakkında merak ettiğiniz her şeyi sorabilirsiniz.
               Nasıl oynanır, puanlama nasıl yapılır, takım modu nasıl çalışır
               gibi sorularınızı yanıtlayabilirim.

@@ -390,7 +390,7 @@ function EditGameContent() {
                       previewSize="md"
                       accept="image/*"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                       Resim dosyası yüklemek için yukarıdaki alana tıklayın veya
                       dosyayı sürükleyin
                     </p>
@@ -791,7 +791,7 @@ function EditGameContent() {
                     ))}
 
                     {rulesSections.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-8 text-gray-600 dark:text-gray-400">
                         <p>Henüz kural bölümü eklenmemiş</p>
                         <p className="text-sm">
                           Aşağıdaki "Bölüm Ekle" butonuna tıklayarak başlayın
@@ -858,7 +858,7 @@ function EditGameContent() {
                     size={48}
                     className="text-gray-400 mx-auto mb-4"
                   />
-                  <p className="text-gray-500">Henüz liste oluşturulmamış</p>
+                  <p className="text-gray-600 dark:text-gray-400">Henüz liste oluşturulmamış</p>
                   <p className="text-sm text-gray-400 mt-2">
                     <a
                       href="/admin/lists"

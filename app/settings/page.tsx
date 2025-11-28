@@ -8,11 +8,19 @@ import { api } from "@/convex/_generated/api";
 import ConfirmModal from "@/components/ConfirmModal";
 import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
-import { ArrowLeft, ArrowClockwise } from "@phosphor-icons/react";
+import { useTheme } from "@/components/ThemeProvider";
+import {
+  ArrowLeft,
+  ArrowClockwise,
+  Sun,
+  Moon,
+  Monitor,
+} from "@phosphor-icons/react";
 
 export default function SettingsPage() {
   const { user, isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
 
@@ -71,6 +79,89 @@ export default function SettingsPage() {
           <div className="max-w-sm mx-auto">
             {/* Settings Sections */}
             <div className="space-y-3">
+              {/* Theme Section */}
+              <div className="bg-white/80 dark:bg-[var(--card-background)] rounded-2xl p-4 border border-gray-200 dark:border-[var(--card-border)] shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                    {resolvedTheme === "dark" ? (
+                      <Moon className="w-5 h-5 text-white" weight="fill" />
+                    ) : (
+                      <Sun className="w-5 h-5 text-white" weight="fill" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                      Tema
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Açık veya koyu mod seçin
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setTheme("light")}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      theme === "light"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Sun
+                        size={20}
+                        weight={theme === "light" ? "fill" : "regular"}
+                      />
+                      <span className="font-medium">Açık Mod</span>
+                    </div>
+                    {theme === "light" && (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => setTheme("dark")}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      theme === "dark"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Moon
+                        size={20}
+                        weight={theme === "dark" ? "fill" : "regular"}
+                      />
+                      <span className="font-medium">Koyu Mod</span>
+                    </div>
+                    {theme === "dark" && (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => setTheme("system")}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      theme === "system"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Monitor
+                        size={20}
+                        weight={theme === "system" ? "fill" : "regular"}
+                      />
+                      <span className="font-medium">Sistem Ayarı</span>
+                    </div>
+                    {theme === "system" && (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               {/* Onboarding Section */}
               <div className="bg-white/80 dark:bg-[var(--card-background)] rounded-2xl p-4 border border-gray-200 dark:border-[var(--card-border)] shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
@@ -81,7 +172,7 @@ export default function SettingsPage() {
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200">
                       Onboarding
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Profil kurulumunu yeniden başlat
                     </p>
                   </div>
@@ -113,7 +204,7 @@ export default function SettingsPage() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       Ad:
                     </span>
                     <span className="text-gray-800 dark:text-gray-200">
@@ -121,7 +212,7 @@ export default function SettingsPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       E-posta:
                     </span>
                     <span className="text-gray-800 dark:text-gray-200">
@@ -129,7 +220,7 @@ export default function SettingsPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       Onboarding:
                     </span>
                     <span

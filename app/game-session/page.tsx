@@ -16,6 +16,7 @@ import {
 import GameRulesTab from "@/components/GameRulesTab";
 import GameAskTab from "@/components/GameAskTab";
 import PokerAssistantTab from "@/components/PokerAssistantTab";
+import PokerGame from "@/components/PokerGame";
 import PuanlarTab from "@/components/PuanlarTab";
 import WyrmspanHorizontalScorepad from "@/components/WyrmspanHorizontalScorepad";
 import CatanHorizontalScorepad from "@/components/CatanHorizontalScorepad";
@@ -89,7 +90,7 @@ function GameSessionContent() {
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading game data...</p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
             {gameSave === undefined && "Loading game save..."}
             {currentUser === undefined && "Loading user..."}
           </p>
@@ -132,6 +133,10 @@ function GameSessionContent() {
   // Check if this is a Catan game
   const isCatanGame =
     gameSave?.gameTemplate === "j97468qwc0r8f3n0a04bhpgtz57sww2t";
+
+  // Check if this is a Poker game
+  const isPokerGame =
+    gameSave?.gameTemplate === "j973hj02fpn4jjr9txpb84fy717rfekq";
 
   const handleBack = () => {
     // Show interstitial ad when navigating back (if ad is ready)
@@ -183,7 +188,9 @@ function GameSessionContent() {
               {gameName}
             </h1>
           </div>
-          <span className="text-sm text-gray-500">{getTimeAgo()}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {getTimeAgo()}
+          </span>
         </div>
 
         {/* Navigation Tabs */}
@@ -191,10 +198,10 @@ function GameSessionContent() {
           <div className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab("puan-tablosu")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "puan-tablosu"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ChartBar size={16} />
@@ -205,10 +212,10 @@ function GameSessionContent() {
             {gameSave?.gameTemplate === "j973hj02fpn4jjr9txpb84fy717rfekq" && (
               <button
                 onClick={() => setActiveTab("poker-helper")}
-                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                   activeTab === "poker-helper"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600"
+                    ? "text-white bg-blue-500 dark:bg-blue-600"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 }`}
               >
                 <Spade size={16} />
@@ -217,10 +224,10 @@ function GameSessionContent() {
             )}
             <button
               onClick={() => setActiveTab("kural-sor")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "kural-sor"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ChatCircle size={16} />
@@ -228,10 +235,10 @@ function GameSessionContent() {
             </button>
             <button
               onClick={() => setActiveTab("tum-kurallar")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "tum-kurallar"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ListBullets size={16} />
@@ -247,7 +254,9 @@ function GameSessionContent() {
         style={{ minHeight: "calc(100vh - 140px)" }}
       >
         {activeTab === "puan-tablosu" ? (
-          isWyrmspanGame ? (
+          isPokerGame ? (
+            <PokerGame gameSaveId={gameSaveId as Id<"gameSaves">} />
+          ) : isWyrmspanGame ? (
             <WyrmspanHorizontalScorepad
               gameSaveId={gameSaveId as Id<"gameSaves">}
             />

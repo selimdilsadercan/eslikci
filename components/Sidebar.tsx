@@ -174,7 +174,7 @@ export default function Sidebar({ currentPage }: SidebarProps) {
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive(item.page)
                   ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-[var(--card-background)]"
-                  : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[var(--card-background)]"
+                  : "text-gray-900 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[var(--card-background)]"
               }`}
             >
               {item.icon}
@@ -195,7 +195,7 @@ export default function Sidebar({ currentPage }: SidebarProps) {
             ) : (
               <div className="w-8 h-8 bg-gray-200 dark:bg-[var(--card-background)] rounded-full flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                  className="w-4 h-4 text-gray-800 dark:text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -216,7 +216,7 @@ export default function Sidebar({ currentPage }: SidebarProps) {
                   user?.email?.split("@")[0] ||
                   "Kullanıcı"}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-xs text-gray-700 dark:text-gray-400 truncate">
                 {user?.email || "user@example.com"}
               </p>
             </div>
@@ -270,7 +270,7 @@ export default function Sidebar({ currentPage }: SidebarProps) {
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-2">
                 Çıkış Yap
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 Hesabınızdan çıkmak istediğinizden emin misiniz?
               </p>
               <div className="flex gap-3">

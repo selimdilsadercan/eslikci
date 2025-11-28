@@ -266,7 +266,7 @@ export default function ListsPage() {
         {gameLists.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-lg">
             <ListBullets size={48} weight="regular" className="text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Henüz liste eklenmemiş</p>
+            <p className="text-gray-600 dark:text-gray-400">Henüz liste eklenmemiş</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">

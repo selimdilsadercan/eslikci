@@ -109,7 +109,7 @@ export default function AppBar({ currentPage }: AppBarProps) {
               className={`flex-1 flex flex-col items-center gap-1 py-2 px-2 rounded-xl transition-all duration-200 ${
                 isActive(item.page)
                   ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-[var(--card-background)]"
-                  : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  : "text-gray-900 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
               }`}
             >
               {item.icon}

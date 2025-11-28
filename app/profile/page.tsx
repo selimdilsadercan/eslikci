@@ -84,7 +84,7 @@ export default function ProfilePage() {
                   "Kullanıcı"
                 )}
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 {user?.email}
               </p>
             </div>
@@ -114,11 +114,11 @@ export default function ProfilePage() {
                     <h3 className="font-semibold">
                       {isPro ? "Pro Aktif" : "Pro Özellikler"}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {isPro ? "Reklamsız deneyim" : "Pro'ya yükselt"}
                     </p>
                   </div>
-                  <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -160,11 +160,11 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex-1 text-left">
                       <h3 className="font-semibold">Admin Paneli</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Oyunları yönet
                       </p>
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-gray-600 dark:text-gray-400">
                       <svg
                         className="w-5 h-5"
                         fill="none"
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                   <div className="flex-1">
                     <h3 className="font-semibold">Profili Düzenle</h3>
                   </div>
-                  <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold">Geri Bildirim Gönder</h3>
                   </div>
-                  <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -297,7 +297,7 @@ export default function ProfilePage() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold">Ayarlar</h3>
                   </div>
-                  <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold">Hakkımızda</h3>
                   </div>
-                  <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"

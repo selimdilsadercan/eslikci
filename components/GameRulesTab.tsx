@@ -72,7 +72,7 @@ export default function GameRulesTab({ gameId }: GameRulesTabProps) {
           <h4 className="text-xl font-semibold text-gray-700 mb-3">
             Kurallar henüz eklenmemiş
           </h4>
-          <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
             Bu oyun için kurallar henüz tanımlanmamış. Oyun yöneticisi kuralları
             eklediğinde burada görünecektir.
           </p>

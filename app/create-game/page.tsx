@@ -452,10 +452,10 @@ function CreateGameContent() {
           <div className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab("oyun-kur")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "oyun-kur"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ChartBar size={16} />
@@ -464,10 +464,10 @@ function CreateGameContent() {
             {gameId === "j973hj02fpn4jjr9txpb84fy717rfekq" && (
               <button
                 onClick={() => setActiveTab("poker-helper")}
-                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+                className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                   activeTab === "poker-helper"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600"
+                    ? "text-white bg-blue-500 dark:bg-blue-600"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 }`}
               >
                 <Spade size={16} />
@@ -476,10 +476,10 @@ function CreateGameContent() {
             )}
             <button
               onClick={() => setActiveTab("sor")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "sor"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ChatCircle size={16} />
@@ -487,10 +487,10 @@ function CreateGameContent() {
             </button>
             <button
               onClick={() => setActiveTab("kurallar")}
-              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 ${
+              className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 flex-shrink-0 rounded-lg transition-colors ${
                 activeTab === "kurallar"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600"
+                  ? "text-white bg-blue-500 dark:bg-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               <ListBullets size={16} />

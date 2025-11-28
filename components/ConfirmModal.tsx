@@ -48,7 +48,7 @@ export default function ConfirmModal({
               </Drawer.Title>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 <X size={20} />
               </button>
