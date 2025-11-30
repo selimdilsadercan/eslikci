@@ -70,7 +70,7 @@ export default function SearchPage() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -171,9 +171,9 @@ export default function SearchPage() {
                             boxShadow: "0 0 8px 5px #297dff0a",
                           }}
                         >
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse mr-3"></div>
+                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mr-3"></div>
                           <div className="flex-1">
-                            <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32"></div>
                           </div>
                         </div>
                       ))
@@ -268,9 +268,9 @@ export default function SearchPage() {
                             boxShadow: "0 0 8px 5px #297dff0a",
                           }}
                         >
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse mr-3"></div>
+                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mr-3"></div>
                           <div className="flex-1">
-                            <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32"></div>
                           </div>
                         </div>
                       ))
@@ -308,10 +308,10 @@ export default function SearchPage() {
                     boxShadow: "0 0 8px 5px #297dff0a",
                   }}
                 >
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse mr-3"></div>
+                  <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mr-3"></div>
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-32 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32 mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20"></div>
                   </div>
                 </div>
               ))}

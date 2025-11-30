@@ -523,14 +523,14 @@ function CreateGameContent() {
 
       {/* Fixed White Rectangle at Bottom - Hide when Sor or Kurallar tab is selected */}
       {activeTab === "oyun-kur" && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[var(--card-background)] rounded-t-3xl shadow-lg">
           <div className="p-6">
             {currentStep === 1 ? (
               // Player Selection in Bottom Panel
               <>
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4 -mx-0.5">
-                  <h2 className="text-lg font-semibold text-gray-800">
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                     Oyuncu Seç
                   </h2>
                   <div className="flex items-center gap-5">
@@ -560,7 +560,7 @@ function CreateGameContent() {
                         placeholder="Oyuncu ara..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <svg
@@ -586,7 +586,7 @@ function CreateGameContent() {
                   {/* Current User */}
                   {currentUserAsPlayer && (
                     <div className="mb-6">
-                      <h3 className="text-sm font-medium text-gray-600 mb-2">
+                      <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                         Ben
                       </h3>
                       <div className="space-y-0.5">
@@ -610,7 +610,7 @@ function CreateGameContent() {
                                 </span>
                               </div>
                             )}
-                            <span className="font-normal text-black text-sm">
+                            <span className="font-normal text-black dark:text-gray-200 text-sm">
                               {currentUserAsPlayer.name}
                             </span>
                           </div>
@@ -621,7 +621,7 @@ function CreateGameContent() {
                             className={`w-5 h-5 border-2 flex items-center justify-center ${
                               selectedPlayers.includes(currentUserAsPlayer._id)
                                 ? "bg-blue-500 border-blue-500"
-                                : "bg-white border-blue-500"
+                                : "bg-white dark:bg-[var(--card-background)] border-blue-500"
                             }`}
                           >
                             {selectedPlayers.includes(
@@ -649,7 +649,7 @@ function CreateGameContent() {
                   {filteredGroupedPlayers.ungrouped &&
                     filteredGroupedPlayers.ungrouped.length > 0 && (
                       <div className="mb-6">
-                        <h3 className="text-sm font-medium text-gray-600 mb-2">
+                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                           Gruplandırılmamış
                         </h3>
                         <div className="space-y-0.5">
@@ -675,7 +675,7 @@ function CreateGameContent() {
                                     </span>
                                   </div>
                                 )}
-                                <span className="font-normal text-black text-sm truncate max-w-[200px]">
+                                <span className="font-normal text-black dark:text-gray-200 text-sm truncate max-w-[200px]">
                                   {player.name}
                                 </span>
                               </div>
@@ -684,7 +684,7 @@ function CreateGameContent() {
                                 className={`w-5 h-5 border-2 flex items-center justify-center ${
                                   selectedPlayers.includes(player._id)
                                     ? "bg-blue-500 border-blue-500"
-                                    : "bg-white border-blue-500"
+                                    : "bg-white dark:bg-[var(--card-background)] border-blue-500"
                                 }`}
                               >
                                 {selectedPlayers.includes(player._id) && (
@@ -715,7 +715,7 @@ function CreateGameContent() {
 
                     return (
                       <div key={group._id} className="mb-6">
-                        <h3 className="text-sm font-medium text-gray-600 mb-2">
+                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                           {group.name}
                         </h3>
                         <div className="space-y-0.5">
@@ -741,7 +741,7 @@ function CreateGameContent() {
                                     </span>
                                   </div>
                                 )}
-                                <span className="font-normal text-black text-sm truncate max-w-[200px]">
+                                <span className="font-normal text-black dark:text-gray-200 text-sm truncate max-w-[200px]">
                                   {player.name}
                                 </span>
                               </div>
@@ -750,7 +750,7 @@ function CreateGameContent() {
                                 className={`w-5 h-5 border-2 flex items-center justify-center ${
                                   selectedPlayers.includes(player._id)
                                     ? "bg-blue-500 border-blue-500"
-                                    : "bg-white border-blue-500"
+                                    : "bg-white dark:bg-[var(--card-background)] border-blue-500"
                                 }`}
                               >
                                 {selectedPlayers.includes(player._id) && (
@@ -785,10 +785,10 @@ function CreateGameContent() {
                       <div className="grid grid-cols-2 gap-4">
                         {/* Kırmızı Takım */}
                         <div>
-                          <h2 className="text-sm font-semibold text-gray-800 mb-3">
+                          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
                             Kırmızı Takım:
                           </h2>
-                          <div className="min-h-[120px] p-4 border-2 border-dashed border-red-300 rounded-lg bg-red-50">
+                          <div className="min-h-[120px] p-4 border-2 border-dashed border-red-300 dark:border-red-700 rounded-lg bg-red-50 dark:bg-red-950/30">
                             <div className="flex flex-wrap gap-2">
                               {redTeam.map((playerId) => {
                                 const player = allPlayers.find(
@@ -804,7 +804,7 @@ function CreateGameContent() {
                               })}
                             </div>
                             {redTeam.length === 0 && (
-                              <p className="text-gray-500 text-sm">
+                              <p className="text-gray-500 dark:text-gray-400 text-sm">
                                 Kırmızı takım oyuncuları
                               </p>
                             )}
@@ -813,10 +813,10 @@ function CreateGameContent() {
 
                         {/* Mavi Takım */}
                         <div>
-                          <h2 className="text-sm font-semibold text-gray-800 mb-3">
+                          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
                             Mavi Takım:
                           </h2>
-                          <div className="min-h-[120px] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
+                          <div className="min-h-[120px] p-4 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-950/30">
                             <div className="flex flex-wrap gap-2">
                               {blueTeam.map((playerId) => {
                                 const player = allPlayers.find(
@@ -832,7 +832,7 @@ function CreateGameContent() {
                               })}
                             </div>
                             {blueTeam.length === 0 && (
-                              <p className="text-gray-500 text-sm">
+                              <p className="text-gray-500 dark:text-gray-400 text-sm">
                                 Mavi takım oyuncuları
                               </p>
                             )}
@@ -842,7 +842,7 @@ function CreateGameContent() {
                     </>
                   ) : (
                     <div>
-                      <h2 className="text-sm font-semibold text-gray-800 mb-3">
+                      <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
                         Oyuncular:
                       </h2>
                       <div className="flex flex-wrap gap-2">
@@ -881,7 +881,7 @@ function CreateGameContent() {
 
                   {/* Oynanış */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Oynanış:
                     </h2>
                     <div className="flex gap-2">
@@ -892,7 +892,7 @@ function CreateGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           gameSettings.gameplay === "herkes-tek"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           gameSettings.gameplay === "herkes-tek"
@@ -907,7 +907,7 @@ function CreateGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           gameSettings.gameplay === "takimli"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           gameSettings.gameplay === "takimli"
@@ -926,9 +926,9 @@ function CreateGameContent() {
                       onClick={() =>
                         setShowAdvancedSettings(!showAdvancedSettings)
                       }
-                      className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between w-full p-3 bg-gray-50 dark:bg-[rgba(247,247,248,0.05)] rounded-lg hover:bg-gray-100 dark:hover:bg-[rgba(247,247,248,0.1)] transition-colors"
                     >
-                      <h2 className="text-sm font-semibold text-gray-800">
+                      <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                         Gelişmiş Ayarlar
                       </h2>
                       <CaretDown
@@ -940,10 +940,10 @@ function CreateGameContent() {
                     </button>
 
                     {showAdvancedSettings && (
-                      <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                      <div className="space-y-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                         {/* Hesaplama Modu */}
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                             Hesaplama Modu:
                           </h3>
                           <div className="flex gap-2">
@@ -954,7 +954,7 @@ function CreateGameContent() {
                               className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                                 gameSettings.calculationMode === "NoPoints"
                                   ? "text-white"
-                                  : "text-gray-800"
+                                  : "text-gray-800 dark:text-gray-300"
                               }`}
                               style={
                                 gameSettings.calculationMode === "NoPoints"
@@ -971,7 +971,7 @@ function CreateGameContent() {
                               className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                                 gameSettings.calculationMode === "Points"
                                   ? "text-white"
-                                  : "text-gray-800"
+                                  : "text-gray-800 dark:text-gray-300"
                               }`}
                               style={
                                 gameSettings.calculationMode === "Points"
@@ -986,7 +986,7 @@ function CreateGameContent() {
 
                         {/* Puanlama */}
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                             Puanlama:
                           </h3>
                           <div className="flex gap-2">
@@ -997,7 +997,7 @@ function CreateGameContent() {
                               className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                                 gameSettings.scoringTiming === "tur-sonu"
                                   ? "text-white"
-                                  : "text-gray-800"
+                                  : "text-gray-800 dark:text-gray-300"
                               }`}
                               style={
                                 gameSettings.scoringTiming === "tur-sonu"
@@ -1014,7 +1014,7 @@ function CreateGameContent() {
                               className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                                 gameSettings.scoringTiming === "oyun-sonu"
                                   ? "text-white"
-                                  : "text-gray-800"
+                                  : "text-gray-800 dark:text-gray-300"
                               }`}
                               style={
                                 gameSettings.scoringTiming === "oyun-sonu"
@@ -1029,7 +1029,7 @@ function CreateGameContent() {
 
                         {/* Tur Kazananı - Conditional based on calculation mode */}
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                             Kazanan:
                           </h3>
                           <div className="flex gap-2">
@@ -1043,7 +1043,7 @@ function CreateGameContent() {
                                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                                     gameSettings.roundWinner === "Highest"
                                       ? "text-white"
-                                      : "text-gray-800"
+                                      : "text-gray-800 dark:text-gray-300"
                                   }`}
                                   style={
                                     gameSettings.roundWinner === "Highest"
@@ -1061,7 +1061,7 @@ function CreateGameContent() {
                                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                                     gameSettings.roundWinner === "Lowest"
                                       ? "text-white"
-                                      : "text-gray-800"
+                                      : "text-gray-800 dark:text-gray-300"
                                   }`}
                                   style={
                                     gameSettings.roundWinner === "Lowest"
@@ -1083,7 +1083,7 @@ function CreateGameContent() {
                                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                                     gameSettings.roundWinner === "Highest"
                                       ? "text-white"
-                                      : "text-gray-800"
+                                      : "text-gray-800 dark:text-gray-300"
                                   }`}
                                   style={
                                     gameSettings.roundWinner === "Highest"
@@ -1101,7 +1101,7 @@ function CreateGameContent() {
                                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                                     gameSettings.roundWinner === "Lowest"
                                       ? "text-white"
-                                      : "text-gray-800"
+                                      : "text-gray-800 dark:text-gray-300"
                                   }`}
                                   style={
                                     gameSettings.roundWinner === "Lowest"
@@ -1120,7 +1120,7 @@ function CreateGameContent() {
                         {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
                         {gameSettings.calculationMode === "Points" && (
                           <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
-                            <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                               Tur İçi Puan Sayısı:
                             </h3>
                             <div className="flex gap-2">
@@ -1131,7 +1131,7 @@ function CreateGameContent() {
                                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                                   gameSettings.pointsPerRound === "Single"
                                     ? "text-white"
-                                    : "text-gray-800"
+                                    : "text-gray-800 dark:text-gray-300"
                                 }`}
                                 style={
                                   gameSettings.pointsPerRound === "Single"
@@ -1151,7 +1151,7 @@ function CreateGameContent() {
                                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                                   gameSettings.pointsPerRound === "Multiple"
                                     ? "text-white"
-                                    : "text-gray-800"
+                                    : "text-gray-800 dark:text-gray-300"
                                 }`}
                                 style={
                                   gameSettings.pointsPerRound === "Multiple"
@@ -1167,7 +1167,7 @@ function CreateGameContent() {
 
                         {/* Toplam Sütununu Gizle */}
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                             Toplam Sütununu Gizle:
                           </h3>
                           <button
@@ -1179,8 +1179,8 @@ function CreateGameContent() {
                             }
                             className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
                               gameSettings.hideTotalColumn
-                                ? "border-gray-300"
-                                : "border-gray-300"
+                                ? "border-gray-300 dark:border-gray-600"
+                                : "border-gray-300 dark:border-gray-600"
                             }`}
                             style={
                               gameSettings.hideTotalColumn
@@ -1205,7 +1205,7 @@ function CreateGameContent() {
               {currentStep === 2 && (
                 <button
                   onClick={() => setCurrentStep(1)}
-                  className="flex-1 bg-white border-2 border-blue-500 text-blue-500 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2"
+                  className="flex-1 bg-white dark:bg-[var(--card-background)] border-2 border-blue-500 text-blue-500 dark:text-blue-400 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2"
                 >
                   <ArrowLeft size={20} />
                   <span>Önceki Adım</span>

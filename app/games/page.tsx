@@ -19,10 +19,12 @@ import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
 import GameImage from "@/components/GameImage";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function GamesPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const games = useQuery(api.games.getGames);
   const gameLists = useQuery(api.gameLists.getGameLists);
   const createGame = useMutation(api.games.createGame);
@@ -54,7 +56,7 @@ export default function GamesPage() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -176,9 +178,10 @@ export default function GamesPage() {
               />
               <button
                 onClick={handleSearchClick}
-                className="w-full bg-white dark:bg-[var(--card-background)] rounded-lg border border-gray-200 pl-10 pr-4 py-3 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="w-full bg-white dark:bg-[var(--card-background)] rounded-lg border border-gray-200 dark:border-gray-700 pl-10 pr-4 py-3 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors cursor-pointer"
                 style={{
-                  boxShadow: "0 0 8px 5px #297dff0a",
+                  boxShadow:
+                    resolvedTheme === "dark" ? "none" : "0 0 8px 5px #297dff0a",
                 }}
               >
                 Oyun ara...
@@ -192,7 +195,7 @@ export default function GamesPage() {
             <div className="space-y-8 mb-8">
               {["Loading..."].map((section, index) => (
                 <div key={index}>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse w-32 mb-4"></div>
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32 mb-4"></div>
                   <div className="grid grid-cols-2 gap-3">
                     {Array.from({ length: 4 }).map((_, gameIndex) => (
                       <div
@@ -201,12 +204,15 @@ export default function GamesPage() {
                         style={{
                           padding: "16px",
                           height: "100px",
-                          boxShadow: "0 0 8px 5px #297dff0a",
+                          boxShadow:
+                            resolvedTheme === "dark"
+                              ? "none"
+                              : "0 0 8px 5px #297dff0a",
                         }}
                       >
                         <div className="flex flex-col justify-center h-full">
-                          <div className="h-5 bg-gray-200 rounded animate-pulse w-20 mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+                          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20 mb-2"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16"></div>
                         </div>
                       </div>
                     ))}
@@ -240,7 +246,7 @@ export default function GamesPage() {
                   {getRecentlyPlayedGames().map((game) => (
                     <div
                       key={game._id}
-                      className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                      className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer transition-all duration-200 hover:scale-105"
                       style={{
                         padding: "12px",
                         height: "50px",
@@ -287,7 +293,10 @@ export default function GamesPage() {
                                 padding: "16px",
                                 height: "100px",
                                 width: "140px",
-                                boxShadow: "0 0 8px 5px #297dff0a",
+                                boxShadow:
+                                  resolvedTheme === "dark"
+                                    ? "none"
+                                    : "0 0 8px 5px #297dff0a",
                               }}
                               onClick={() => handleGameSelect(game._id)}
                             >
@@ -358,12 +367,15 @@ export default function GamesPage() {
                       {games?.slice(0, 8).map((game) => (
                         <div
                           key={game._id}
-                          className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                          className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 flex-shrink-0"
                           style={{
                             padding: "16px",
                             height: "100px",
                             width: "140px",
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                           onClick={() => handleGameSelect(game._id)}
                         >
@@ -390,12 +402,15 @@ export default function GamesPage() {
                   {games?.map((game) => (
                     <div
                       key={game._id}
-                      className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+                      className="bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 flex-shrink-0"
                       style={{
                         padding: "16px",
                         height: "100px",
                         width: "140px",
-                        boxShadow: "0 0 8px 5px #297dff0a",
+                        boxShadow:
+                          resolvedTheme === "dark"
+                            ? "none"
+                            : "0 0 8px 5px #297dff0a",
                       }}
                       onClick={() => handleGameSelect(game._id)}
                     >

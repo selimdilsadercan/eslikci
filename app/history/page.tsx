@@ -13,10 +13,12 @@ import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function HistoryPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<Id<"gameSaves"> | null>(
     null
@@ -54,7 +56,7 @@ export default function HistoryPage() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -196,15 +198,18 @@ export default function HistoryPage() {
                   key={index}
                   className="bg-white dark:bg-[var(--card-background)] rounded-lg p-4 flex items-center justify-between"
                   style={{
-                    boxShadow: "0 0 8px 5px #297dff0a",
+                    boxShadow:
+                      resolvedTheme === "dark"
+                        ? "none"
+                        : "0 0 8px 5px #297dff0a",
                   }}
                 >
                   <div className="flex-1">
-                    <div className="h-6 bg-gray-200 rounded animate-pulse w-32 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-48 mb-1"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-40"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-48 mb-1"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-40"></div>
                   </div>
-                  <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                 </div>
               ))
             ) : gameSaves.length > 0 ? (
@@ -229,7 +234,10 @@ export default function HistoryPage() {
                               key={gameSave._id}
                               className="bg-white dark:bg-[var(--card-background)] rounded-lg p-4 flex items-center justify-between"
                               style={{
-                                boxShadow: "0 0 8px 5px #297dff0a",
+                                boxShadow:
+                                  resolvedTheme === "dark"
+                                    ? "none"
+                                    : "0 0 8px 5px #297dff0a",
                               }}
                             >
                               <div

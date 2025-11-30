@@ -27,7 +27,7 @@ html.light {
 /* Dark mode */
 .dark,
 html.dark {
-  --background: #03000a;
+  --background: #100d16;
   --foreground: #ededed;
   --card-background: rgba(247, 247, 248, 0.05);
   --card-border: rgba(247, 247, 248, 0.1);
@@ -36,7 +36,7 @@ html.dark {
 /* System preference fallback (only if no class is set) */
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not(.dark) {
-    --background: #03000a;
+    --background: #100d16;
     --foreground: #ededed;
     --card-background: rgba(247, 247, 248, 0.05);
     --card-border: rgba(247, 247, 248, 0.1);

@@ -12,10 +12,12 @@ import EditPlayerModal from "@/components/EditPlayerModal";
 import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function ContactsPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Id<"players"> | null>(
@@ -55,7 +57,7 @@ export default function ContactsPage() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -112,13 +114,18 @@ export default function ContactsPage() {
               <div className="space-y-2">
                 <div
                   className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3"
-                  style={{ boxShadow: "0 0 8px 5px #297dff0a" }}
+                  style={{
+                    boxShadow:
+                      resolvedTheme === "dark"
+                        ? "none"
+                        : "0 0 8px 5px #297dff0a",
+                  }}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24"></div>
                   </div>
-                  <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -130,7 +137,13 @@ export default function ContactsPage() {
               <div className="space-y-2">
                 <div
                   onClick={() => handleEditPlayer(currentUserAsPlayer._id)}
-                  className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                  className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                  style={{
+                    boxShadow:
+                      resolvedTheme === "dark"
+                        ? "none"
+                        : "0 0 8px 5px #297dff0a",
+                  }}
                 >
                   <div className="flex items-center space-x-3">
                     {currentUserAsPlayer.avatar ? (
@@ -177,13 +190,19 @@ export default function ContactsPage() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }}"
+                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3"
+                    style={{
+                      boxShadow:
+                        resolvedTheme === "dark"
+                          ? "none"
+                          : "0 0 8px 5px #297dff0a",
+                    }}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20"></div>
                     </div>
-                    <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   </div>
                 ))}
               </div>
@@ -199,7 +218,13 @@ export default function ContactsPage() {
                   <div
                     key={player._id}
                     onClick={() => handleEditPlayer(player._id)}
-                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                    style={{
+                      boxShadow:
+                        resolvedTheme === "dark"
+                          ? "none"
+                          : "0 0 8px 5px #297dff0a",
+                    }}
                   >
                     <div className="flex items-center space-x-3">
                       {player.avatar ? (
@@ -247,13 +272,19 @@ export default function ContactsPage() {
                 {Array.from({ length: 2 }).map((_, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }}"
+                    className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3"
+                    style={{
+                      boxShadow:
+                        resolvedTheme === "dark"
+                          ? "none"
+                          : "0 0 8px 5px #297dff0a",
+                    }}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16"></div>
                     </div>
-                    <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   </div>
                 ))}
               </div>
@@ -273,7 +304,13 @@ export default function ContactsPage() {
                         <div
                           key={player._id}
                           onClick={() => handleEditPlayer(player._id)}
-                          className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 style={{ boxShadow: '0 0 8px 5px #297dff0a' }} cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                          className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
+                          style={{
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
+                          }}
                         >
                           <div className="flex items-center space-x-3">
                             {player.avatar ? (
