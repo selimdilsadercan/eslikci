@@ -22,7 +22,8 @@ export default defineSchema({
     .index("by_player", ["playerId"]),
 
   players: defineTable({
-    userId: v.id("users"),
+    userId: v.optional(v.id("users")),
+    linkedUserId: v.optional(v.id("users")), // User ID if player is linked to a user via login
     name: v.string(),
     initial: v.string(),
     avatar: v.optional(v.string()),
@@ -31,6 +32,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_linked_user", ["linkedUserId"])
     .index("by_group", ["groupId"]),
 
   groups: defineTable({

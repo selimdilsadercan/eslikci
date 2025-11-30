@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Status bar colors for dark mode -->
+    <color name="statusBarColor">#100d16</color>
+    <color name="navigationBarColor">#100d16</color>
+    
+    <!-- Primary colors -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#100d16</color>
+    <color name="colorAccent">#03DAC5</color>
+    
+    <!-- Background colors -->
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+</resources>
+

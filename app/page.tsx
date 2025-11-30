@@ -43,7 +43,7 @@ export default function Home() {
             Your companion app for table games
           </p>
           {/* White card wrapper for wide screens only */}
-          <div className="lg:bg-white lg:rounded-xl lg:shadow-lg lg:p-8 lg:border lg:border-gray-100">
+          <div className="lg:bg-white dark:lg:bg-[var(--card-background)] lg:rounded-xl lg:shadow-lg dark:lg:shadow-none lg:p-8 lg:border lg:border-gray-100 dark:lg:border-[var(--card-border)]">
             <FirebaseAuthButton />
           </div>
         </div>

@@ -83,7 +83,14 @@ export default function ContactsPage() {
       {} as Record<string, typeof players>
     ) || {};
 
-  const handleEditPlayer = (playerId: Id<"players">) => {
+  const handlePlayerClick = (playerId: Id<"players">) => {
+    router.push(`/player?playerId=${playerId}`);
+  };
+
+  const handleEditPlayer = (playerId: Id<"players">, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setSelectedPlayer(playerId);
     setShowEditModal(true);
   };
@@ -136,7 +143,7 @@ export default function ContactsPage() {
               </h2>
               <div className="space-y-2">
                 <div
-                  onClick={() => handleEditPlayer(currentUserAsPlayer._id)}
+                  onClick={() => handlePlayerClick(currentUserAsPlayer._id)}
                   className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                   style={{
                     boxShadow:
@@ -169,7 +176,7 @@ export default function ContactsPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleEditPlayer(currentUserAsPlayer._id);
+                      handleEditPlayer(currentUserAsPlayer._id, e);
                     }}
                     className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                   >
@@ -217,7 +224,7 @@ export default function ContactsPage() {
                 {groupedPlayers.ungrouped.map((player) => (
                   <div
                     key={player._id}
-                    onClick={() => handleEditPlayer(player._id)}
+                    onClick={() => handlePlayerClick(player._id)}
                     className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                     style={{
                       boxShadow:
@@ -250,7 +257,7 @@ export default function ContactsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditPlayer(player._id);
+                        handleEditPlayer(player._id, e);
                       }}
                       className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                     >
@@ -303,7 +310,7 @@ export default function ContactsPage() {
                       groupPlayers.map((player) => (
                         <div
                           key={player._id}
-                          onClick={() => handleEditPlayer(player._id)}
+                          onClick={() => handlePlayerClick(player._id)}
                           className="flex items-center justify-between py-2 bg-white dark:bg-[var(--card-background)] rounded-lg px-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                           style={{
                             boxShadow:

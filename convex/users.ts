@@ -40,6 +40,12 @@ export const getUserByFirebaseId = query({
   },
 });
 
+export const getUserById = query({
+  args: { id: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
 
 export const createUser = mutation({
   args: {
@@ -82,7 +88,7 @@ export const createUser = mutation({
 
     // Create a player for this user
     const playerId = await createPlayerForUser(ctx, userId, args.name);
-    
+
     // Update user with playerId
     await ctx.db.patch(userId, { playerId: playerId });
 
@@ -154,24 +160,24 @@ export const getOrCreateUser = mutation({
 
       // Create a player for this user
       const playerId = await createPlayerForUser(ctx, userId, args.name);
-      
+
       // Update user with playerId
       await ctx.db.patch(userId, { playerId: playerId });
-      
+
       user = await ctx.db.get(userId);
     } else {
       // Update existing user if name has changed (e.g., if displayName was updated)
       if (user.name !== args.name) {
-        await ctx.db.patch(user._id, { 
+        await ctx.db.patch(user._id, {
           name: args.name,
-          email: args.email
+          email: args.email,
         });
-        
+
         // Also update the associated player
         if (user.playerId) {
           await ctx.db.patch(user.playerId, { name: args.name });
         }
-        
+
         user = await ctx.db.get(user._id);
       }
     }
@@ -202,7 +208,7 @@ export const syncUserWithPlayer = mutation({
 
     // Create a player for this user
     const playerId = await createPlayerForUser(ctx, user._id, user.name);
-    
+
     // Update user with playerId
     await ctx.db.patch(user._id, { playerId: playerId });
 
@@ -231,12 +237,12 @@ export const isUserPro = query({
       .first();
 
     if (!user) return false;
-    
+
     // Check if user has pro status and it hasn't expired
     if (user.isPro && user.proExpiresAt) {
       return user.proExpiresAt > Date.now();
     }
-    
+
     return false;
   },
 });
@@ -257,9 +263,10 @@ export const upgradeToPro = mutation({
     }
 
     const now = Date.now();
-    const newExpirationTime = user.proExpiresAt && user.proExpiresAt > now 
-      ? user.proExpiresAt + args.duration 
-      : now + args.duration;
+    const newExpirationTime =
+      user.proExpiresAt && user.proExpiresAt > now
+        ? user.proExpiresAt + args.duration
+        : now + args.duration;
 
     await ctx.db.patch(user._id, {
       isPro: true,

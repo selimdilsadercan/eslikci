@@ -8,10 +8,12 @@ import { api } from "@/convex/_generated/api";
 import { MagnifyingGlass, ArrowLeft } from "@phosphor-icons/react";
 import Sidebar from "@/components/Sidebar";
 import GameImage from "@/components/GameImage";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function SearchPage() {
   const { isSignedIn, isLoaded, user } = useAuth();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const games = useQuery(api.games.getGames);
 
   // Get current user
@@ -71,7 +73,7 @@ export default function SearchPage() {
       >
         <div className="text-center">
           <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -131,7 +133,7 @@ export default function SearchPage() {
             <div className="flex items-center mb-4">
               <button
                 onClick={handleBackClick}
-                className="mr-3 p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="mr-3 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
               >
                 <ArrowLeft size={24} />
               </button>
@@ -142,9 +144,12 @@ export default function SearchPage() {
                   placeholder="Ne oynamak istiyorsun?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white pl-4 pr-4 py-3 text-gray-800 placeholder-gray-500 focus:outline-none border-none text-lg rounded-lg"
+                  className="w-full bg-white dark:bg-[var(--card-background)] pl-4 pr-4 py-3 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none border-none text-lg rounded-lg"
                   style={{
-                    boxShadow: "0 0 8px 5px #297dff0a",
+                    boxShadow:
+                      resolvedTheme === "dark"
+                        ? "none"
+                        : "0 0 8px 5px #297dff0a",
                   }}
                 />
               </div>
@@ -157,7 +162,7 @@ export default function SearchPage() {
             <div>
               {/* Popular Searches Section */}
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                   Popüler Aramalar
                 </h2>
                 <div className="space-y-3">
@@ -168,7 +173,10 @@ export default function SearchPage() {
                           key={index}
                           className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg"
                           style={{
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                         >
                           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mr-3"></div>
@@ -181,9 +189,12 @@ export default function SearchPage() {
                       games.slice(0, 5).map((game) => (
                         <div
                           key={game._id}
-                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                           style={{
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                           onClick={() => handleGameSelect(game._id)}
                         >
@@ -191,7 +202,7 @@ export default function SearchPage() {
                             <GameImage game={game} size="lg" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-800 text-base">
+                            <h3 className="font-medium text-gray-800 dark:text-gray-200 text-base">
                               {game.name}
                             </h3>
                           </div>
@@ -203,7 +214,7 @@ export default function SearchPage() {
               {/* Recent Searches Section - Only show if there are recent searches */}
               {recentSearches && recentSearches.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                     Yakındaki aramalar
                   </h2>
                   <div className="space-y-3">
@@ -214,9 +225,12 @@ export default function SearchPage() {
                       return (
                         <div
                           key={search._id}
-                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                           style={{
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                           onClick={() => handleGameSelect(game._id)}
                         >
@@ -226,7 +240,7 @@ export default function SearchPage() {
                             </span>
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-800 text-base">
+                            <h3 className="font-medium text-gray-800 dark:text-gray-200 text-base">
                               {game.name}
                             </h3>
                             {search.searchQuery && (
@@ -240,7 +254,7 @@ export default function SearchPage() {
                               onClick={(e) =>
                                 handleRemoveRecentSearch(search._id, e)
                               }
-                              className="w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full flex items-center justify-center transition-colors"
+                              className="w-8 h-8 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[var(--card-background)]/80 rounded-full flex items-center justify-center transition-colors"
                             >
                               <span className="text-lg">×</span>
                             </button>
@@ -254,7 +268,7 @@ export default function SearchPage() {
 
               {/* All Games Section */}
               <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                   Tüm Oyunlar
                 </h2>
                 <div className="space-y-3">
@@ -265,7 +279,10 @@ export default function SearchPage() {
                           key={index}
                           className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg"
                           style={{
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                         >
                           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mr-3"></div>
@@ -278,9 +295,12 @@ export default function SearchPage() {
                       games.map((game) => (
                         <div
                           key={game._id}
-                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                          className="flex items-center p-3 bg-white dark:bg-[var(--card-background)] rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--card-background)]/80 transition-colors"
                           style={{
-                            boxShadow: "0 0 8px 5px #297dff0a",
+                            boxShadow:
+                              resolvedTheme === "dark"
+                                ? "none"
+                                : "0 0 8px 5px #297dff0a",
                           }}
                           onClick={() => handleGameSelect(game._id)}
                         >
@@ -288,7 +308,7 @@ export default function SearchPage() {
                             <GameImage game={game} size="lg" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-800 text-base">
+                            <h3 className="font-medium text-gray-800 dark:text-gray-200 text-base">
                               {game.name}
                             </h3>
                           </div>
@@ -318,10 +338,13 @@ export default function SearchPage() {
             </div>
           ) : filteredGames.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MagnifyingGlass size={32} className="text-gray-400" />
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MagnifyingGlass
+                  size={32}
+                  className="text-gray-400 dark:text-gray-500"
+                />
               </div>
-              <h3 className="text-lg font-medium text-gray-600 mb-2">
+              <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Sonuç bulunamadı
               </h3>
               <p className="text-gray-600 dark:text-gray-400">

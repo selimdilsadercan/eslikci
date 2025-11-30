@@ -61,10 +61,10 @@ interface BottomInputAreaProps {
   };
   setConfirmModalConfig: React.Dispatch<
     React.SetStateAction<{
-      title: string;
-      message: string;
-      confirmText: string;
-      isDestructive: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    isDestructive: boolean;
     }>
   >;
   setConfirmAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
@@ -84,10 +84,10 @@ interface BottomInputAreaProps {
   handleConfirmAction: (
     action: () => void,
     config: {
-      title: string;
-      message: string;
-      confirmText: string;
-      isDestructive: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    isDestructive: boolean;
     }
   ) => void;
 }
@@ -136,12 +136,12 @@ export default function BottomInputArea({
         /* Settings Modal */
         <div className="p-4 border-b border-gray-200 dark:border-[var(--card-border)]">
           <div className="space-y-3">
-            <button
+            <button 
               onClick={() =>
                 handleConfirmAction(undoLastRound, {
-                  title: "Son Turu Geri Al",
-                  message: "Son turu geri almak istediğinizden emin misiniz?",
-                  confirmText: "Geri Al",
+                title: "Son Turu Geri Al",
+                message: "Son turu geri almak istediğinizden emin misiniz?",
+                confirmText: "Geri Al",
                   isDestructive: true,
                 })
               }
@@ -150,13 +150,13 @@ export default function BottomInputArea({
               <ArrowCounterClockwise size={16} />
               <span className="text-sm font-medium">Son Turu Geri Al</span>
             </button>
-            <button
+            <button 
               onClick={() =>
                 handleConfirmAction(resetAllRounds, {
-                  title: "Turları Sıfırla",
+                title: "Turları Sıfırla",
                   message:
                     "Tüm turları sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-                  confirmText: "Sıfırla",
+                confirmText: "Sıfırla",
                   isDestructive: true,
                 })
               }
@@ -243,7 +243,7 @@ export default function BottomInputArea({
                           "Kırmızı Takım"}
                       </span>
                     </div>
-
+                    
                     {gameSave?.settings.calculationMode === "NoPoints" ? (
                       /* Crown Mode for Teams */
                       <button
@@ -270,40 +270,40 @@ export default function BottomInputArea({
                               key={scoreIndex}
                               className="flex flex-col items-center space-y-1"
                             >
-                              <input
-                                type="text"
+                            <input
+                              type="text"
                                 value={score || ""}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value) || 0;
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value) || 0;
                                   setMultipleScores((prev) => {
                                     const currentScores = prev["redTeam"] || [
                                       0,
                                     ];
-                                    const updatedScores = [...currentScores];
+                                  const updatedScores = [...currentScores];
                                     updatedScores[scoreIndex] = Math.max(
                                       0,
                                       value
                                     );
-                                    return {
-                                      ...prev,
+                                  return {
+                                    ...prev,
                                       redTeam: updatedScores,
-                                    };
-                                  });
-                                }}
+                                  };
+                                });
+                              }}
                                 className="w-24 h-12 bg-white dark:bg-[var(--card-background)] border-2 rounded-lg text-center font-medium text-gray-800 dark:text-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 style={{
                                   borderColor: "rgba(134, 189, 255, 0.4)",
                                 }}
-                                placeholder="0"
-                              />
-                            </div>
+                              placeholder="0"
+                            />
+                          </div>
                           )
                         )}
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() =>
                               setMultipleScores((prev) => ({
-                                ...prev,
+                              ...prev,
                                 redTeam: [...(prev["redTeam"] || []), 0],
                               }))
                             }
@@ -318,7 +318,7 @@ export default function BottomInputArea({
                           <button
                             onClick={() =>
                               setMultipleScores((prev) => ({
-                                ...prev,
+                              ...prev,
                                 redTeam: prev["redTeam"]?.slice(0, -1) || [],
                               }))
                             }
@@ -371,31 +371,31 @@ export default function BottomInputArea({
                             {blueTeamPlayers
                               .slice(0, 2)
                               .map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
+                              <div
+                                key={player._id}
+                                className="relative"
                                   style={{
                                     zIndex: Math.min(
                                       blueTeamPlayers.length - index,
                                       5
                                     ),
                                   }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
+                              >
+                                {player.avatar ? (
+                                  <img
+                                    src={player.avatar}
+                                    alt={player.name}
                                       className="w-6 h-6 rounded-full object-cover border border-white dark:border-[var(--card-background)]"
-                                    />
-                                  ) : (
+                                  />
+                                ) : (
                                     <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center border border-white dark:border-[var(--card-background)]">
                                       <span className="text-blue-600 dark:text-blue-300 font-semibold text-xs">
                                         {player.initial}
                                       </span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                             {blueTeamPlayers.length > 2 && (
                               <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center border border-white dark:border-[var(--card-background)]">
                                 <span className="text-gray-600 dark:text-gray-300 font-semibold text-xs">
@@ -417,7 +417,7 @@ export default function BottomInputArea({
                           "Mavi Takım"}
                       </span>
                     </div>
-
+                    
                     {gameSave?.settings.calculationMode === "NoPoints" ? (
                       /* Crown Mode for Teams */
                       <button
@@ -444,40 +444,40 @@ export default function BottomInputArea({
                               key={scoreIndex}
                               className="flex flex-col items-center space-y-1"
                             >
-                              <input
-                                type="text"
+                            <input
+                              type="text"
                                 value={score || ""}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value) || 0;
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value) || 0;
                                   setMultipleScores((prev) => {
                                     const currentScores = prev["blueTeam"] || [
                                       0,
                                     ];
-                                    const updatedScores = [...currentScores];
+                                  const updatedScores = [...currentScores];
                                     updatedScores[scoreIndex] = Math.max(
                                       0,
                                       value
                                     );
-                                    return {
-                                      ...prev,
+                                  return {
+                                    ...prev,
                                       blueTeam: updatedScores,
-                                    };
-                                  });
-                                }}
+                                  };
+                                });
+                              }}
                                 className="w-24 h-12 bg-white dark:bg-[var(--card-background)] border-2 rounded-lg text-center font-medium text-gray-800 dark:text-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 style={{
                                   borderColor: "rgba(134, 189, 255, 0.4)",
                                 }}
-                                placeholder="0"
-                              />
-                            </div>
+                              placeholder="0"
+                            />
+                          </div>
                           )
                         )}
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() =>
                               setMultipleScores((prev) => ({
-                                ...prev,
+                              ...prev,
                                 blueTeam: [...(prev["blueTeam"] || []), 0],
                               }))
                             }
@@ -492,7 +492,7 @@ export default function BottomInputArea({
                           <button
                             onClick={() =>
                               setMultipleScores((prev) => ({
-                                ...prev,
+                              ...prev,
                                 blueTeam: prev["blueTeam"]?.slice(0, -1) || [],
                               }))
                             }
@@ -544,7 +544,7 @@ export default function BottomInputArea({
                     index % 2 === 0 ? "items-end" : "items-start"
                   }`}
                 >
-                  <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col items-center space-y-2">
                     <div
                       className={`flex items-center ${
                         gameSave?.settings.calculationMode === "NoPoints"
@@ -552,117 +552,117 @@ export default function BottomInputArea({
                           : ""
                       }`}
                     >
-                      {player.avatar ? (
-                        <img
-                          src={player.avatar}
-                          alt={player.name}
-                          className="w-6 h-6 rounded-full object-cover mr-2"
-                        />
-                      ) : (
+                    {player.avatar ? (
+                      <img
+                        src={player.avatar}
+                        alt={player.name}
+                        className="w-6 h-6 rounded-full object-cover mr-2"
+                      />
+                    ) : (
                         <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
                           <span className="text-blue-600 dark:text-blue-300 font-semibold text-xs">
                             {player.initial}
                           </span>
-                        </div>
-                      )}
+                      </div>
+                    )}
                       <span className="font-medium text-gray-800 dark:text-gray-200 text-sm truncate max-w-[200px]">
                         {player.name}
                       </span>
-                    </div>
-
+                  </div>
+                  
                     {gameSave?.settings.calculationMode === "NoPoints" ? (
-                      /* Crown Mode - Toggle crown for 1 point */
-                      <button
-                        onClick={() => toggleCrown(player._id)}
-                        className={`p-1 ${
-                          crownWinners[player._id]
+                    /* Crown Mode - Toggle crown for 1 point */
+                    <button
+                      onClick={() => toggleCrown(player._id)}
+                      className={`p-1 ${
+                        crownWinners[player._id] 
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-gray-400 dark:text-gray-500"
-                        }`}
-                      >
-                        <CrownSimple size={20} weight="fill" />
-                      </button>
+                      }`}
+                    >
+                      <CrownSimple size={20} weight="fill" />
+                    </button>
                     ) : gameSave?.settings.pointsPerRound === "Multiple" ? (
-                      /* Multiple Scores Mode - Multiple input fields with horizontal buttons */
-                      <div className="flex flex-col items-center space-y-2">
+                    /* Multiple Scores Mode - Multiple input fields with horizontal buttons */
+                    <div className="flex flex-col items-center space-y-2">
                         {(multipleScores[player._id] || [0]).map(
                           (score, scoreIndex) => (
                             <div
                               key={scoreIndex}
                               className="flex flex-col items-center space-y-1"
                             >
-                              <input
-                                type="text"
+                          <input
+                            type="text"
                                 value={score || ""}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value) || 0;
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 0;
                                   updateMultipleScore(
                                     player._id,
                                     scoreIndex,
                                     value
                                   );
-                                }}
+                            }}
                                 className="w-24 h-12 bg-white dark:bg-[var(--card-background)] border-2 rounded-lg text-center font-medium text-gray-800 dark:text-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 style={{
                                   borderColor: "rgba(134, 189, 255, 0.4)",
                                 }}
-                                placeholder="0"
-                              />
-                            </div>
+                            placeholder="0"
+                          />
+                        </div>
                           )
                         )}
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => addScoreInput(player._id)}
-                            className="w-6 h-6 flex items-center justify-center"
-                          >
+                      <div className="flex items-center space-x-2">
+                             <button
+                               onClick={() => addScoreInput(player._id)}
+                               className="w-6 h-6 flex items-center justify-center"
+                             >
                             <Plus
                               size={18}
                               className="text-gray-600 dark:text-gray-300"
                               weight="bold"
                             />
-                          </button>
-                          <button
-                            onClick={() => removeScoreInput(player._id)}
+                             </button>
+                             <button
+                               onClick={() => removeScoreInput(player._id)}
                             disabled={
                               (multipleScores[player._id] || [0]).length <= 1
                             }
-                            className={`w-6 h-6 flex items-center justify-center ${
-                              (multipleScores[player._id] || [0]).length <= 1
+                               className={`w-6 h-6 flex items-center justify-center ${
+                                 (multipleScores[player._id] || [0]).length <= 1 
                                 ? "opacity-30 cursor-not-allowed"
                                 : ""
-                            }`}
-                          >
+                               }`}
+                             >
                             <Minus
                               size={18}
                               className="text-gray-600 dark:text-gray-300"
                               weight="bold"
                             />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Single Score Mode - Direct input field */
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="text"
+                             </button>
+                           </div>
+                    </div>
+                  ) : (
+                    /* Single Score Mode - Direct input field */
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="text"
                           value={currentScores[player._id] || ""}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 0;
                             setCurrentScores((prev) => ({
-                              ...prev,
+                            ...prev,
                               [player._id]: Math.max(0, value),
-                            }));
-                          }}
+                          }));
+                        }}
                           className="w-20 h-10 bg-white dark:bg-[var(--card-background)] border-2 rounded-lg text-center font-medium text-gray-800 dark:text-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           style={{ borderColor: "rgba(134, 189, 255, 0.4)" }}
-                          placeholder="0"
-                        />
-                      </div>
-                    )}
-                  </div>
+                        placeholder="0"
+                      />
+                    </div>
+                  )}
                 </div>
-              ))
+              </div>
+            ))
             )}
           </div>
         </div>
@@ -677,10 +677,10 @@ export default function BottomInputArea({
           >
             {getNextRoundNumber()}. Turu Bitir
           </button>
-          <button
+          <button 
             onClick={() => setShowSettings(!showSettings)}
             className={`ml-2 w-12 h-12 rounded-xl flex items-center justify-center ${
-              showSettings
+              showSettings 
                 ? "bg-blue-500 text-white hover:bg-blue-600"
                 : "border-2 border-blue-500 text-blue-500 bg-white dark:bg-[var(--card-background)] hover:bg-blue-50 dark:hover:bg-[var(--card-background)]"
             }`}

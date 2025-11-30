@@ -27,12 +27,13 @@ export const getPlayersByIds = query({
   handler: async (ctx, args) => {
     // Get players by their IDs directly (no auth required)
     const players = await Promise.all(
-      args.playerIds.map(id => ctx.db.get(id))
+      args.playerIds.map((id) => ctx.db.get(id))
     );
-    
+
     // Filter out any null results and return only active players
-    return players.filter((player): player is NonNullable<typeof player> => 
-      player !== null && player.isActive
+    return players.filter(
+      (player): player is NonNullable<typeof player> =>
+        player !== null && player.isActive
     );
   },
 });
@@ -147,5 +148,41 @@ export const hardDeletePlayer = mutation({
   args: { id: v.id("players") },
   handler: async (ctx, args) => {
     return await ctx.db.delete(args.id);
+  },
+});
+
+export const linkPlayerToUser = mutation({
+  args: {
+    playerId: v.id("players"),
+    firebaseId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Get user by Firebase ID
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_id", (q) => q.eq("firebaseId", args.firebaseId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get player
+    const player = await ctx.db.get(args.playerId);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    // Check if player is already linked to another user
+    if (player.linkedUserId && player.linkedUserId !== user._id) {
+      throw new Error("Player is already linked to another user");
+    }
+
+    // Link player to user
+    await ctx.db.patch(args.playerId, {
+      linkedUserId: user._id,
+    });
+
+    return { success: true };
   },
 });

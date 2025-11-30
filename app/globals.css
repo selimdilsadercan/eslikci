@@ -251,6 +251,36 @@ body {
   color: #e5e7eb;
 }
 
+/* Autofill styles override for dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #1c1922 inset !important;
+  -webkit-text-fill-color: #ededed !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autofill */
+input:-moz-autofill {
+  background-color: white !important;
+  color: #111827 !important;
+}
+
+.dark input:-moz-autofill {
+  background-color: #1c1922 !important;
+  color: #ededed !important;
+}
+
 /* Poker Chip Styles */
 .pokerchip {
   display: inline-block;

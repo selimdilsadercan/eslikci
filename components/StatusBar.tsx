@@ -36,25 +36,30 @@ const StatusBarComponent: React.FC<StatusBarProps> = ({
       setIsCapacitor(isCapacitorAvailable);
     };
 
-    // Check dark mode preference
+    // Check dark mode by checking HTML class
     const checkDarkMode = () => {
       if (typeof window !== "undefined") {
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        setIsDarkMode(prefersDark);
+        const htmlElement = document.documentElement;
+        const isDark = htmlElement.classList.contains("dark");
+        setIsDarkMode(isDark);
       }
     };
 
     checkMobile();
     checkDarkMode();
 
-    // Listen for dark mode changes
+    // Listen for dark mode changes by observing HTML class changes
     if (typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
+      const observer = new MutationObserver(() => {
+        checkDarkMode();
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
+      return () => observer.disconnect();
     }
   }, []);
 
@@ -64,29 +69,36 @@ const StatusBarComponent: React.FC<StatusBarProps> = ({
     const configureStatusBar = async () => {
       try {
         // Use provided backgroundColor or get from CSS variable
-        const bgColor = backgroundColor || (() => {
-          if (typeof window !== "undefined") {
-            const computedStyle = getComputedStyle(document.documentElement);
-            return computedStyle.getPropertyValue("--background").trim() || (isDarkMode ? "#03000A" : "#ffffff");
-          }
-          return isDarkMode ? "#03000A" : "#ffffff";
-        })();
+        const bgColor =
+          backgroundColor ||
+          (() => {
+            if (typeof window !== "undefined") {
+              const computedStyle = getComputedStyle(document.documentElement);
+              const bg = computedStyle.getPropertyValue("--background").trim();
+              if (bg) return bg;
+            }
+            // Default colors based on dark mode
+            return isDarkMode ? "#100d16" : "#f4f6f9";
+          })();
 
         // Set status bar background color
         await StatusBar.setBackgroundColor({ color: bgColor });
 
         // Set status bar style (light/dark content)
-        // In dark mode, use light content; in light mode, use dark content
+        // Style.Light = white text/icons (for dark backgrounds)
+        // Style.Dark = black text/icons (for light backgrounds)
+        // In dark mode: use Style.Light (white text on dark background)
+        // In light mode: use Style.Dark (black text on light background)
         const statusBarStyle = style
           ? typeof style === "string"
             ? style === "dark"
-              ? Style.Dark
-              : Style.Light
+              ? Style.Light // Dark content (black text) for light backgrounds
+              : Style.Dark // Light content (white text) for dark backgrounds
             : style
           : isDarkMode
-            ? Style.Light
-            : Style.Dark;
-        await StatusBar.setStyle({ style: statusBarStyle });
+            ? Style.Dark // Dark mode: white text
+            : Style.Light; // Light mode: black text
+        await StatusBar.setStyle({ style: statusBarStyle });d
 
         // Set overlay mode
         await StatusBar.setOverlaysWebView({ overlay });

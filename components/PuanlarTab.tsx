@@ -24,7 +24,7 @@ export default function PuanlarTab({
 }: PuanlarTabProps) {
   const addRoundScores = useMutation(api.gameSaves.addRoundScores);
   const updateGameSave = useMutation(api.gameSaves.updateGameSave);
-
+  
   // Fetch game save data
   const gameSave = useQuery(
     api.gameSaves.getGameSaveById,
@@ -34,7 +34,7 @@ export default function PuanlarTab({
     api.players.getPlayersByIds,
     gameSave?.players ? { playerIds: gameSave.players } : "skip"
   );
-
+  
   // Score-related states
   const [currentScores, setCurrentScores] = useState<{ [key: string]: number }>(
     {}
@@ -68,13 +68,13 @@ export default function PuanlarTab({
     ) {
       return { redTeamPlayers: [], blueTeamPlayers: [] };
     }
-
+    
     const redTeamPlayers =
       players?.filter((player) => gameSave.redTeam?.includes(player._id)) || [];
     const blueTeamPlayers =
       players?.filter((player) => gameSave.blueTeam?.includes(player._id)) ||
       [];
-
+    
     return { redTeamPlayers, blueTeamPlayers };
   };
 
@@ -82,35 +82,35 @@ export default function PuanlarTab({
 
   const getTotalScore = (playerId: Id<"players">) => {
     if (!gameSave?.laps) return 0;
-
+    
     const playerIndex = gameSave.players.findIndex(
       (id: Id<"players">) => id === playerId
     );
     if (playerIndex === -1) return 0;
-
+    
     const playerLaps = gameSave.laps[playerIndex] || [];
     const totalFromLaps = playerLaps.reduce(
       (sum: number, score: number | number[]) => {
-        if (Array.isArray(score)) {
-          return sum + score.reduce((subSum, subScore) => subSum + subScore, 0);
-        } else {
-          return sum + score;
-        }
+      if (Array.isArray(score)) {
+        return sum + score.reduce((subSum, subScore) => subSum + subScore, 0);
+      } else {
+        return sum + score;
+      }
       },
       0
     );
-
+    
     return totalFromLaps;
   };
 
   // Team score calculation functions
   const getTeamTotalScore = (teamPlayers: any[]) => {
     if (!teamPlayers) return 0;
-
+    
     // For team mode, use teamLaps if available
     if (gameSave?.settings.gameplay === "takimli" && gameSave?.teamLaps) {
       const teamIndex = teamPlayers === redTeamPlayers ? 0 : 1; // 0 for red team, 1 for blue team
-
+      
       // Sum all individual scores from all rounds
       let totalSum = 0;
       gameSave.teamLaps.forEach((roundScores: (number | number[])[]) => {
@@ -126,11 +126,11 @@ export default function PuanlarTab({
           }
         }
       });
-
+      
       // Return the sum for total column
       return totalSum;
     }
-
+    
     // Fallback to individual player scores (for backward compatibility)
     return teamPlayers.reduce((teamSum, player) => {
       return teamSum + getTotalScore(player._id);
@@ -139,13 +139,13 @@ export default function PuanlarTab({
 
   const getTeamRoundScore = (teamPlayers: any[], roundNumber: number) => {
     if (!teamPlayers) return 0;
-
+    
     // For team mode, use teamLaps if available
     if (gameSave?.settings.gameplay === "takimli" && gameSave?.teamLaps) {
       const teamIndex = teamPlayers === redTeamPlayers ? 0 : 1; // 0 for red team, 1 for blue team
       const roundIndex = roundNumber - 1; // Convert to 0-based index
       const roundScores = gameSave.teamLaps[roundIndex];
-
+      
       if (Array.isArray(roundScores) && roundScores[teamIndex] !== undefined) {
         const teamScore = roundScores[teamIndex];
         if (Array.isArray(teamScore)) {
@@ -157,17 +157,17 @@ export default function PuanlarTab({
       }
       return 0;
     }
-
+    
     // Fallback to individual player scores (for backward compatibility)
     return teamPlayers.reduce((teamSum, player) => {
       const playerIndex = gameSave?.players.findIndex(
         (id: Id<"players">) => id === player._id
       );
       if (playerIndex === -1 || playerIndex === undefined) return teamSum;
-
+      
       const playerLaps = gameSave?.laps?.[playerIndex] || [];
       const roundScore = playerLaps[roundNumber - 1];
-
+      
       if (Array.isArray(roundScore)) {
         return teamSum + roundScore.reduce((s, sc) => s + sc, 0);
       }
@@ -177,16 +177,16 @@ export default function PuanlarTab({
 
   const getRoundScores = (playerId: Id<"players">, roundNumber: number) => {
     if (!gameSave?.laps) return 0;
-
+    
     const playerIndex = gameSave.players.findIndex(
       (id: Id<"players">) => id === playerId
     );
     if (playerIndex === -1) return 0;
-
+    
     const playerLaps = gameSave.laps[playerIndex] || [];
     const roundIndex = roundNumber - 1; // Convert to 0-based index
     const score = playerLaps[roundIndex];
-
+    
     if (Array.isArray(score)) {
       return score.join(", ");
     } else {
@@ -201,7 +201,7 @@ export default function PuanlarTab({
       if (gameSave.teamLaps.length === 0) {
         return [];
       }
-
+      
       const rounds = [];
       // Generate round numbers from most recent to oldest
       for (let i = gameSave.teamLaps.length; i >= 1; i--) {
@@ -213,24 +213,24 @@ export default function PuanlarTab({
       if (!gameSave?.laps || gameSave.laps.length === 0) {
         return [];
       }
-
+      
       // Get the maximum number of rounds from the laps data
       const maxRounds = Math.max(
         ...gameSave.laps.map((playerLaps: any[]) => playerLaps.length)
       );
-
+      
       // If no rounds have been recorded, don't show any round columns
       if (maxRounds === 0) {
         return [];
       }
-
+      
       const rounds = [];
-
+      
       // Generate round numbers from most recent to oldest
       for (let i = maxRounds; i >= 1; i--) {
         rounds.push(i);
       }
-
+      
       return rounds;
     }
   };
@@ -239,10 +239,10 @@ export default function PuanlarTab({
 
   const endRound = async () => {
     if (!gameSaveId) return;
-
+    
     // Prepare round scores array based on calculation mode
     let roundScores: (number | number[])[];
-
+    
     // Individual Mode - Original logic
     if (gameSave?.settings.calculationMode === "NoPoints") {
       // For crown mode, give 1 point to players with crowns
@@ -259,10 +259,10 @@ export default function PuanlarTab({
       // For single score mode, use the current scores
       roundScores = gamePlayers.map((player) => currentScores[player._id] || 0);
     }
-
+    
     // Check if all scores are 0
     let allScoresZero = false;
-
+    
     if (gameSave?.settings.gameplay === "takimli") {
       // For team mode, check if both team scores are zero
       if (gameSave?.settings.calculationMode === "NoPoints") {
@@ -297,7 +297,7 @@ export default function PuanlarTab({
         }
       });
     }
-
+    
     if (allScoresZero) {
       const errorMessage =
         gameSave?.settings.gameplay === "takimli"
@@ -306,12 +306,12 @@ export default function PuanlarTab({
       toast.error(errorMessage);
       return;
     }
-
+    
     try {
       if (gameSave?.settings.gameplay === "takimli") {
         // Team mode: send team scores directly
         let teamScores: (number | number[])[];
-
+        
         if (gameSave?.settings.calculationMode === "NoPoints") {
           // For crown mode, send 1 for winning team, 0 for losing team
           teamScores = [
@@ -331,7 +331,7 @@ export default function PuanlarTab({
             currentScores["blueTeam"] || 0,
           ];
         }
-
+        
         await addRoundScores({
           id: gameSaveId as Id<"gameSaves">,
           roundScores: [], // Empty for team mode
@@ -346,12 +346,12 @@ export default function PuanlarTab({
           isTeamMode: false,
         });
       }
-
+      
       // Clear current scores and crowns after successful save
       setCurrentScores({});
       setCrownWinners({});
       setMultipleScores({});
-
+      
       // Increment round count and show interstitial ad every 3 rounds
       setRoundCount((prev) => {
         const newCount = prev + 1;
@@ -416,15 +416,15 @@ export default function PuanlarTab({
 
   const undoLastRound = async () => {
     if (!gameSaveId) return;
-
+    
     // Check if it's team mode and has teamLaps
     if (gameSave?.settings.gameplay === "takimli") {
       if (!gameSave?.teamLaps || gameSave.teamLaps.length === 0) return;
-
+      
       try {
         // Remove the last round from teamLaps
         const updatedTeamLaps = gameSave.teamLaps.slice(0, -1);
-
+        
         await updateGameSave({
           id: gameSaveId as Id<"gameSaves">,
           teamLaps: updatedTeamLaps,
@@ -435,13 +435,13 @@ export default function PuanlarTab({
     } else {
       // Individual mode - use laps
       if (!gameSave?.laps || gameSave.laps.length === 0) return;
-
+      
       try {
         // Remove the last round from all players
         const updatedLaps = gameSave.laps.map(
           (playerLaps: any[]) => playerLaps.slice(0, -1) // Remove last element
         );
-
+        
         await updateGameSave({
           id: gameSaveId as Id<"gameSaves">,
           laps: updatedLaps as any, // Type assertion for now
@@ -454,7 +454,7 @@ export default function PuanlarTab({
 
   const resetAllRounds = async () => {
     if (!gameSaveId) return;
-
+    
     try {
       if (gameSave?.settings.gameplay === "takimli") {
         // Team mode - reset teamLaps
@@ -477,10 +477,10 @@ export default function PuanlarTab({
   const handleConfirmAction = (
     action: () => void,
     config: {
-      title: string;
-      message: string;
-      confirmText: string;
-      isDestructive: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    isDestructive: boolean;
     }
   ) => {
     setConfirmAction(() => action);
@@ -497,7 +497,7 @@ export default function PuanlarTab({
 
   const toggleHideTotalColumn = async () => {
     if (!gameSaveId || !gameSave?.settings) return;
-
+    
     try {
       await updateGameSave({
         id: gameSaveId as Id<"gameSaves">,
@@ -524,7 +524,7 @@ export default function PuanlarTab({
       if (!gameSave?.laps || gameSave.laps.length === 0) {
         return 1; // First round if no laps exist
       }
-
+      
       // Get the maximum number of rounds from the laps data
       const maxRounds = Math.max(
         ...gameSave.laps.map((playerLaps: any[]) => playerLaps.length)
@@ -546,7 +546,7 @@ export default function PuanlarTab({
     <>
       {/* Banner Ad above score table */}
       <AdBanner position="top" className="mb-4 mx-4" />
-
+      
       {/* Score Table - Full height, horizontally scrollable */}
       <div
         className="flex-1 overflow-x-auto overflow-y-auto"
@@ -611,7 +611,7 @@ export default function PuanlarTab({
                       </span>
                     </div>
                   </div>
-
+                  
                   {/* Blue Team */}
                   <div className="py-2 pl-4 pr-2 flex items-center">
                     <div className="flex items-center min-w-[180px] flex-1">
@@ -621,28 +621,28 @@ export default function PuanlarTab({
                             {blueTeamPlayers
                               .slice(0, 3)
                               .map((player, index) => (
-                                <div
-                                  key={player._id}
-                                  className="relative"
+                              <div
+                                key={player._id}
+                                className="relative"
                                   style={{
                                     zIndex: 10 + blueTeamPlayers.length - index,
                                   }}
-                                >
-                                  {player.avatar ? (
-                                    <img
-                                      src={player.avatar}
-                                      alt={player.name}
+                              >
+                                {player.avatar ? (
+                                  <img
+                                    src={player.avatar}
+                                    alt={player.name}
                                       className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-[var(--card-background)]"
-                                    />
-                                  ) : (
+                                  />
+                                ) : (
                                     <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--card-background)]">
                                       <span className="text-blue-600 dark:text-blue-200 font-semibold text-xs">
                                         {player.initial}
                                       </span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                             {blueTeamPlayers.length > 3 && (
                               <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--card-background)]">
                                 <span className="text-gray-600 dark:text-gray-200 font-semibold text-xs">
@@ -810,53 +810,53 @@ export default function PuanlarTab({
                 )}
               </div>
             ))}
-          </div>
-        </div>
-      </div>
+           </div>
+         </div>
+       </div>
 
-      {/* Fixed Bottom Area - Now using BottomInputArea component */}
-      <BottomInputArea
-        activeTab="puan-tablosu"
-        gameSave={gameSave}
-        gamePlayers={gamePlayers}
-        redTeamPlayers={redTeamPlayers}
-        blueTeamPlayers={blueTeamPlayers}
-        currentScores={currentScores}
-        setCurrentScores={setCurrentScores}
-        multipleScores={multipleScores}
-        setMultipleScores={setMultipleScores}
-        crownWinners={crownWinners}
-        setCrownWinners={setCrownWinners}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        showConfirmModal={showConfirmModal}
-        setShowConfirmModal={setShowConfirmModal}
-        confirmModalConfig={confirmModalConfig}
-        setConfirmModalConfig={setConfirmModalConfig}
-        setConfirmAction={setConfirmAction}
-        addScoreInput={addScoreInput}
-        removeScoreInput={removeScoreInput}
-        updateMultipleScore={updateMultipleScore}
-        toggleCrown={toggleCrown}
-        undoLastRound={undoLastRound}
-        resetAllRounds={resetAllRounds}
-        toggleHideTotalColumn={toggleHideTotalColumn}
-        endRound={endRound}
-        getNextRoundNumber={getNextRoundNumber}
-        handleConfirmAction={handleConfirmAction}
-      />
+       {/* Fixed Bottom Area - Now using BottomInputArea component */}
+       <BottomInputArea
+         activeTab="puan-tablosu"
+         gameSave={gameSave}
+         gamePlayers={gamePlayers}
+         redTeamPlayers={redTeamPlayers}
+         blueTeamPlayers={blueTeamPlayers}
+         currentScores={currentScores}
+         setCurrentScores={setCurrentScores}
+         multipleScores={multipleScores}
+         setMultipleScores={setMultipleScores}
+         crownWinners={crownWinners}
+         setCrownWinners={setCrownWinners}
+         showSettings={showSettings}
+         setShowSettings={setShowSettings}
+         showConfirmModal={showConfirmModal}
+         setShowConfirmModal={setShowConfirmModal}
+         confirmModalConfig={confirmModalConfig}
+         setConfirmModalConfig={setConfirmModalConfig}
+         setConfirmAction={setConfirmAction}
+         addScoreInput={addScoreInput}
+         removeScoreInput={removeScoreInput}
+         updateMultipleScore={updateMultipleScore}
+         toggleCrown={toggleCrown}
+         undoLastRound={undoLastRound}
+         resetAllRounds={resetAllRounds}
+         toggleHideTotalColumn={toggleHideTotalColumn}
+         endRound={endRound}
+         getNextRoundNumber={getNextRoundNumber}
+         handleConfirmAction={handleConfirmAction}
+       />
 
-      {/* Confirm Modal */}
-      <ConfirmModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleConfirm}
-        title={confirmModalConfig.title}
-        message={confirmModalConfig.message}
-        confirmText={confirmModalConfig.confirmText}
-        cancelText="İptal"
-        isDestructive={confirmModalConfig.isDestructive}
-      />
-    </>
-  );
-}
+       {/* Confirm Modal */}
+       <ConfirmModal
+         isOpen={showConfirmModal}
+         onClose={() => setShowConfirmModal(false)}
+         onConfirm={handleConfirm}
+         title={confirmModalConfig.title}
+         message={confirmModalConfig.message}
+         confirmText={confirmModalConfig.confirmText}
+         cancelText="İptal"
+         isDestructive={confirmModalConfig.isDestructive}
+       />
+     </>
+   );
+ }
