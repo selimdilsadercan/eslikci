@@ -98,7 +98,7 @@ const StatusBarComponent: React.FC<StatusBarProps> = ({
           : isDarkMode
             ? Style.Dark // Dark mode: white text
             : Style.Light; // Light mode: black text
-        await StatusBar.setStyle({ style: statusBarStyle });d
+        await StatusBar.setStyle({ style: statusBarStyle });
 
         // Set overlay mode
         await StatusBar.setOverlaysWebView({ overlay });
