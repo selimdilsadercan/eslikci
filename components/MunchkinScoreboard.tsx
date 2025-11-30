@@ -106,7 +106,7 @@ export default function MunchkinScoreboard({
               className="bg-white dark:bg-[var(--card-background)] rounded-2xl p-4 border border-gray-200 dark:border-[var(--card-border)] shadow-sm hover:shadow-lg transition-shadow"
             >
               {/* Player Header with Level and Expand Button */}
-              <div className="flex items-center space-x-3 mb-4">
+              <div className="flex items-center space-x-3">
                 {player.avatar ? (
                   <img
                     src={player.avatar}

@@ -96,11 +96,11 @@ export default function EditPlayerModal({
     <>
       <Drawer.Root open={true} onOpenChange={(open) => !open && onClose()}>
         <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
-          <Drawer.Content className="bg-white dark:bg-[var(--card-background)] h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl z-[60]">
+          <Drawer.Overlay className="fixed inset-0 bg-black/40 opacity-100 z-[60]" />
+          <Drawer.Content className="bg-white dark:bg-[#1C1922] h-fit fixed bottom-0 left-0 right-0 outline-none rounded-t-3xl z-[60]">
             {/* Gesture bar */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
+              <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
             </div>
             <div className="px-6 pb-6">
               <div className="flex items-center justify-between mb-6 pt-4">
@@ -138,7 +138,7 @@ export default function EditPlayerModal({
                           value={playerName}
                           onChange={(e) => setPlayerName(e.target.value)}
                           placeholder="Kişi adını girin"
-                          className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                          className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                           required
                         />
                       </div>
@@ -149,7 +149,7 @@ export default function EditPlayerModal({
                 {/* Group Selection */}
                 {groups.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                       Grup Seçimi
                     </label>
                     <div className="space-y-2">
@@ -158,14 +158,16 @@ export default function EditPlayerModal({
                           key={group._id}
                           className="flex items-center justify-between py-2"
                         >
-                          <span className="text-gray-800">{group.name}</span>
+                          <span className="text-gray-800 dark:text-gray-200">
+                            {group.name}
+                          </span>
                           <button
                             type="button"
                             onClick={() => selectGroup(group._id)}
                             className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
                               selectedGroup === group._id
                                 ? "bg-blue-500 border-blue-500"
-                                : "bg-white border-blue-500"
+                                : "bg-white dark:bg-gray-700 border-blue-500 dark:border-blue-400"
                             }`}
                           >
                             {selectedGroup === group._id && (
@@ -184,7 +186,7 @@ export default function EditPlayerModal({
                     type="button"
                     onClick={handleDeleteClick}
                     disabled={isDeleting}
-                    className="flex-1 py-3 px-4 border border-red-300 text-red-600 rounded-lg font-medium flex items-center justify-center space-x-2"
+                    className="flex-1 py-3 px-4 border border-red-300 dark:border-red-500 text-red-600 dark:text-red-400 rounded-lg font-medium flex items-center justify-center space-x-2"
                   >
                     <Trash size={16} />
                     <span>{isDeleting ? "Siliniyor..." : "Kaldır"}</span>
@@ -192,7 +194,7 @@ export default function EditPlayerModal({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium"
+                    className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
                   >
                     İptal
                   </button>
@@ -201,7 +203,7 @@ export default function EditPlayerModal({
                     disabled={!playerName.trim() || isUpdating}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium ${
                       !playerName.trim() || isUpdating
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                         : "bg-blue-500 text-white"
                     }`}
                   >

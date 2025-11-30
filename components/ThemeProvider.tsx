@@ -13,13 +13,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Get theme from localStorage or default to light
+    // Get theme from localStorage or default to dark
     const storedTheme = localStorage.getItem("theme") as Theme | null;
     if (
       storedTheme &&
@@ -29,8 +29,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     ) {
       setThemeState(storedTheme);
     } else {
-      // Default to light mode if no preference stored
-      setThemeState("light");
+      // Default to dark mode if no preference stored
+      setThemeState("dark");
     }
   }, []);
 
