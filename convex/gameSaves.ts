@@ -4,14 +4,60 @@ import { v } from "convex/values";
 export const getGameSaves = query({
   args: { userId: v.optional(v.id("users")) },
   handler: async (ctx, args) => {
-    if (args.userId) {
-      return await ctx.db
-        .query("gameSaves")
-        .withIndex("by_user", (q) => q.eq("userId", args.userId!))
-        .order("desc")
-        .collect();
+    if (!args.userId) {
+      return await ctx.db.query("gameSaves").order("desc").collect();
     }
-    return await ctx.db.query("gameSaves").order("desc").collect();
+
+    // Get user's own game saves
+    const ownGameSaves = await ctx.db
+      .query("gameSaves")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId!))
+      .order("desc")
+      .collect();
+
+    // Get players linked to this user
+    const linkedPlayers = await ctx.db
+      .query("players")
+      .withIndex("by_linked_user", (q) => q.eq("linkedUserId", args.userId!))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    // Get all game saves that include any of the linked players
+    const allGameSaves = await ctx.db
+      .query("gameSaves")
+      .order("desc")
+      .collect();
+
+    const linkedGameSaves = allGameSaves.filter((gameSave) => {
+      // Check if any linked player is in the game save
+      const linkedPlayerIds = linkedPlayers.map((p) => p._id);
+      
+      // Check players array
+      if (gameSave.players?.some((playerId) => linkedPlayerIds.includes(playerId))) {
+        return true;
+      }
+      
+      // Check redTeam
+      if (gameSave.redTeam?.some((playerId) => linkedPlayerIds.includes(playerId))) {
+        return true;
+      }
+      
+      // Check blueTeam
+      if (gameSave.blueTeam?.some((playerId) => linkedPlayerIds.includes(playerId))) {
+        return true;
+      }
+      
+      return false;
+    });
+
+    // Combine and remove duplicates
+    const allUniqueGameSaves = [...ownGameSaves, ...linkedGameSaves];
+    const uniqueGameSaves = allUniqueGameSaves.filter(
+      (gameSave, index, self) =>
+        index === self.findIndex((gs) => gs._id === gameSave._id)
+    );
+
+    return uniqueGameSaves;
   },
 });
 

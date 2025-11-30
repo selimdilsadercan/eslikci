@@ -41,6 +41,25 @@ export default function HistoryPage() {
   const games = useQuery(api.games.getGames);
   const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
 
+  // Get all unique player IDs from game saves
+  const allPlayerIds = gameSaves
+    ? Array.from(
+        new Set(
+          gameSaves.flatMap((gs) => [
+            ...(gs.players || []),
+            ...(gs.redTeam || []),
+            ...(gs.blueTeam || []),
+          ])
+        )
+      )
+    : [];
+
+  // Get all players from game saves (including those not in contacts)
+  const allGamePlayers = useQuery(
+    api.players.getPlayersByIds,
+    allPlayerIds.length > 0 ? { playerIds: allPlayerIds } : "skip"
+  );
+
   // Redirect to home page if user is not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -157,10 +176,20 @@ export default function HistoryPage() {
   };
 
   const getPlayerData = (playerIds: Id<"players">[]) => {
-    if (!players) return [];
+    if (!playerIds || playerIds.length === 0) return [];
+
+    // Combine allGamePlayers and players to ensure we have all players
+    const allAvailablePlayers = [...(allGamePlayers || []), ...(players || [])];
+
+    // Remove duplicates by _id
+    const uniquePlayers = allAvailablePlayers.filter(
+      (player, index, self) =>
+        index === self.findIndex((p) => p._id === player._id)
+    );
+
     return playerIds
       .map((id) => {
-        const player = players.find((p) => p._id === id);
+        const player = uniquePlayers.find((p) => p._id === id);
         return player;
       })
       .filter(Boolean);
@@ -224,7 +253,17 @@ export default function HistoryPage() {
                       <div className="space-y-2">
                         {groupGameSaves.map((gameSave) => {
                           const gameName = getGameName(gameSave.gameTemplate);
-                          const playerData = getPlayerData(gameSave.players);
+                          // Get all players from the game save (including teams)
+                          const allPlayerIdsInGame = [
+                            ...(gameSave.players || []),
+                            ...(gameSave.redTeam || []),
+                            ...(gameSave.blueTeam || []),
+                          ];
+                          // Remove duplicates
+                          const uniquePlayerIds = Array.from(
+                            new Set(allPlayerIdsInGame)
+                          );
+                          const playerData = getPlayerData(uniquePlayerIds);
                           const formattedDate = formatDate(
                             gameSave.createdTime
                           );
@@ -244,7 +283,7 @@ export default function HistoryPage() {
                                 className="flex-1 cursor-pointer"
                                 onClick={() => handleGameClick(gameSave._id)}
                               >
-                                <h3 className="font-medium text-gray-800 dark:text-gray-200 text-lg hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <h3 className="font-medium text-gray-800 dark:text-gray-200 text-lg">
                                   {gameName}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-sm">

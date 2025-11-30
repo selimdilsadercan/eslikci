@@ -84,7 +84,12 @@ export default function ContactsPage() {
     ) || {};
 
   const handlePlayerClick = (playerId: Id<"players">) => {
-    router.push(`/player?playerId=${playerId}`);
+    // If clicking on own player, go to profile page
+    if (currentUserAsPlayer && currentUserAsPlayer._id === playerId) {
+      router.push("/profile");
+    } else {
+      router.push(`/player?playerId=${playerId}`);
+    }
   };
 
   const handleEditPlayer = (playerId: Id<"players">, e?: React.MouseEvent) => {
@@ -221,7 +226,7 @@ export default function ContactsPage() {
                 Gruplandırılmamış
               </h2>
               <div className="space-y-2">
-                {groupedPlayers.ungrouped.map((player) => (
+                {groupedPlayers.ungrouped.map((player: typeof players[number]) => (
                   <div
                     key={player._id}
                     onClick={() => handlePlayerClick(player._id)}
@@ -255,7 +260,7 @@ export default function ContactsPage() {
                       </span>
                     </div>
                     <button
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         handleEditPlayer(player._id, e);
                       }}
@@ -307,7 +312,7 @@ export default function ContactsPage() {
                   </h2>
                   <div className="space-y-2">
                     {groupPlayers.length > 0 ? (
-                      groupPlayers.map((player) => (
+                      groupPlayers.map((player: any) => (
                         <div
                           key={player._id}
                           onClick={() => handlePlayerClick(player._id)}
@@ -341,7 +346,7 @@ export default function ContactsPage() {
                             </span>
                           </div>
                           <button
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
                               handleEditPlayer(player._id);
                             }}

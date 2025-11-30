@@ -97,20 +97,20 @@ export default function FeedbackPage() {
             <span className="font-medium">Geri</span>
           </button>
 
-          <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Heart size={32} className="text-green-600" />
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-2xl p-8 shadow-sm dark:shadow-none text-center">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Heart size={32} className="text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-[var(--foreground)] mb-2">
               Teşekkürler!
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Geri bildiriminiz başarıyla gönderildi. Değerli görüşleriniz
               uygulamayı geliştirmemize yardımcı olacak.
             </p>
             <button
               onClick={() => router.push("/profile")}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
             >
               Profile Dön
             </button>
@@ -140,16 +140,16 @@ export default function FeedbackPage() {
         </button>
 
         {/* Feedback Form */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-2xl p-6 shadow-sm dark:shadow-none">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <ChatCircle size={24} className="text-blue-600" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+              <ChatCircle size={24} className="text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-[var(--foreground)]">
                 Geri Bildirim Gönder
               </h1>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
                 Görüşleriniz bizim için değerli
               </p>
             </div>
@@ -158,7 +158,7 @@ export default function FeedbackPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Feedback Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Geri Bildirim Türü
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -171,22 +171,22 @@ export default function FeedbackPage() {
                       onClick={() => setFeedbackType(type.id)}
                       className={`p-4 rounded-lg border-2 transition-colors ${
                         feedbackType === type.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-500/20"
+                          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
                     >
                       <Icon
                         size={24}
                         className={`mx-auto mb-2 ${
                           feedbackType === type.id
-                            ? "text-blue-600"
-                            : "text-gray-400"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-400 dark:text-gray-500"
                         }`}
                       />
-                      <div className="text-sm font-medium text-gray-800">
+                      <div className="text-sm font-medium text-gray-800 dark:text-gray-300">
                         {type.label}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {type.description}
                       </div>
                     </button>
@@ -197,7 +197,7 @@ export default function FeedbackPage() {
 
             {/* Rating */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Genel Değerlendirme
               </label>
               <div className="flex space-x-2">
@@ -212,13 +212,13 @@ export default function FeedbackPage() {
                       size={32}
                       weight={star <= rating ? "fill" : "regular"}
                       className={
-                        star <= rating ? "text-yellow-400" : "text-gray-300"
+                        star <= rating ? "text-yellow-400" : "text-gray-300 dark:text-gray-600"
                       }
                     />
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 {rating === 0 && "Değerlendirme seçin"}
                 {rating === 1 && "Çok kötü"}
                 {rating === 2 && "Kötü"}
@@ -232,7 +232,7 @@ export default function FeedbackPage() {
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Mesajınız *
               </label>
@@ -241,11 +241,11 @@ export default function FeedbackPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Geri bildiriminizi buraya yazın..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 rows={5}
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {message.length}/500 karakter
               </p>
             </div>
@@ -254,7 +254,7 @@ export default function FeedbackPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 E-posta (İsteğe bağlı)
               </label>
@@ -264,9 +264,9 @@ export default function FeedbackPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Yanıt almak istiyorsanız e-posta adresinizi girin"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 E-posta adresinizi verirseniz, geri bildiriminize yanıt
                 verebiliriz.
               </p>
@@ -276,7 +276,7 @@ export default function FeedbackPage() {
             <button
               type="submit"
               disabled={!message.trim() || isSubmitting}
-              className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {isSubmitting ? (
                 <>
