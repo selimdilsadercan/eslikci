@@ -15,7 +15,8 @@ export default defineSchema({
     isOnboardingFinished: v.optional(v.boolean()), // Onboarding completion status
     createdAt: v.number(),
     lastSeen: v.optional(v.number()),
-  }).index("by_email", ["email"])
+  })
+    .index("by_email", ["email"])
     .index("by_firebase_id", ["firebaseId"])
     .index("by_clerk_id", ["clerkId"]) // Keep for backward compatibility
     .index("by_player", ["playerId"]),
@@ -28,7 +29,8 @@ export default defineSchema({
     groupId: v.optional(v.id("groups")),
     isActive: v.boolean(),
     createdAt: v.number(),
-  }).index("by_user", ["userId"])
+  })
+    .index("by_user", ["userId"])
     .index("by_group", ["groupId"]),
 
   groups: defineTable({
@@ -55,7 +57,8 @@ export default defineSchema({
     isActive: v.boolean(),
     index: v.optional(v.number()),
     createdAt: v.number(),
-  }).index("by_name", ["name"])
+  })
+    .index("by_name", ["name"])
     .index("by_index", ["index"]),
 
   gameSaves: defineTable({
@@ -65,21 +68,33 @@ export default defineSchema({
     redTeam: v.optional(v.array(v.id("players"))),
     blueTeam: v.optional(v.array(v.id("players"))),
     results: v.optional(v.string()),
-    laps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))), // Two-dimensional matrix: [playerIndex][roundIndex] = score or array of scores
-    teamLaps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))), // For team mode: [roundIndex][teamIndex] = team score or array of team scores
+    laps: v.optional(
+      v.array(v.array(v.union(v.number(), v.array(v.number()))))
+    ), // Two-dimensional matrix: [playerIndex][roundIndex] = score or array of scores
+    teamLaps: v.optional(
+      v.array(v.array(v.union(v.number(), v.array(v.number()))))
+    ), // For team mode: [roundIndex][teamIndex] = team score or array of team scores
+    specialPoints: v.optional(v.any()), // JSON field for special scoreboards (e.g., Munchkin)
     settings: v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
       calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
       roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
-      pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      scoringTiming: v.optional(v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))),
+      pointsPerRound: v.optional(
+        v.union(v.literal("Single"), v.literal("Multiple"))
+      ),
+      penaltiesPerRound: v.optional(
+        v.union(v.literal("Single"), v.literal("Multiple"))
+      ),
+      scoringTiming: v.optional(
+        v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))
+      ),
       hideTotalColumn: v.boolean(),
     }),
     createdTime: v.number(),
     userId: v.id("users"),
     isActive: v.boolean(),
-  }).index("by_user", ["userId"])
+  })
+    .index("by_user", ["userId"])
     .index("by_game", ["gameTemplate"])
     .index("by_created_time", ["createdTime"]),
 
@@ -89,7 +104,8 @@ export default defineSchema({
     gameName: v.string(),
     searchQuery: v.optional(v.string()),
     createdAt: v.number(),
-  }).index("by_user", ["userId"])
+  })
+    .index("by_user", ["userId"])
     .index("by_user_created", ["userId", "createdAt"]),
 
   gameLists: defineTable({
@@ -99,6 +115,7 @@ export default defineSchema({
     isActive: v.boolean(),
     order: v.number(),
     createdAt: v.number(),
-  }).index("by_order", ["order"])
+  })
+    .index("by_order", ["order"])
     .index("by_active", ["isActive"]),
 });

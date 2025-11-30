@@ -11,10 +11,7 @@ export const getGameSaves = query({
         .order("desc")
         .collect();
     }
-    return await ctx.db
-      .query("gameSaves")
-      .order("desc")
-      .collect();
+    return await ctx.db.query("gameSaves").order("desc").collect();
   },
 });
 
@@ -34,13 +31,20 @@ export const createGameSave = mutation({
     blueTeam: v.optional(v.array(v.id("players"))),
     results: v.optional(v.string()),
     laps: v.optional(v.array(v.array(v.number()))),
+    specialPoints: v.optional(v.any()), // JSON field for special scoreboards
     settings: v.object({
       gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
       calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
       roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
-      pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      scoringTiming: v.optional(v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))),
+      pointsPerRound: v.optional(
+        v.union(v.literal("Single"), v.literal("Multiple"))
+      ),
+      penaltiesPerRound: v.optional(
+        v.union(v.literal("Single"), v.literal("Multiple"))
+      ),
+      scoringTiming: v.optional(
+        v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))
+      ),
       hideTotalColumn: v.boolean(),
     }),
     userId: v.id("users"),
@@ -54,6 +58,7 @@ export const createGameSave = mutation({
       blueTeam: args.blueTeam,
       results: args.results,
       laps: args.laps,
+      specialPoints: args.specialPoints,
       settings: args.settings,
       createdTime: Date.now(),
       userId: args.userId,
@@ -68,16 +73,27 @@ export const updateGameSave = mutation({
     name: v.optional(v.string()),
     results: v.optional(v.string()),
     laps: v.optional(v.array(v.array(v.number()))),
-    teamLaps: v.optional(v.array(v.array(v.union(v.number(), v.array(v.number()))))),
-    settings: v.optional(v.object({
-      gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
-      calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
-      roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
-      pointsPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      penaltiesPerRound: v.optional(v.union(v.literal("Single"), v.literal("Multiple"))),
-      scoringTiming: v.optional(v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))),
-      hideTotalColumn: v.boolean(),
-    })),
+    teamLaps: v.optional(
+      v.array(v.array(v.union(v.number(), v.array(v.number()))))
+    ),
+    specialPoints: v.optional(v.any()), // JSON field for special scoreboards
+    settings: v.optional(
+      v.object({
+        gameplay: v.union(v.literal("herkes-tek"), v.literal("takimli")),
+        calculationMode: v.union(v.literal("NoPoints"), v.literal("Points")),
+        roundWinner: v.union(v.literal("Highest"), v.literal("Lowest")),
+        pointsPerRound: v.optional(
+          v.union(v.literal("Single"), v.literal("Multiple"))
+        ),
+        penaltiesPerRound: v.optional(
+          v.union(v.literal("Single"), v.literal("Multiple"))
+        ),
+        scoringTiming: v.optional(
+          v.union(v.literal("tur-sonu"), v.literal("oyun-sonu"))
+        ),
+        hideTotalColumn: v.boolean(),
+      })
+    ),
     isTotalHidden: v.optional(v.boolean()),
     isMultipleLapitems: v.optional(v.boolean()),
   },
@@ -101,28 +117,28 @@ export const addRoundScores = mutation({
     if (args.isTeamMode && args.teamScores) {
       // Team mode: store team scores directly
       let teamLaps = gameSave.teamLaps || [];
-      
+
       // Add the new round scores for teams
       const updatedTeamLaps = [...teamLaps];
       updatedTeamLaps.push(args.teamScores);
-      
+
       return await ctx.db.patch(args.id, { teamLaps: updatedTeamLaps });
     } else {
       // Individual mode: use the original logic
       let laps = gameSave.laps || [];
-      
+
       // Ensure we have arrays for all players
       while (laps.length < gameSave.players.length) {
         laps.push([]);
       }
-      
+
       // Add the new round scores to each player's laps
       const updatedLaps = laps.map((playerLaps, index) => {
         const newLaps = [...playerLaps];
         newLaps.push(args.roundScores[index] || 0);
         return newLaps;
       });
-      
+
       return await ctx.db.patch(args.id, { laps: updatedLaps });
     }
   },

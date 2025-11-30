@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useQuery } from "convex/react";
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Plus, Minus, CaretDown } from "@phosphor-icons/react";
@@ -29,27 +29,63 @@ export default function MunchkinScoreboard({
     gameSave?.players ? { playerIds: gameSave.players } : "skip"
   );
 
-  // Initialize player scores from game save or default values
+  const updateGameSave = useMutation(api.gameSaves.updateGameSave);
+
+  // Initialize player scores from game save's specialPoints or default values
   const [playerScores, setPlayerScores] = useState<{
     [key: string]: PlayerScore;
-  }>(() => {
+  }>({});
+
+  // Load scores from gameSave when it's available
+  useEffect(() => {
+    if (!gameSave?.players) return;
+
     const initialScores: { [key: string]: PlayerScore } = {};
-    if (gameSave?.players) {
-      gameSave.players.forEach((playerId) => {
+    // Try to load from specialPoints if available
+    const savedScores = gameSave.specialPoints as
+      | { [key: string]: PlayerScore }
+      | undefined;
+
+    gameSave.players.forEach((playerId) => {
+      if (savedScores && savedScores[playerId]) {
+        // Use saved scores from specialPoints
+        initialScores[playerId] = savedScores[playerId];
+      } else {
+        // Use default values
         initialScores[playerId] = {
           level: 1,
           bonus: 0,
           gender: "male",
         };
-      });
-    }
-    return initialScores;
-  });
+      }
+    });
+
+    setPlayerScores(initialScores);
+  }, [gameSave]);
 
   // Track expanded state for all players (global)
   const [isAllExpanded, setIsAllExpanded] = useState(false);
 
   const gamePlayers = players || [];
+
+  // Update specialPoints in game save when player scores change
+  useEffect(() => {
+    if (!gameSave || !gameSaveId) return;
+
+    // Debounce: wait a bit before saving to avoid too many updates
+    const timeoutId = setTimeout(async () => {
+      try {
+        await updateGameSave({
+          id: gameSaveId,
+          specialPoints: playerScores,
+        });
+      } catch (error) {
+        console.error("Error updating specialPoints:", error);
+      }
+    }, 500); // Wait 500ms after last change
+
+    return () => clearTimeout(timeoutId);
+  }, [playerScores, gameSaveId, gameSave, updateGameSave]);
 
   const updatePlayerScore = (
     playerId: string,

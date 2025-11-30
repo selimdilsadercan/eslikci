@@ -283,7 +283,7 @@ function EditGameContent() {
             <div className="flex items-center space-x-3">
               <button
                 onClick={handleBack}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 <ArrowLeft
                   size={20}
@@ -308,13 +308,13 @@ function EditGameContent() {
 
         {/* Tabs */}
         <div className="px-6 py-4">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setActiveTab("genel")}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 activeTab === "genel"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                  ? "bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200 shadow-sm"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               Genel
@@ -323,8 +323,8 @@ function EditGameContent() {
               onClick={() => setActiveTab("kurallar")}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 activeTab === "kurallar"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                  ? "bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200 shadow-sm"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               Kurallar
@@ -333,8 +333,8 @@ function EditGameContent() {
               onClick={() => setActiveTab("listeler")}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 activeTab === "listeler"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                  ? "bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200 shadow-sm"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
               Listeler
@@ -348,40 +348,40 @@ function EditGameContent() {
             <div className="space-y-6">
               {/* Basic Information */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   Temel Bilgiler
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Oyun Adı *
                     </label>
                     <input
                       type="text"
                       value={gameName}
                       onChange={(e) => setGameName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                       placeholder="Oyun adını girin"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Emoji
                     </label>
                     <input
                       type="text"
                       value={gameEmoji}
                       onChange={(e) => setGameEmoji(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                       placeholder="Oyun emojisini girin (örn: 🎮, 🃏, ⚡)"
                       maxLength={2}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Resim Dosyası Yükle
                     </label>
                     <ImageUpload
@@ -399,15 +399,15 @@ function EditGameContent() {
               </div>
 
               {/* Game Settings */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   Oyun Ayarları
                 </h3>
 
                 <div className="space-y-6">
                   {/* Oynanış */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Oynanış:
                     </h2>
                     <div className="flex gap-2">
@@ -416,7 +416,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           gameplay === "herkes-tek"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           gameplay === "herkes-tek"
@@ -431,7 +431,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           gameplay === "takimli"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           gameplay === "takimli"
@@ -446,7 +446,7 @@ function EditGameContent() {
 
                   {/* Hesaplama Modu */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Hesaplama Modu:
                     </h2>
                     <div className="flex gap-2">
@@ -455,7 +455,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           calculationMode === "NoPoints"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           calculationMode === "NoPoints"
@@ -470,7 +470,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           calculationMode === "Points"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           calculationMode === "Points"
@@ -485,7 +485,7 @@ function EditGameContent() {
 
                   {/* Puanlama Zamanı */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Puanlama:
                     </h2>
                     <div className="flex gap-2">
@@ -494,7 +494,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           scoringTiming === "tur-sonu"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           scoringTiming === "tur-sonu"
@@ -509,7 +509,7 @@ function EditGameContent() {
                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                           scoringTiming === "oyun-sonu"
                             ? "text-white"
-                            : "text-gray-800"
+                            : "text-gray-800 dark:text-gray-300"
                         }`}
                         style={
                           scoringTiming === "oyun-sonu"
@@ -524,7 +524,7 @@ function EditGameContent() {
 
                   {/* Tur Kazananı - Conditional based on calculation mode */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Kazanan:
                     </h2>
                     <div className="flex gap-2">
@@ -536,7 +536,7 @@ function EditGameContent() {
                             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                               roundWinner === "Highest"
                                 ? "text-white"
-                                : "text-gray-800"
+                                : "text-gray-800 dark:text-gray-300"
                             }`}
                             style={
                               roundWinner === "Highest"
@@ -552,7 +552,7 @@ function EditGameContent() {
                             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                               roundWinner === "Lowest"
                                 ? "text-white"
-                                : "text-gray-800"
+                                : "text-gray-800 dark:text-gray-300"
                             }`}
                             style={
                               roundWinner === "Lowest"
@@ -588,7 +588,7 @@ function EditGameContent() {
                             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-2 ${
                               roundWinner === "Lowest"
                                 ? "text-white"
-                                : "text-gray-800"
+                                : "text-gray-800 dark:text-gray-300"
                             }`}
                             style={
                               roundWinner === "Lowest"
@@ -607,7 +607,7 @@ function EditGameContent() {
                   {/* Tur İçi Puan Sayısı - Only show when Puanlı is selected with animation */}
                   {calculationMode === "Points" && (
                     <div className="flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-300">
-                      <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                      <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                         Tur İçi Puan Sayısı:
                       </h2>
                       <div className="flex gap-2">
@@ -616,7 +616,7 @@ function EditGameContent() {
                           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                             pointsPerRound === "Single"
                               ? "text-white"
-                              : "text-gray-800"
+                              : "text-gray-800 dark:text-gray-300"
                           }`}
                           style={
                             pointsPerRound === "Single"
@@ -631,7 +631,7 @@ function EditGameContent() {
                           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
                             pointsPerRound === "Multiple"
                               ? "text-white"
-                              : "text-gray-800"
+                              : "text-gray-800 dark:text-gray-300"
                           }`}
                           style={
                             pointsPerRound === "Multiple"
@@ -647,13 +647,15 @@ function EditGameContent() {
 
                   {/* Toplam Sütununu Gizle */}
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                    <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
                       Toplam Sütununu Gizle:
                     </h2>
                     <button
                       onClick={() => setHideTotalColumn(!hideTotalColumn)}
                       className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                        hideTotalColumn ? "border-gray-300" : "border-gray-300"
+                        hideTotalColumn
+                          ? "border-gray-300 dark:border-gray-600"
+                          : "border-gray-300 dark:border-gray-600"
                       }`}
                       style={
                         hideTotalColumn ? { backgroundColor: "#365376" } : {}
@@ -682,7 +684,7 @@ function EditGameContent() {
               {/* PDF Preview Section */}
               {rulesPdfId && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                     PDF Önizleme
                   </h3>
                   <PdfViewer
@@ -695,10 +697,10 @@ function EditGameContent() {
               {/* Text Rules Section */}
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                     Metin Kuralları
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     PDF yüklediyseniz, bu kurallar PDF ile birlikte
                     görüntülenecek. PDF yoksa sadece bu kurallar gösterilir.
                   </p>
@@ -706,13 +708,13 @@ function EditGameContent() {
 
                 {/* Inner Tabs for Rules Mode */}
                 <div className="mb-6">
-                  <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
+                  <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit">
                     <button
                       onClick={() => setRulesMode("text")}
                       className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                         rulesMode === "text"
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                          ? "bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200 shadow-sm"
+                          : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-200"
                       }`}
                     >
                       Metin Modu
@@ -721,8 +723,8 @@ function EditGameContent() {
                       onClick={() => setRulesMode("json")}
                       className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                         rulesMode === "json"
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900"
+                          ? "bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200 shadow-sm"
+                          : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-200"
                       }`}
                     >
                       JSON Modu
@@ -736,15 +738,15 @@ function EditGameContent() {
                     {rulesSections.map((section, index) => (
                       <div
                         key={section.id}
-                        className="border border-gray-200 rounded-lg p-4"
+                        className="border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-4"
                       >
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-md font-medium text-gray-800">
+                          <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">
                             Bölüm {index + 1}
                           </h4>
                           <button
                             onClick={() => removeRulesSection(section.id)}
-                            className="text-red-500 hover:text-red-700 p-1"
+                            className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1"
                           >
                             <X size={16} weight="regular" />
                           </button>
@@ -752,7 +754,7 @@ function EditGameContent() {
 
                         <div className="space-y-3">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Bölüm Başlığı
                             </label>
                             <input
@@ -765,13 +767,13 @@ function EditGameContent() {
                                   e.target.value
                                 )
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                               placeholder="Örn: TAKIMLARIN OTURMA DÜZENİ"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Bölüm İçeriği
                             </label>
                             <RichTextEditor
@@ -813,13 +815,13 @@ function EditGameContent() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         JSON Kurallar
                       </label>
                       <textarea
                         value={gameRules}
                         onChange={(e) => setGameRules(e.target.value)}
-                        className="w-full h-96 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-mono text-sm"
+                        className="w-full h-96 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 font-mono text-sm bg-white dark:bg-[var(--card-background)]"
                         placeholder='[{"id":"1","title":"Bölüm Başlığı","content":"<p>Bölüm içeriği...</p>"}]'
                       />
                     </div>
@@ -840,10 +842,10 @@ function EditGameContent() {
 
           {activeTab === "listeler" && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                 Oyun Listeleri
               </h3>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 Bu oyunu hangi listelerde göstermek istediğinizi seçin.
               </p>
 
@@ -858,7 +860,9 @@ function EditGameContent() {
                     size={48}
                     className="text-gray-400 mx-auto mb-4"
                   />
-                  <p className="text-gray-600 dark:text-gray-400">Henüz liste oluşturulmamış</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Henüz liste oluşturulmamış
+                  </p>
                   <p className="text-sm text-gray-400 mt-2">
                     <a
                       href="/admin/lists"
@@ -875,8 +879,8 @@ function EditGameContent() {
                       key={list._id}
                       className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
                         selectedLists.includes(list._id)
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                          ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30"
+                          : "border-gray-200 dark:border-[var(--card-border)] hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                       }`}
                       onClick={() => {
                         setSelectedLists((prev) =>
@@ -889,11 +893,11 @@ function EditGameContent() {
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
                           {selectedLists.includes(list._id) ? (
-                            <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
+                            <div className="w-5 h-5 bg-blue-500 dark:bg-blue-400 rounded flex items-center justify-center">
                               <Check size={12} className="text-white" />
                             </div>
                           ) : (
-                            <div className="w-5 h-5 border-2 border-gray-300 rounded"></div>
+                            <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded"></div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -901,11 +905,11 @@ function EditGameContent() {
                             {list.emoji && (
                               <span className="text-lg">{list.emoji}</span>
                             )}
-                            <h4 className="text-sm font-medium text-gray-900 truncate">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
                               {list.name}
                             </h4>
                           </div>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                             {list.gameIds.length} oyun
                           </p>
                         </div>

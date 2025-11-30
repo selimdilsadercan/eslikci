@@ -302,7 +302,7 @@ function AdminPageContent() {
           <div className="col-span-1">
             <div className="flex items-center justify-center">
               <div
-                className="p-2 rounded hover:bg-gray-100 cursor-move touch-manipulation select-none"
+                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-move touch-manipulation select-none"
                 style={{ touchAction: "none" }}
                 {...attributes}
                 {...listeners}
@@ -328,14 +328,14 @@ function AdminPageContent() {
           </div>
           <div className="hidden md:block col-span-2">
             <div className="flex items-center justify-start">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                 {game.listName}
               </span>
             </div>
           </div>
           <div className="hidden md:block col-span-2">
             <div className="flex items-center justify-start">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                 {getRuleSectionsCount(game)} bölüm
               </span>
             </div>
@@ -344,13 +344,13 @@ function AdminPageContent() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => onEdit(game._id)}
-                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                className="p-2 text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
               >
                 <PencilSimple size={16} weight="regular" />
               </button>
               <button
                 onClick={() => onDelete(game._id)}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                className="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
               >
                 <Trash size={16} weight="regular" />
               </button>
@@ -377,12 +377,12 @@ function AdminPageContent() {
             <div className="flex items-center space-x-3">
               <button
                 onClick={handleBack}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 <ArrowLeft
                   size={20}
                   weight="regular"
-                  className="text-gray-600"
+                  className="text-gray-600 dark:text-gray-400"
                 />
               </button>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
@@ -427,7 +427,7 @@ function AdminPageContent() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => updateUrlParams({ search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--card-background)] text-gray-900 dark:text-gray-200"
                 placeholder="Oyun adı ara..."
               />
             </div>
@@ -440,16 +440,19 @@ function AdminPageContent() {
               <select
                 value={selectedListFilter}
                 onChange={(e) => updateUrlParams({ list: e.target.value })}
-                className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white appearance-none text-gray-800"
+                className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--card-background)] appearance-none text-gray-800 dark:text-gray-200"
               >
-                <option value="all" className="text-gray-800 bg-white">
+                <option
+                  value="all"
+                  className="text-gray-800 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
+                >
                   Tüm Listeler
                 </option>
                 {uniqueListNames.map((listName) => (
                   <option
                     key={listName}
                     value={listName}
-                    className="text-gray-800 bg-white"
+                    className="text-gray-800 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                   >
                     {listName}
                   </option>
@@ -513,7 +516,7 @@ function AdminPageContent() {
                   items={filteredGames.map((game) => game._id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="divide-y divide-gray-200">
+                  <div className="divide-y divide-gray-200 dark:divide-[var(--card-border)]">
                     {filteredGames.map((game) => (
                       <SortableItem
                         key={game._id}
@@ -536,16 +539,16 @@ function AdminPageContent() {
             onClick={() => setShowAddModal(false)}
           >
             <div
-              className="bg-white rounded-2xl p-6 w-full max-w-md"
+              className="bg-white dark:bg-[var(--card-background)] rounded-2xl p-6 w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                 Yeni Oyun Ekle
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Oyun Adı *
                   </label>
                   <input
@@ -554,27 +557,27 @@ function AdminPageContent() {
                     value={newGameName}
                     onChange={(e) => setNewGameName(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                     placeholder="Oyun adını girin"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Emoji
                   </label>
                   <input
                     type="text"
                     value={newGameEmoji}
                     onChange={(e) => setNewGameEmoji(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200 bg-white dark:bg-[var(--card-background)]"
                     placeholder="🎮"
                     maxLength={2}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Resim Dosyası Yükle
                   </label>
                   <ImageUpload
@@ -596,7 +599,7 @@ function AdminPageContent() {
                 </button>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   İptal
                 </button>
