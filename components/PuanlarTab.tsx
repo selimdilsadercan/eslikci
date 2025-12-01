@@ -543,7 +543,7 @@ export default function PuanlarTab({
   }
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       {/* Banner Ad above score table */}
       <AdBanner position="top" className="mb-4 mx-4" />
       
@@ -857,6 +857,6 @@ export default function PuanlarTab({
          cancelText="İptal"
          isDestructive={confirmModalConfig.isDestructive}
        />
-     </>
+     </div>
    );
  }

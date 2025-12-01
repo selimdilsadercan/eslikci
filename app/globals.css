@@ -29,7 +29,7 @@ html.light {
 html.dark {
   --background: #100d16;
   --foreground: #ededed;
-  --card-background: rgba(247, 247, 248, 0.05);
+  --card-background: #1C1922;
   --card-border: rgba(247, 247, 248, 0.1);
 }
 

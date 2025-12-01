@@ -185,7 +185,15 @@ export default function BottomInputArea({
       ) : (
         /* Current Round Score Input */
         <div className="p-4 border-b border-gray-200 dark:border-[var(--card-border)]">
-          <div className="grid grid-cols-2 gap-x-10 gap-y-6 max-h-100 overflow-y-auto place-content-center pb-4">
+          <div
+            className={`grid ${
+              gameSave?.settings?.gameplay === "herkes-tek" &&
+              gamePlayers &&
+              gamePlayers.length > 4
+                ? "grid-cols-3"
+                : "grid-cols-2"
+            } gap-x-4 gap-y-6 max-h-100 overflow-y-auto place-content-center pb-4`}
+          >
             {gameSave?.settings.gameplay === "takimli" ? (
               // Team Mode - Show Teams for Score Input (one input per team)
               <>
@@ -541,7 +549,9 @@ export default function BottomInputArea({
                 <div
                   key={player._id}
                   className={`flex flex-col space-y-2 ${
-                    index % 2 === 0 ? "items-end" : "items-start"
+                    (gamePlayers && gamePlayers.length > 4)
+                      ? "items-center"
+                      : (index % 2 === 0 ? "items-end mr-4" : "items-start ml-4")
                   }`}
                 >
                 <div className="flex flex-col items-center space-y-2">
