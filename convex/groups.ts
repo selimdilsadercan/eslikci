@@ -21,6 +21,13 @@ export const getGroups = query({
   },
 });
 
+export const getGroupById = query({
+  args: { id: v.id("groups") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
 export const createGroup = mutation({
   args: {
     name: v.string(),

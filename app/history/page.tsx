@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuth } from "@/components/FirebaseAuthProvider";
-import { Trash } from "@phosphor-icons/react";
+
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -12,6 +12,7 @@ import AdBanner from "@/components/AdBanner";
 import Sidebar from "@/components/Sidebar";
 import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
+import GameHistoryCard from "@/components/GameHistoryCard";
 import { useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -41,47 +42,6 @@ export default function HistoryPage() {
   const games = useQuery(api.games.getGames);
   const deleteGameSave = useMutation(api.gameSaves.deleteGameSave);
 
-  // Get all unique player IDs from game saves
-  const allPlayerIds = gameSaves
-    ? Array.from(
-        new Set(
-          gameSaves.flatMap((gs) => [
-            ...(gs.players || []),
-            ...(gs.redTeam || []),
-            ...(gs.blueTeam || []),
-          ])
-        )
-      )
-    : [];
-
-  // Get all players from game saves (including those not in contacts)
-  const allGamePlayers = useQuery(
-    api.players.getPlayersByIds,
-    allPlayerIds.length > 0 ? { playerIds: allPlayerIds } : "skip"
-  );
-
-  // Redirect to home page if user is not signed in
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace("/");
-    }
-  }, [isLoaded, isSignedIn, router]);
-
-  // Show loading state while checking authentication
-  if (!isLoaded || (isLoaded && !isSignedIn)) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "var(--background)" }}
-      >
-        <div className="text-center">
-          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleDelete = (gameSaveId: Id<"gameSaves">) => {
     setGameToDelete(gameSaveId);
     setShowConfirmModal(true);
@@ -91,18 +51,35 @@ export default function HistoryPage() {
     if (gameToDelete) {
       try {
         await deleteGameSave({ id: gameToDelete });
-        setShowConfirmModal(false);
-        setGameToDelete(null);
       } catch (error) {
         console.error("Error deleting game save:", error);
+      } finally {
+        setShowConfirmModal(false);
+        setGameToDelete(null);
       }
     }
   };
 
   const handleGameClick = (gameSaveId: Id<"gameSaves">) => {
-    // Navigate to game session with the game save ID
     router.push(`/game-session?gameSaveId=${gameSaveId}`);
   };
+
+  const allPlayerIds = gameSaves
+    ? Array.from(
+        new Set(
+          gameSaves.flatMap((gs: any) => [
+            ...(gs.players || []),
+            ...(gs.redTeam || []),
+            ...(gs.blueTeam || []),
+          ])
+        )
+      )
+    : [];
+
+  const allGamePlayers = useQuery(
+    api.players.getPlayersByIds,
+    allPlayerIds.length > 0 ? { playerIds: allPlayerIds } : "skip"
+  );
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -263,82 +240,38 @@ export default function HistoryPage() {
                           const uniquePlayerIds = Array.from(
                             new Set(allPlayerIdsInGame)
                           );
-                          const playerData = getPlayerData(uniquePlayerIds);
+                          // Oyunculara skor/puan ekle
+                          const playerData = getPlayerData(uniquePlayerIds).map((player) => {
+                            // gameSave'de playerScores, scores, puanlar veya benzeri bir alan varsa buradan çek
+                            // Örnek: gameSave.scores = [{playerId, score}]
+                            let score = null;
+                            if (gameSave.scores && Array.isArray(gameSave.scores)) {
+                              const found = gameSave.scores.find((s: any) => s.playerId === player._id);
+                              if (found) score = found.score;
+                            }
+                            // Alternatif olarak gameSave.puanlar veya player.puan/score
+                            if (score == null && gameSave.puanlar && Array.isArray(gameSave.puanlar)) {
+                              const found = gameSave.puanlar.find((s: any) => s.playerId === player._id);
+                              if (found) score = found.puan;
+                            }
+                            // Eğer player objesinde score/puan varsa onu da kullan
+                            score = score ?? player.score ?? player.puan ?? 0;
+                            return { ...player, score };
+                          });
                           const formattedDate = formatDate(
                             gameSave.createdTime
                           );
 
                           return (
-                            <div
+                            <GameHistoryCard
                               key={gameSave._id}
-                              className="bg-white dark:bg-[var(--card-background)] rounded-lg p-4 flex items-center justify-between"
-                              style={{
-                                boxShadow:
-                                  resolvedTheme === "dark"
-                                    ? "none"
-                                    : "0 0 8px 5px #297dff0a",
-                              }}
-                            >
-                              <div
-                                className="flex-1 cursor-pointer"
-                                onClick={() => handleGameClick(gameSave._id)}
-                              >
-                                <h3 className="font-medium text-gray-800 dark:text-gray-200 text-lg">
-                                  {gameName}
-                                </h3>
-                                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                  {formattedDate}
-                                </p>
-                                <div className="flex space-x-1 mt-1">
-                                  {playerData.map((player, index) => {
-                                    const colors = [
-                                      "bg-blue-100 text-blue-600",
-                                      "bg-green-100 text-green-600",
-                                      "bg-purple-100 text-purple-600",
-                                      "bg-orange-100 text-orange-600",
-                                      "bg-pink-100 text-pink-600",
-                                      "bg-indigo-100 text-indigo-600",
-                                    ];
-                                    const colorClass =
-                                      colors[index % colors.length];
-
-                                    return (
-                                      <div
-                                        key={player?._id || index}
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
-                                      >
-                                        {player?.avatar ? (
-                                          <img
-                                            src={player.avatar}
-                                            alt={player.name}
-                                            className="w-6 h-6 rounded-full object-cover"
-                                          />
-                                        ) : (
-                                          <div
-                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${colorClass}`}
-                                          >
-                                            {player?.initial ||
-                                              player?.name
-                                                ?.charAt(0)
-                                                .toUpperCase() ||
-                                              ""}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(gameSave._id);
-                                }}
-                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                              >
-                                <Trash size={20} />
-                              </button>
-                            </div>
+                              gameSave={gameSave}
+                              variant="full"
+                              players={playerData}
+                              onClick={() => handleGameClick(gameSave._id)}
+                              showDelete={true}
+                              onDelete={() => handleDelete(gameSave._id)}
+                            />
                           );
                         })}
                       </div>

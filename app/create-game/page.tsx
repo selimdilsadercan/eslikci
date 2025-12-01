@@ -62,6 +62,7 @@ function CreateGameContent() {
   // ALL STATE HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [activeTab, setActiveTab] = useState("oyun-kur");
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedGroupId, setSelectedGroupId] = useState<Id<"groups"> | undefined>(undefined);
   const [selectedPlayers, setSelectedPlayers] = useState<Id<"players">[]>([]);
   const [redTeam, setRedTeam] = useState<Id<"players">[]>([]);
   const [blueTeam, setBlueTeam] = useState<Id<"players">[]>([]);
@@ -105,6 +106,23 @@ function CreateGameContent() {
     }
   }, [game]);
 
+  // Auto-select players when group is selected
+  useEffect(() => {
+    if (selectedGroupId && currentUserAsPlayer && players) {
+      // Start with current user's player
+      const autoSelectedPlayers: Id<"players">[] = [currentUserAsPlayer._id];
+      
+      // Add all players from the selected group
+      const groupPlayers = players.filter(
+        (player) => player.groupId === selectedGroupId && player._id !== currentUserAsPlayer._id
+      );
+      
+      autoSelectedPlayers.push(...groupPlayers.map((p) => p._id));
+      
+      setSelectedPlayers(autoSelectedPlayers);
+    }
+  }, [selectedGroupId, currentUserAsPlayer, players]);
+
   // Show loading state while checking authentication
   if (!isLoaded || (isLoaded && !isSignedIn)) {
     return (
@@ -124,19 +142,25 @@ function CreateGameContent() {
     if (currentStep === 1) {
       router.back();
     } else {
-      setCurrentStep(1);
+      setCurrentStep(currentStep - 1);
     }
   };
 
   const handleNext = async () => {
     if (currentStep === 1) {
+      if (!selectedGroupId) {
+        toast.error("Bir grup seçmelisiniz!");
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
       if (selectedPlayers.length === 0) {
         toast.error("En az bir oyuncu seçmelisiniz!");
         return;
       }
-      setCurrentStep(2);
+      setCurrentStep(3);
     } else {
-      // Create game save and start the game
+      // Create game save and start the game (step 3)
       if (!currentUser || !gameId) {
         console.error("Missing user or game ID");
         return;
@@ -176,6 +200,7 @@ function CreateGameContent() {
           name: gameName,
           gameTemplate: gameId as Id<"games">,
           players: selectedPlayers,
+          groupId: selectedGroupId,
           redTeam: gameSettings.gameplay === "takimli" ? redTeam : undefined,
           blueTeam: gameSettings.gameplay === "takimli" ? blueTeam : undefined,
           settings: {
@@ -526,6 +551,92 @@ function CreateGameContent() {
         <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[var(--card-background)] rounded-t-3xl shadow-lg">
           <div className="p-6">
             {currentStep === 1 ? (
+              // Group Selection in Bottom Panel
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4 -mx-0.5">
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    Grubu Seç
+                  </h2>
+                </div>
+
+                {/* Groups List */}
+                <div className="space-y-3 max-h-92 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {groups?.map((group) => {
+                    // Get players in this group
+                    const groupPlayers = players?.filter(
+                      (player) => player.groupId === group._id
+                    ) || [];
+
+                    return (
+                      <button
+                        key={group._id}
+                        onClick={() => setSelectedGroupId(group._id)}
+                        className={`w-full px-4 py-4 rounded-xl transition-all border-2 ${
+                          selectedGroupId === group._id
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+                            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--card-background)]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            {/* Group Name */}
+                            <div className="text-left">
+                              <h3
+                                className={`font-semibold text-sm ${
+                                  selectedGroupId === group._id
+                                    ? "text-blue-600 dark:text-blue-400"
+                                    : "text-gray-800 dark:text-gray-200"
+                                }`}
+                              >
+                                {group.name}
+                              </h3>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {groupPlayers.length} oyuncu
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Player Avatars */}
+                          <div className="flex items-center -space-x-2 ml-2">
+                            {groupPlayers.slice(0, 3).map((player) => (
+                              <div
+                                key={player._id}
+                                className="w-8 h-8 rounded-full border-2 border-white dark:border-[var(--card-background)] overflow-hidden flex-shrink-0"
+                              >
+                                {player.avatar ? (
+                                  <img
+                                    src={player.avatar}
+                                    alt={player.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                    <span className="text-blue-600 dark:text-blue-300 font-semibold text-xs">
+                                      {player.initial}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {groupPlayers.length > 3 && (
+                              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white dark:border-[var(--card-background)] flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">
+                                +{groupPlayers.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {!groups || groups.length === 0 && (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                      Grup bulunamadı. Lütfen grup oluşturun.
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : currentStep === 2 ? (
               // Player Selection in Bottom Panel
               <>
                 {/* Header */}
@@ -708,39 +819,46 @@ function CreateGameContent() {
                     )}
 
                   {/* Grouped Players */}
-                  {groups?.map((group) => {
-                    const groupPlayers =
-                      filteredGroupedPlayers[group._id] || [];
-                    if (groupPlayers.length === 0) return null;
+                  {groups
+                    ?.sort((a, b) => {
+                      // Seçilen grup ilk sıraya gelsin
+                      if (a._id === selectedGroupId) return -1;
+                      if (b._id === selectedGroupId) return 1;
+                      return 0;
+                    })
+                    .map((group) => {
+                      const groupPlayers =
+                        filteredGroupedPlayers[group._id] || [];
+                      if (groupPlayers.length === 0) return null;
 
-                    return (
-                      <div key={group._id} className="mb-6">
-                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-                          {group.name}
-                        </h3>
-                        <div className="space-y-0.5">
-                          {groupPlayers.map((player) => (
-                            <div
-                              key={player._id}
-                              className="flex items-center justify-between py-1"
-                            >
+                      return (
+                        <div key={group._id} className="mb-6">
+                          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                            {group.name}
+                          </h3>
+                          <div className="space-y-0.5">
+                            {groupPlayers.map((player) => (
                               <div
-                                className="flex items-center space-x-3 cursor-pointer flex-1"
-                                onClick={() => openEditPlayerModal(player._id)}
+                                key={player._id}
+                                className="flex items-center justify-between py-1"
                               >
-                                {player.avatar ? (
-                                  <img
-                                    src={player.avatar}
-                                    alt={player.name}
-                                    className="w-8 h-8 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <span className="text-blue-600 font-semibold text-sm">
-                                      {player.initial}
-                                    </span>
-                                  </div>
-                                )}
+                                <div
+                                  className="flex items-center space-x-3 cursor-pointer flex-1"
+                                  onClick={() => openEditPlayerModal(player._id)}
+                                >
+                                  {player.avatar ? (
+                                    <img
+                                      src={player.avatar}
+                                      alt={player.name}
+                                      className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                      <span className="text-blue-600 font-semibold text-sm">
+                                        {player.initial}
+                                      </span>
+                                    </div>
+                                  )}
                                 <span className="font-normal text-black dark:text-gray-200 text-sm truncate max-w-[200px]">
                                   {player.name}
                                 </span>
@@ -775,8 +893,8 @@ function CreateGameContent() {
                   })}
                 </div>
               </>
-            ) : (
-              // Game Settings State
+            ) : currentStep === 3 ? (
+              // Game Settings / Options State
               <>
                 <div className="space-y-6">
                   {/* Oyuncular - Show teams if team mode is selected */}
@@ -1198,13 +1316,13 @@ function CreateGameContent() {
                   </div>
                 </div>
               </>
-            )}
+            ) : null}
 
             {/* Action Buttons */}
             <div className="flex gap-3 mt-6">
-              {currentStep === 2 && (
+              {currentStep > 1 && (
                 <button
-                  onClick={() => setCurrentStep(1)}
+                  onClick={handleBack}
                   className="flex-1 bg-white dark:bg-[var(--card-background)] border-2 border-blue-500 text-blue-500 dark:text-blue-400 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2"
                 >
                   <ArrowLeft size={20} />
@@ -1216,7 +1334,7 @@ function CreateGameContent() {
                 className="flex-1 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors"
               >
                 <span>
-                  {currentStep === 1 ? "Sonraki Adım" : "Oyunu Başlat"}
+                  {currentStep === 1 || currentStep === 2 ? "Sonraki Adım" : "Oyunu Başlat"}
                 </span>
                 <ArrowRight size={20} />
               </button>

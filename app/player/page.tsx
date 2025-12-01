@@ -23,6 +23,7 @@ import AppBar from "@/components/AppBar";
 import Header from "@/components/Header";
 import { useTheme } from "@/components/ThemeProvider";
 import GameImage from "@/components/GameImage";
+import GameHistoryCard from "@/components/GameHistoryCard";
 
 function PlayerDetailContent() {
   const { isSignedIn, isLoaded, user } = useAuth();
@@ -64,6 +65,24 @@ function PlayerDetailContent() {
   const allGameSaves = useQuery(
     api.gameSaves.getGameSaves,
     currentUser ? { userId: currentUser._id } : "skip"
+  );
+
+  // Collect all player ids from the available game saves so we can fetch their data for avatars
+  const allPlayerIds = allGameSaves
+    ? Array.from(
+        new Set(
+          allGameSaves.flatMap((gs: any) => [
+            ...(gs.players || []),
+            ...(gs.redTeam || []),
+            ...(gs.blueTeam || []),
+          ])
+        )
+      )
+    : [];
+
+  const allGamePlayers = useQuery(
+    api.players.getPlayersByIds,
+    allPlayerIds.length > 0 ? { playerIds: allPlayerIds } : "skip"
   );
 
   // Get games for game names
@@ -368,48 +387,38 @@ function PlayerDetailContent() {
                       {groupName}
                     </h3>
                     <div className="space-y-2">
-                      {groupedGameSaves[groupName].map((gameSave) => (
-                        <div
-                          key={gameSave._id}
-                          onClick={() =>
-                            router.push(
-                              `/game-session?gameSaveId=${gameSave._id}`
-                            )
-                          }
-                          className="flex items-center p-3 bg-gray-50 dark:bg-[var(--card-background)]/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--card-background)]/80 transition-colors"
-                        >
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 overflow-hidden flex-shrink-0">
-                            {games &&
-                            games.find(
-                              (g) => g._id === gameSave.gameTemplate
-                            ) ? (
-                              <GameImage
-                                game={
-                                  games.find(
-                                    (g) => g._id === gameSave.gameTemplate
-                                  )!
-                                }
-                                size="lg"
-                              />
-                            ) : (
-                              <span className="text-white text-xl">
-                                {games?.find(
-                                  (g) => g._id === gameSave.gameTemplate
-                                )?.emoji || "🎮"}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 dark:text-gray-200 truncate">
-                              {gameSave.name ||
-                                getGameName(gameSave.gameTemplate)}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {formatDate(gameSave.createdTime)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                      {groupedGameSaves[groupName].map((gameSave) => {
+                        const allPlayerIdsInGame = [
+                          ...(gameSave.players || []),
+                          ...(gameSave.redTeam || []),
+                          ...(gameSave.blueTeam || []),
+                        ];
+                        const uniquePlayerIds = Array.from(
+                          new Set(allPlayerIdsInGame)
+                        );
+
+                        const playerData = allGamePlayers
+                          ? uniquePlayerIds
+                              .map((id) => allGamePlayers.find((p) => p._id === id))
+                              .filter(Boolean)
+                          : [];
+
+                        return (
+                          <GameHistoryCard
+                            key={gameSave._id}
+                            gameSave={gameSave}
+                            variant="full"
+                            players={playerData}
+                            playerIds={uniquePlayerIds}
+                            onClick={() =>
+                              router.push(
+                                `/game-session?gameSaveId=${gameSave._id}`
+                              )
+                            }
+                            showDelete={false}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

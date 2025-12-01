@@ -67,6 +67,7 @@ export default defineSchema({
     name: v.string(),
     gameTemplate: v.id("games"),
     players: v.array(v.id("players")),
+    groupId: v.optional(v.id("groups")),
     redTeam: v.optional(v.array(v.id("players"))),
     blueTeam: v.optional(v.array(v.id("players"))),
     results: v.optional(v.string()),

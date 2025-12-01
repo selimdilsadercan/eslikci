@@ -18,6 +18,7 @@ import type * as files from "../files.js";
 import type * as gameLists from "../gameLists.js";
 import type * as gameSaves from "../gameSaves.js";
 import type * as games from "../games.js";
+import type * as groupStats from "../groupStats.js";
 import type * as groups from "../groups.js";
 import type * as players from "../players.js";
 import type * as recentSearches from "../recentSearches.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   gameLists: typeof gameLists;
   gameSaves: typeof gameSaves;
   games: typeof games;
+  groupStats: typeof groupStats;
   groups: typeof groups;
   players: typeof players;
   recentSearches: typeof recentSearches;
