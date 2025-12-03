@@ -5,10 +5,47 @@ import { Id } from "./_generated/dataModel";
 type WinnerCount = Record<string, number>;
 
 const calculateWinners = (gs: any): string[] => {
+  // Carcassonne
+  if (
+    gs.gameTemplate === "j977k8t8rhgtxyzvwyafvk0nc17wkqh3" &&
+    gs.specialPoints
+  ) {
+    let winnerIds: string[] = [];
+    let maxScore = -1; // Start at -1 to ensure we only count positive scores or 0
+
+    const sp = gs.specialPoints as Record<string, { entries?: { points: number }[] }>;
+
+    for (const playerId in sp) {
+      const playerData = sp[playerId];
+      if (playerData && Array.isArray(playerData.entries)) {
+        const totalScore = playerData.entries.reduce(
+          (sum, entry) => sum + (entry.points || 0),
+          0
+        );
+
+        if (totalScore > maxScore) {
+          maxScore = totalScore;
+          winnerIds = [playerId];
+        } else if (totalScore === maxScore) {
+          winnerIds.push(playerId);
+        }
+      }
+    }
+    
+    // If maxScore is still -1, it means no one scored anything (or no entries). 
+    // In Carcassonne, 0 points is possible, so maybe we should allow 0?
+    // If everyone has 0, everyone wins? Or no one?
+    // Let's assume if maxScore >= 0, we have winners.
+    return maxScore >= 0 ? winnerIds : [];
+  }
+
   // Munchkin: scores are stored in specialPoints { [playerId]: { level, bonus, ... } }
   if (gs?.specialPoints && typeof gs.specialPoints === "object") {
     const entries = Object.entries(gs.specialPoints).filter(
-      ([_, val]) => typeof val === "object" && val !== null && typeof (val as any).level === "number"
+      ([_, val]) =>
+        typeof val === "object" &&
+        val !== null &&
+        typeof (val as any).level === "number"
     );
 
     if (entries.length > 0) {
@@ -17,7 +54,8 @@ const calculateWinners = (gs: any): string[] => {
 
       for (const [playerId, value] of entries) {
         const level = (value as any).level ?? 0;
-        const bonus = typeof (value as any).bonus === "number" ? (value as any).bonus : 0;
+        const bonus =
+          typeof (value as any).bonus === "number" ? (value as any).bonus : 0;
         const score = level + bonus; // prioritize level; include bonus if present
 
         if (score > maxLevel) {
@@ -32,28 +70,96 @@ const calculateWinners = (gs: any): string[] => {
     }
   }
 
-  // Default: use laps totals (highest score wins)
-  if (Array.isArray(gs?.laps) && gs.laps.length > 0 && Array.isArray(gs.players)) {
+  const isLowScoreWins = gs?.settings?.roundWinner === "Lowest";
+
+  // Team Games
+  if (
+    gs?.settings?.gameplay === "takimli" &&
+    Array.isArray(gs?.teamLaps) &&
+    gs.teamLaps.length > 0
+  ) {
+    // teamLaps is [roundIndex][teamIndex]
+    // teamIndex 0 = Red, 1 = Blue
+    const teamTotals: Record<number, number> = { 0: 0, 1: 0 };
+
+    for (const round of gs.teamLaps) {
+      if (Array.isArray(round)) {
+        // Red Team (0)
+        if (typeof round[0] === "number") teamTotals[0] += round[0];
+        else if (Array.isArray(round[0]))
+          teamTotals[0] += round[0].reduce((a: number, b: number) => a + b, 0);
+
+        // Blue Team (1)
+        if (typeof round[1] === "number") teamTotals[1] += round[1];
+        else if (Array.isArray(round[1]))
+          teamTotals[1] += round[1].reduce((a: number, b: number) => a + b, 0);
+      }
+    }
+
+    let winningTeamIndex = -1;
+    if (isLowScoreWins) {
+      if (teamTotals[0] < teamTotals[1]) winningTeamIndex = 0;
+      else if (teamTotals[1] < teamTotals[0]) winningTeamIndex = 1;
+      // Draw: winningTeamIndex = -1 (or maybe both? let's assume no winner for now or handle draw)
+      else if (teamTotals[0] === teamTotals[1]) return []; // Draw
+    } else {
+      if (teamTotals[0] > teamTotals[1]) winningTeamIndex = 0;
+      else if (teamTotals[1] > teamTotals[0]) winningTeamIndex = 1;
+      else if (teamTotals[0] === teamTotals[1]) return []; // Draw
+    }
+
+    if (winningTeamIndex === 0) return gs.redTeam || [];
+    if (winningTeamIndex === 1) return gs.blueTeam || [];
+    return [];
+  }
+
+  // Individual Games: use laps totals
+  // laps is [playerIndex][roundIndex]
+  if (
+    Array.isArray(gs?.laps) &&
+    gs.laps.length > 0 &&
+    Array.isArray(gs.players)
+  ) {
     const totals: Record<number, number> = {};
+    
+    // Iterate over players
     for (let idx = 0; idx < gs.players.length; idx++) {
+      const playerLaps = gs.laps[idx];
       let total = 0;
-      for (const round of gs.laps) {
-        if (Array.isArray(round) && typeof round[idx] === "number") {
-          total += round[idx] as number;
+      
+      if (Array.isArray(playerLaps)) {
+        for (const score of playerLaps) {
+           if (typeof score === "number") {
+             total += score;
+           } else if (Array.isArray(score)) {
+             total += score.reduce((a, b) => a + b, 0);
+           }
         }
       }
       totals[idx] = total;
     }
 
     let winnerIds: string[] = [];
-    let maxScore = -Infinity;
+    let bestScore = isLowScoreWins ? Infinity : -Infinity;
+
     for (let idx = 0; idx < gs.players.length; idx++) {
       const score = totals[idx];
-      if (score > maxScore) {
-        maxScore = score;
-        winnerIds = [gs.players[idx]];
-      } else if (score === maxScore) {
-        winnerIds.push(gs.players[idx]);
+      // Skip if score is NaN (e.g. player has no laps) - though total starts at 0
+      
+      if (isLowScoreWins) {
+        if (score < bestScore) {
+          bestScore = score;
+          winnerIds = [gs.players[idx]];
+        } else if (score === bestScore) {
+          winnerIds.push(gs.players[idx]);
+        }
+      } else {
+        if (score > bestScore) {
+          bestScore = score;
+          winnerIds = [gs.players[idx]];
+        } else if (score === bestScore) {
+          winnerIds.push(gs.players[idx]);
+        }
       }
     }
     return winnerIds;

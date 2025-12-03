@@ -20,6 +20,7 @@ import PokerGame from "@/components/PokerGame";
 import PuanlarTab from "@/components/PuanlarTab";
 import WyrmspanHorizontalScorepad from "@/components/WyrmspanHorizontalScorepad";
 import CatanHorizontalScorepad from "@/components/CatanHorizontalScorepad";
+import CarcassoneScoreboard from "@/components/CarcassoneScoreboard";
 import { useInterstitialAd } from "@/components/InterstitialAd";
 
 function GameSessionContent() {
@@ -133,6 +134,10 @@ function GameSessionContent() {
   // Check if this is a Catan game
   const isCatanGame =
     gameSave?.gameTemplate === "j97468qwc0r8f3n0a04bhpgtz57sww2t";
+
+  // Check if this is a Carcassonne game
+  const isCarcassonneGame =
+    gameSave?.gameTemplate === "j977k8t8rhgtxyzvwyafvk0nc17wkqh3";
 
   // Check if this is a Poker game
   const isPokerGame =
@@ -265,6 +270,10 @@ function GameSessionContent() {
             />
           ) : isCatanGame ? (
             <CatanHorizontalScorepad
+              gameSaveId={gameSaveId as Id<"gameSaves">}
+            />
+          ) : isCarcassonneGame ? (
+            <CarcassoneScoreboard
               gameSaveId={gameSaveId as Id<"gameSaves">}
             />
           ) : (
